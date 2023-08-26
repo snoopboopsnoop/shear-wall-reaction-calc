@@ -23,25 +23,6 @@ namespace workspace_test
             radioButton1.CheckedChanged += radioButton_CheckedChanged;
             radioButton2.CheckedChanged += radioButton_CheckedChanged;
             this.KeyDown += workspace_KeyDown;
-
-        }
-
-        protected override bool IsInputKey(Keys keyData)
-        {
-            switch (keyData)
-            {
-                case Keys.Right:
-                case Keys.Left:
-                case Keys.Up:
-                case Keys.Down:
-                    return true;
-                case Keys.Shift | Keys.Right:
-                case Keys.Shift | Keys.Left:
-                case Keys.Shift | Keys.Up:
-                case Keys.Shift | Keys.Down:
-                    return true;
-            }
-            return base.IsInputKey(keyData);
         }
 
         void radioButton_CheckedChanged(object sender, EventArgs e)
@@ -67,9 +48,6 @@ namespace workspace_test
                         workspace.SetPointerMode("select");
                         break;
                 }
-                    
-                        
-
             }
         }
 
