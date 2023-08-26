@@ -1,0 +1,12 @@
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.csproj.AssemblyReference.cache
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form1.resources
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Properties.Resources.resources
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.csproj.GenerateResource.cache
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.csproj.CoreCompileInputs.cache
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace-test.exe.config
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace-test.exe
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace-test.pdb
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.exe
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.pdb
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form2.resources
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form3.resources
