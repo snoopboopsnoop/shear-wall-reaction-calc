@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.ComponentModel;
 
 namespace workspace_test
 {
@@ -25,6 +26,8 @@ namespace workspace_test
         private PointF start = PointF.Empty;
         private PointF end = PointF.Empty;
 
+        private PointF hover = PointF.Empty;
+
         //index of currently selected rectangle
         private int currentlySelected = -1;
 
@@ -32,6 +35,18 @@ namespace workspace_test
         //private List<RectangleF> rects = new List<RectangleF>();
         //private List<Tuple<RectangleF, ShearData>> analyzed = new List<Tuple<RectangleF, ShearData>>();
         private List<Tuple<RectangleF, ShearData>> rects = new List<Tuple<RectangleF, ShearData>>();
+        private List<Tuple<PointF, PointF>> lines = new List<Tuple<PointF, PointF>>();
+
+        private int dotSize = 6;
+
+        private Font font = new Font("Arial", 8);
+
+        private StringFormat formatWidth = new StringFormat();
+        private StringFormat formatHeight = new StringFormat();
+        private StringFormat formatwx = new StringFormat();
+        private StringFormat formatwy = new StringFormat();
+
+        
 
         // default constructor
         public DrawPanel()
@@ -49,6 +64,19 @@ namespace workspace_test
             DoubleBuffered = true;
             BorderStyle = BorderStyle.FixedSingle;
             Name = name;
+
+            // string formatting settings
+            formatWidth.Alignment = StringAlignment.Center;
+            formatWidth.LineAlignment = StringAlignment.Far;
+
+            formatHeight.Alignment = StringAlignment.Near;
+            formatHeight.LineAlignment = StringAlignment.Center;
+
+            formatwx.Alignment = StringAlignment.Center;
+            formatwx.LineAlignment = StringAlignment.Far;
+
+            formatwy.Alignment = StringAlignment.Near;
+            formatwy.LineAlignment = StringAlignment.Center;
         }
 
         public void SetPointerMode(string mode)
@@ -148,7 +176,6 @@ namespace workspace_test
         //draws rectangle without any physics data
         private void DrawRect(PaintEventArgs e, RectangleF paramRect, Color color)
         {
-            Font font = new Font("Arial", 8);
             Brush brush = new SolidBrush(color);
             Pen pen = new Pen(brush);
 
@@ -187,24 +214,6 @@ namespace workspace_test
             ShearData data = rect.Item2;
 
             RectangleF[] temp = new RectangleF[1] { rect.Item1 };
-
-            StringFormat formatWidth = new StringFormat();
-            StringFormat formatHeight = new StringFormat();
-            StringFormat formatwx = new StringFormat();
-            StringFormat formatwy = new StringFormat();
-
-            // string formatting settings
-            formatWidth.Alignment = StringAlignment.Center;
-            formatWidth.LineAlignment = StringAlignment.Far;
-
-            formatHeight.Alignment = StringAlignment.Near;
-            formatHeight.LineAlignment = StringAlignment.Center;
-
-            formatwx.Alignment = StringAlignment.Center;
-            formatwx.LineAlignment = StringAlignment.Far;
-
-            formatwy.Alignment = StringAlignment.Near;
-            formatwy.LineAlignment = StringAlignment.Center;
 
             // draw rectangle and measurements
             e.Graphics.DrawRectangles(pen, temp);
@@ -257,6 +266,11 @@ namespace workspace_test
             pen.Dispose();
         }
 
+        private void DrawLine(Tuple<Point, Point> line)
+        {
+
+        }
+
         // move currently selected rectangle by values given by translation Point
         public void moveSelected(PointF translation)
         {
@@ -265,11 +279,32 @@ namespace workspace_test
             rects[currentlySelected] = new Tuple<RectangleF, ShearData>(newRect, rects[currentlySelected].Item2);
         }
 
+        private string getDirection(PointF start, PointF location)
+        {
+            float x = location.X - start.X;
+            float y = location.Y - start.Y;
+
+            if (Math.Abs(x) > Math.Abs(y))
+            {
+                return "horizontal";
+            }
+            else return "vertical";
+        }
+
         // begin new rectangle if mouse down while rectangle selection
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
-            if (e.Button == MouseButtons.Left && pointerMode == "rectangle")
+            if (pointerMode == "pen" && drawing)
+            {
+                lines.Add(new Tuple<PointF, PointF>(start, end));
+
+                drawing = false;
+                start = PointF.Empty;
+                end = PointF.Empty;
+                Invalidate();
+            }
+            else if (e.Button == MouseButtons.Left && (pointerMode == "rectangle" || pointerMode == "pen"))
             {
                 drawing = true;
                 dragging = false;
@@ -317,8 +352,12 @@ namespace workspace_test
             base.OnMouseUp(e);
             if (drawing && !start.IsEmpty && !end.IsEmpty)
             {
-                RectangleF rect = GetRectangle(start, end);
-                rects.Add(new Tuple<RectangleF, ShearData>(rect, new ShearData(rect)));
+                if (pointerMode == "rectangle")
+                {
+                    RectangleF rect = GetRectangle(start, end);
+                    rects.Add(new Tuple<RectangleF, ShearData>(rect, new ShearData(rect)));
+                }
+                
 
                 // resets
                 drawing = false;
@@ -332,6 +371,7 @@ namespace workspace_test
         // move end location if mouse moves
         protected override void OnMouseMove(MouseEventArgs e)
         {
+            hover = PointF.Empty;
             base.OnMouseMove(e);
             if (e.Button == MouseButtons.Left)
             {
@@ -343,6 +383,31 @@ namespace workspace_test
                     lastPos = e.Location;
                 }
             }
+            else if(drawing)
+            {
+                string direction = getDirection(start, e.Location);
+                if(direction == "vertical")
+                {
+                    end = new PointF(start.X, e.Location.Y);
+                }
+                else if(direction == "horizontal")
+                {
+                    end = new PointF(e.Location.X, start.Y);
+                }
+            }
+
+            foreach(var line in lines)
+            {
+                if(Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 6)
+                {
+                    hover = line.Item1;
+                }
+                else if (Math.Sqrt(Math.Pow(line.Item2.X - e.Location.X, 2) + Math.Pow(line.Item2.Y - e.Location.Y, 2)) <= 6)
+                {
+                    hover = line.Item2;
+                }
+            }
+
             Invalidate();
         }
 
@@ -354,6 +419,10 @@ namespace workspace_test
         // paint solid rectangles and currently drawing rectangles
         protected override void OnPaint(PaintEventArgs e)
         {
+            SolidBrush solidBrush = new SolidBrush(Color.White);
+
+            
+
             foreach (var (rectangle, i) in rects.Select((value, i) => (value, i)))
             {
                 if(i == currentlySelected)
@@ -362,12 +431,61 @@ namespace workspace_test
                 }
                 else DrawRect(e, rectangle, Color.Black);
             }
+            foreach (var line in lines)
+            {
+                e.Graphics.DrawLine(Pens.Black, line.Item1, line.Item2);
+
+                
+                e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item1.X - 3, line.Item1.Y - 3, 6, 6));
+                e.Graphics.DrawEllipse(Pens.Black, new RectangleF(line.Item1.X - 3, line.Item1.Y - 3, 6, 6));
+                
+                e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item2.X - 3, line.Item2.Y - 3, 6, 6));
+                e.Graphics.DrawEllipse(Pens.Black, new RectangleF(line.Item2.X - 3, line.Item2.Y - 3, 6, 6));
+
+                double magnitude = Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
+
+                if (line.Item1.X == line.Item2.X)
+                {
+                    e.Graphics.DrawString(magnitude.ToString("0.###"), font, Brushes.Black, line.Item1.X + 10, line.Item1.Y + (line.Item2.Y - line.Item1.Y) / 2, formatHeight);
+                }
+                else
+                {
+                    e.Graphics.DrawString(magnitude.ToString("0.###"), font, Brushes.Black, line.Item1.X + (line.Item2.X - line.Item1.X) / 2, line.Item1.Y - 10, formatWidth);
+                }
+            }
 
             if (!start.IsEmpty && !end.IsEmpty)
             {
-                RectangleF measurements = GetRectangle(start, end);
-                DrawRect(e, measurements, Color.Blue);
+                if(pointerMode == "rectangle") {
+                    RectangleF measurements = GetRectangle(start, end);
+                    DrawRect(e, measurements, Color.Blue);
+                }
+                else if(pointerMode == "pen")
+                {
+                    e.Graphics.DrawLine(Pens.Blue, start, end);
+                    e.Graphics.FillEllipse(solidBrush, new RectangleF(start.X - dotSize/2, start.Y - dotSize/2, dotSize, dotSize));
+                    e.Graphics.DrawEllipse(Pens.Blue, new RectangleF(start.X - dotSize / 2, start.Y - dotSize / 2, dotSize, dotSize));
+
+                    e.Graphics.FillEllipse(solidBrush, new RectangleF(end.X - dotSize / 2, end.Y - dotSize / 2, dotSize, dotSize));
+                    e.Graphics.DrawEllipse(Pens.Blue, new RectangleF(end.X - dotSize / 2, end.Y - dotSize / 2, dotSize, dotSize));
+
+                    double magnitude = Math.Sqrt(Math.Pow(end.X - start.X, 2) + Math.Pow(end.Y - start.Y, 2));
+                    if(start.X == end.X)
+                    {
+                        e.Graphics.DrawString(magnitude.ToString("0.###"), font, Brushes.Blue, start.X + 10, start.Y + (end.Y - start.Y) / 2, formatHeight);
+                    }
+                    else
+                    {
+                        e.Graphics.DrawString(magnitude.ToString("0.###"), font, Brushes.Blue, start.X + (end.X - start.X) / 2, start.Y - 10, formatWidth);
+                    }
+                    
+                }
+                
             }
+            e.Graphics.FillEllipse(solidBrush, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
+            e.Graphics.DrawEllipse(Pens.Black, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
+
+            solidBrush.Dispose();
         }
     }
 }

@@ -22,6 +22,7 @@ namespace workspace_test
             workspace = tableLayoutPanel1.Controls["workspace"] as DrawPanel;
             radioButton1.CheckedChanged += radioButton_CheckedChanged;
             radioButton2.CheckedChanged += radioButton_CheckedChanged;
+            radioButton3.CheckedChanged += radioButton_CheckedChanged; 
             this.KeyDown += workspace_KeyDown;
         }
 
@@ -43,6 +44,9 @@ namespace workspace_test
                         return;
                     case "Rectangle Tool":
                         workspace.SetPointerMode("rectangle");
+                        break;
+                    case "Pen Tool":
+                        workspace.SetPointerMode("pen");
                         break;
                     default:
                         workspace.SetPointerMode("select");
