@@ -64,6 +64,7 @@ namespace workspace_test
             DoubleBuffered = true;
             BorderStyle = BorderStyle.FixedSingle;
             Name = name;
+            BackColor = Color.White;
 
             // string formatting settings
             formatWidth.Alignment = StringAlignment.Center;
@@ -266,10 +267,33 @@ namespace workspace_test
             pen.Dispose();
         }
 
-        private void DrawLine(Tuple<Point, Point> line)
+        private void DrawLine(PaintEventArgs e, Tuple<PointF, PointF> line, Color color)
         {
+            Font font = new Font("Arial", 8);
+            Brush brush = new SolidBrush(color);
+            Pen pen = new Pen(brush);
+            SolidBrush solidBrush = new SolidBrush(Color.White);
 
+            e.Graphics.DrawLine(pen, line.Item1, line.Item2);
+
+            e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item1.X - 3, line.Item1.Y - 3, 6, 6));
+            e.Graphics.DrawEllipse(pen, new RectangleF(line.Item1.X - 3, line.Item1.Y - 3, 6, 6));
+
+            e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item2.X - 3, line.Item2.Y - 3, 6, 6));
+            e.Graphics.DrawEllipse(pen, new RectangleF(line.Item2.X - 3, line.Item2.Y - 3, 6, 6));
+
+            double magnitude = Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
+
+            if (line.Item1.X == line.Item2.X)
+            {
+                e.Graphics.DrawString(magnitude.ToString("0.###"), font, brush, line.Item1.X + 5, line.Item1.Y + (line.Item2.Y - line.Item1.Y) / 2, formatHeight);
+            }
+            else
+            {
+                e.Graphics.DrawString(magnitude.ToString("0.###"), font, brush, line.Item1.X + (line.Item2.X - line.Item1.X) / 2, line.Item1.Y - 5, formatWidth);
+            }
         }
+
 
         // move currently selected rectangle by values given by translation Point
         public void moveSelected(PointF translation)
@@ -308,7 +332,11 @@ namespace workspace_test
             {
                 drawing = true;
                 dragging = false;
-                start = e.Location;
+                if(!hover.IsEmpty)
+                {
+                    start = hover;
+                }
+                else start = e.Location;
             }
             else if(e.Button == MouseButtons.Left && pointerMode == "select")
             {
@@ -398,13 +426,21 @@ namespace workspace_test
 
             foreach(var line in lines)
             {
-                if(Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 6)
+                if(Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 10)
                 {
                     hover = line.Item1;
+                    if(drawing)
+                    {
+                        end = hover;
+                    }
                 }
-                else if (Math.Sqrt(Math.Pow(line.Item2.X - e.Location.X, 2) + Math.Pow(line.Item2.Y - e.Location.Y, 2)) <= 6)
+                else if (Math.Sqrt(Math.Pow(line.Item2.X - e.Location.X, 2) + Math.Pow(line.Item2.Y - e.Location.Y, 2)) <= 10)
                 {
                     hover = line.Item2;
+                    if (drawing)
+                    {
+                        end = hover;
+                    }
                 }
             }
 
@@ -421,8 +457,6 @@ namespace workspace_test
         {
             SolidBrush solidBrush = new SolidBrush(Color.White);
 
-            
-
             foreach (var (rectangle, i) in rects.Select((value, i) => (value, i)))
             {
                 if(i == currentlySelected)
@@ -433,25 +467,7 @@ namespace workspace_test
             }
             foreach (var line in lines)
             {
-                e.Graphics.DrawLine(Pens.Black, line.Item1, line.Item2);
-
-                
-                e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item1.X - 3, line.Item1.Y - 3, 6, 6));
-                e.Graphics.DrawEllipse(Pens.Black, new RectangleF(line.Item1.X - 3, line.Item1.Y - 3, 6, 6));
-                
-                e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item2.X - 3, line.Item2.Y - 3, 6, 6));
-                e.Graphics.DrawEllipse(Pens.Black, new RectangleF(line.Item2.X - 3, line.Item2.Y - 3, 6, 6));
-
-                double magnitude = Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
-
-                if (line.Item1.X == line.Item2.X)
-                {
-                    e.Graphics.DrawString(magnitude.ToString("0.###"), font, Brushes.Black, line.Item1.X + 10, line.Item1.Y + (line.Item2.Y - line.Item1.Y) / 2, formatHeight);
-                }
-                else
-                {
-                    e.Graphics.DrawString(magnitude.ToString("0.###"), font, Brushes.Black, line.Item1.X + (line.Item2.X - line.Item1.X) / 2, line.Item1.Y - 10, formatWidth);
-                }
+                DrawLine(e, line, Color.Black);
             }
 
             if (!start.IsEmpty && !end.IsEmpty)
@@ -462,22 +478,7 @@ namespace workspace_test
                 }
                 else if(pointerMode == "pen")
                 {
-                    e.Graphics.DrawLine(Pens.Blue, start, end);
-                    e.Graphics.FillEllipse(solidBrush, new RectangleF(start.X - dotSize/2, start.Y - dotSize/2, dotSize, dotSize));
-                    e.Graphics.DrawEllipse(Pens.Blue, new RectangleF(start.X - dotSize / 2, start.Y - dotSize / 2, dotSize, dotSize));
-
-                    e.Graphics.FillEllipse(solidBrush, new RectangleF(end.X - dotSize / 2, end.Y - dotSize / 2, dotSize, dotSize));
-                    e.Graphics.DrawEllipse(Pens.Blue, new RectangleF(end.X - dotSize / 2, end.Y - dotSize / 2, dotSize, dotSize));
-
-                    double magnitude = Math.Sqrt(Math.Pow(end.X - start.X, 2) + Math.Pow(end.Y - start.Y, 2));
-                    if(start.X == end.X)
-                    {
-                        e.Graphics.DrawString(magnitude.ToString("0.###"), font, Brushes.Blue, start.X + 10, start.Y + (end.Y - start.Y) / 2, formatHeight);
-                    }
-                    else
-                    {
-                        e.Graphics.DrawString(magnitude.ToString("0.###"), font, Brushes.Blue, start.X + (end.X - start.X) / 2, start.Y - 10, formatWidth);
-                    }
+                    DrawLine(e, new Tuple<PointF, PointF> (start, end), Color.Blue);
                     
                 }
                 
