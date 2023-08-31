@@ -19,6 +19,9 @@ namespace workspace_test
         private string pointerMode = "select";
         private Boolean drawing = false;
         private Boolean dragging = false;
+        private Boolean selecting = false;
+        private Boolean selected = false;
+        private PointF clickOff = Point.Empty;
 
         private PointF lastPos = PointF.Empty;
 
@@ -31,11 +34,14 @@ namespace workspace_test
         //index of currently selected rectangle
         private int currentlySelected = -1;
 
+        private Rectangle selection = Rectangle.Empty;
+
         // List containing drawn rectangles
         //private List<RectangleF> rects = new List<RectangleF>();
         //private List<Tuple<RectangleF, ShearData>> analyzed = new List<Tuple<RectangleF, ShearData>>();
         private List<Tuple<RectangleF, ShearData>> rects = new List<Tuple<RectangleF, ShearData>>();
         private List<Tuple<PointF, PointF>> lines = new List<Tuple<PointF, PointF>>();
+        private List<int> selectedLines = new List<int>();
 
         private int dotSize = 6;
 
@@ -112,6 +118,56 @@ namespace workspace_test
             rects[i] = temp;
             Invalidate();
             return data;
+        }
+
+        private void checkSelection()
+        {
+
+            foreach(var (line, i) in lines.Select((value, i) => (value, i)))
+            {
+                if (selection.Contains(Point.Round(line.Item1)))
+                {
+                    selectedLines.Add(i);
+                }
+                else if (line.Item1.X <= selection.Right && line.Item1.X >= selection.Left)
+                {
+                    if(line.Item2.X == line.Item1.X)
+                    {
+                        selectedLines.Add(i);
+                    }
+                }
+                else if(line.Item1.Y <= selection.Bottom && line.Item1.Y >= selection.Top)
+                {
+                    if(line.Item2.Y == line.Item1.Y)
+                    {
+                        selectedLines.Add(i);
+                    }
+                }
+                else if(selection.Contains(Point.Round(line.Item2)))
+                {
+                    selectedLines.Add(i);
+                }
+                else if (line.Item2.X <= selection.Right && line.Item2.X >= selection.Left)
+                {
+                    if (line.Item2.X == line.Item1.X)
+                    {
+                        selectedLines.Add(i);
+                    }
+                }
+                else if (line.Item2.Y <= selection.Bottom && line.Item2.Y >= selection.Top)
+                {
+                    if (line.Item2.Y == line.Item1.Y)
+                    {
+                        selectedLines.Add(i);
+                    }
+                }
+            }
+
+            if (selectedLines.Count == 0)
+            {
+                selected = false;
+            }
+            else selected = true;
         }
 
         // returns rectangle data from 2 points in form (starting point, (width, length))
@@ -276,11 +332,11 @@ namespace workspace_test
 
             e.Graphics.DrawLine(pen, line.Item1, line.Item2);
 
-            e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item1.X - 3, line.Item1.Y - 3, 6, 6));
-            e.Graphics.DrawEllipse(pen, new RectangleF(line.Item1.X - 3, line.Item1.Y - 3, 6, 6));
+            e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item1.X - dotSize/2, line.Item1.Y - dotSize/2, dotSize, dotSize));
+            e.Graphics.DrawEllipse(pen, new RectangleF(line.Item1.X - dotSize / 2, line.Item1.Y - dotSize / 2, dotSize, dotSize));
 
-            e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item2.X - 3, line.Item2.Y - 3, 6, 6));
-            e.Graphics.DrawEllipse(pen, new RectangleF(line.Item2.X - 3, line.Item2.Y - 3, 6, 6));
+            e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item2.X - dotSize / 2, line.Item2.Y - dotSize / 2, dotSize, dotSize));
+            e.Graphics.DrawEllipse(pen, new RectangleF(line.Item2.X - dotSize / 2, line.Item2.Y - dotSize / 2, dotSize, dotSize));
 
             double magnitude = Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
 
@@ -359,8 +415,23 @@ namespace workspace_test
                     }
                     else
                     {
+                        selecting = true;
+                        start = e.Location;
                         currentlySelected = -1;
+                        System.Console.WriteLine("selecting");
                     }
+                }
+                if(rects.Count == 0)
+                {
+                    selecting = true;
+                    start = e.Location;
+                    currentlySelected = -1;
+                    System.Console.WriteLine("selecting");
+                }
+
+                if(selected)
+                {
+                    clickOff = e.Location;
                 }
             }
             else
@@ -368,6 +439,7 @@ namespace workspace_test
                 dragging = false;
                 drawing = false;
                 start = PointF.Empty;
+                clickOff = Point.Empty;
             }
 
             end = PointF.Empty;
@@ -393,7 +465,22 @@ namespace workspace_test
                 end = PointF.Empty;
                 Invalidate();
             }
-            if (dragging) dragging = false;
+            else if (dragging) dragging = false;
+            else if (selecting)
+            {
+                checkSelection();
+
+                selecting = false;
+                start = PointF.Empty;
+                end = PointF.Empty;
+                selection = Rectangle.Empty;
+                Invalidate();
+            }
+            if(clickOff == e.Location || selecting)
+            {
+                selectedLines.Clear();
+                clickOff = Point.Empty;
+            }
         }
 
         // move end location if mouse moves
@@ -410,6 +497,10 @@ namespace workspace_test
                     moveSelected(new PointF(e.Location.X - lastPos.X, e.Location.Y - lastPos.Y));
                     lastPos = e.Location;
                 }
+                else if (selecting)
+                {
+                    selection = Rectangle.Round(GetRectangle(start, e.Location));
+                }
             }
             else if(drawing)
             {
@@ -423,6 +514,7 @@ namespace workspace_test
                     end = new PointF(e.Location.X, start.Y);
                 }
             }
+            
 
             foreach(var line in lines)
             {
@@ -455,6 +547,8 @@ namespace workspace_test
         // paint solid rectangles and currently drawing rectangles
         protected override void OnPaint(PaintEventArgs e)
         {
+            Color color = Color.FromArgb(25, Color.Blue);
+            SolidBrush selectBrush = new SolidBrush(color);
             SolidBrush solidBrush = new SolidBrush(Color.White);
 
             foreach (var (rectangle, i) in rects.Select((value, i) => (value, i)))
@@ -465,9 +559,13 @@ namespace workspace_test
                 }
                 else DrawRect(e, rectangle, Color.Black);
             }
-            foreach (var line in lines)
+            foreach (var (line, i) in lines.Select((value, i) => (value, i)))
             {
-                DrawLine(e, line, Color.Black);
+                if(selectedLines.Contains(i))
+                {
+                    DrawLine(e, line, Color.Blue);
+                }
+                else DrawLine(e, line, Color.Black);
             }
 
             if (!start.IsEmpty && !end.IsEmpty)
@@ -483,10 +581,19 @@ namespace workspace_test
                 }
                 
             }
-            e.Graphics.FillEllipse(solidBrush, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
-            e.Graphics.DrawEllipse(Pens.Black, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
+            if(!hover.IsEmpty)
+            {
+                e.Graphics.FillEllipse(solidBrush, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
+                e.Graphics.DrawEllipse(Pens.Black, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
+
+            }
+
+            e.Graphics.FillRectangle(selectBrush, selection);
+            e.Graphics.DrawRectangle(Pens.Blue, selection);
+
 
             solidBrush.Dispose();
+            selectBrush.Dispose();
         }
     }
 }
