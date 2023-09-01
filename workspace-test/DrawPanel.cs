@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Data.SqlClient;
+using Microsoft.Win32;
 
 namespace workspace_test
 {
@@ -33,6 +34,8 @@ namespace workspace_test
         private PointF end = PointF.Empty;
 
         private PointF hover = PointF.Empty;
+
+        private PointF suggestLine = PointF.Empty;
 
         //index of currently selected rectangle
         private int currentlySelected = -1;
@@ -112,7 +115,7 @@ namespace workspace_test
         //    e.Cancel = false;
         //}
 
-        void contextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void contextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             ToolStripItem item = e.ClickedItem;
             System.Console.WriteLine(item.Text);
@@ -151,6 +154,18 @@ namespace workspace_test
             Invalidate();
         }
 
+        public void deleteSelected()
+        {
+            foreach (var (pos, i) in selectedLines.Select((value, i) => (value, i)))
+            {
+                lines.RemoveAt(pos - i);
+            }
+
+            selectedLines.Clear();
+
+            Invalidate();
+        }
+
         // do the math for shear wall reaction
         public ShearData Calculate(int i, float LA, float LD)
         {
@@ -172,9 +187,9 @@ namespace workspace_test
             selectedLines.Sort();
 
             List<PointF> points = new List<PointF>();
-            foreach (var (pos, i) in selectedLines.Select((value, i) => (value, i)))
+            foreach (var pos in selectedLines)
             {
-                Tuple<PointF, PointF> currLine = lines[pos - i];
+                Tuple<PointF, PointF> currLine = lines[pos];
                 if(!points.Contains(currLine.Item1))
                 {
                     points.Add(currLine.Item1);
@@ -184,27 +199,35 @@ namespace workspace_test
                 {
                     points.Add(currLine.Item2);
                 }
-
-                lines.RemoveAt(pos - i);
             }
 
-            if(isRectangle(points))
+            if (isRectangle(points))
             {
                 points = points.OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
-                foreach(var point in points)
+                foreach (var point in points)
                 {
                     System.Console.WriteLine(point.X + ", " + point.Y);
                 }
 
+                foreach (var (pos, i) in selectedLines.Select((value, i) => (value, i)))
+                {
+                    lines.RemoveAt(pos - i);
+                }
+
                 return (new RectangleF(points[0], new Size((int)(points[3].X - points[0].X), (int)(points[3].Y - points[0].Y))));
             }
+            else Console.WriteLine("not a rectangle");
 
             return RectangleF.Empty;
         }
 
         private bool isRectangle(List<PointF> points)
         {
-            if (points.Count != 4) return false;
+            if (points.Count != 4)
+            {
+                Console.WriteLine("not enough points");
+                return false;
+            }
 
             double cx = (points[0].X + points[1].X + points[2].X + points[3].X) / 4;
             double cy = (points[0].Y + points[1].Y + points[2].Y + points[3].Y) / 4;
@@ -531,6 +554,7 @@ namespace workspace_test
 
             if (pointerMode == "pen" && drawing)
             {
+                suggestLine = PointF.Empty;
                 lines.Add(new Tuple<PointF, PointF>(start, end));
 
                 drawing = false;
@@ -587,9 +611,6 @@ namespace workspace_test
                 {
                     clickOff = e.Location;
                 }
-            }
-            else if (e.Button == MouseButtons.Right)
-            {
             }
             else
             {
@@ -648,6 +669,7 @@ namespace workspace_test
         // move end location if mouse moves
         protected override void OnMouseMove(MouseEventArgs e)
         {
+            suggestLine = PointF.Empty;
             hover = PointF.Empty;
             base.OnMouseMove(e);
             if (e.Button == MouseButtons.Left)
@@ -676,9 +698,9 @@ namespace workspace_test
                     end = new PointF(e.Location.X, start.Y);
                 }
             }
-            
 
-            foreach(var line in lines)
+
+            foreach (var line in lines)
             {
                 if(Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 10)
                 {
@@ -694,6 +716,35 @@ namespace workspace_test
                     if (drawing)
                     {
                         end = hover;
+                    }
+                }
+
+                if(pointerMode == "pen" && drawing)
+                {
+                    if(!line.Item1.Equals(e.Location) && !line.Item2.Equals(e.Location))
+                    {
+                        string direction = getDirection(start, e.Location);
+
+                        if (Math.Abs(line.Item1.Y - e.Location.Y) <= 5 && direction == "vertical")
+                        {
+                            suggestLine = line.Item1;
+                            end = new PointF(start.X, line.Item1.Y);
+                        }
+                        else if (Math.Abs(line.Item1.X - e.Location.X) <= 5 && direction == "horizontal")
+                        {
+                            suggestLine = line.Item1;
+                            end = new PointF(line.Item1.X, start.Y);
+                        }
+                        else if (Math.Abs(line.Item2.Y - e.Location.Y) <= 5 && direction == "vertical")
+                        {
+                            suggestLine = line.Item2;
+                            end = new PointF(start.X, line.Item2.Y);
+                        }
+                        else if (Math.Abs(line.Item2.X - e.Location.X) <= 5 && direction == "horizontal")
+                        {
+                            suggestLine = line.Item2;
+                            end = new PointF(line.Item2.X, start.Y);
+                        }
                     }
                 }
             }
@@ -712,6 +763,11 @@ namespace workspace_test
             Color color = Color.FromArgb(25, Color.Blue);
             SolidBrush selectBrush = new SolidBrush(color);
             SolidBrush solidBrush = new SolidBrush(Color.White);
+
+            if(!suggestLine.IsEmpty)
+            {
+                e.Graphics.DrawLine(Pens.Red, end, suggestLine);
+            }
 
             foreach (var (rectangle, i) in rects.Select((value, i) => (value, i)))
             {
@@ -752,7 +808,6 @@ namespace workspace_test
 
             e.Graphics.FillRectangle(selectBrush, selection);
             e.Graphics.DrawRectangle(Pens.Blue, selection);
-
 
             solidBrush.Dispose();
             selectBrush.Dispose();

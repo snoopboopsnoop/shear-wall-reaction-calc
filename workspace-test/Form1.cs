@@ -72,7 +72,7 @@ namespace workspace_test
         // this kind of works but it sucks
         private void workspace_KeyDown(object sender, KeyEventArgs e)
         {
-            System.Console.WriteLine("key");
+            System.Console.WriteLine(e.KeyCode);
             if (workspace.GetCurrentlySelected() != -1)
             {
                 if (e.KeyCode == Keys.W)
@@ -95,6 +95,26 @@ namespace workspace_test
                     //System.Console.WriteLine("a pressed");
                     workspace.moveSelected(new Point(1, 0));
                 }
+            }
+            if (e.KeyCode == Keys.Delete)
+            {
+                Console.WriteLine("delete");
+                workspace.deleteSelected();
+            }
+            else if(e.KeyCode == Keys.V)
+            {
+                radioButton1.Checked = true;
+                workspace.SetPointerMode("select");
+            }
+            else if (e.KeyCode == Keys.R)
+            {
+                radioButton2.Checked = true;
+                workspace.SetPointerMode("rectangle");
+            }
+            else if (e.KeyCode == Keys.P)
+            {
+                radioButton3.Checked = true;
+                workspace.SetPointerMode("pen");
             }
         }
     }
