@@ -125,40 +125,96 @@ namespace workspace_test
 
             foreach(var (line, i) in lines.Select((value, i) => (value, i)))
             {
+                //    2 
+                //  |----|
+                //  | 1  |
+                //  |____|
+                //
                 if (selection.Contains(Point.Round(line.Item1)))
+                {
+                    selectedLines.Add(i);
+                }
+                //    1 
+                //  |----|
+                //  | 2  |
+                //  |____|
+                //
+                else if (selection.Contains(Point.Round(line.Item2)))
                 {
                     selectedLines.Add(i);
                 }
                 else if (line.Item1.X <= selection.Right && line.Item1.X >= selection.Left)
                 {
-                    if(line.Item2.X == line.Item1.X)
+                    //    1 
+                    //  |----|
+                    //  |    |
+                    //  |____|
+                    //    
+                    if (line.Item1.Y < selection.Top)
                     {
-                        selectedLines.Add(i);
+                        //    1 
+                        //  |----|
+                        //  |    |
+                        //  |____|
+                        //    2
+                        if (line.Item2.X == line.Item1.X && line.Item2.Y > selection.Bottom)
+                        {
+                            selectedLines.Add(i);
+                        }
+                    }
+                    //     
+                    //  |----|
+                    //  |    |
+                    //  |____|
+                    //    1
+                    else if (line.Item1.Y >= selection.Bottom)
+                    {
+                        //    2 
+                        //  |----|
+                        //  |    |
+                        //  |____|
+                        //    1
+                        if (line.Item2.X == line.Item1.X && line.Item2.Y < selection.Top)
+                        {
+                            selectedLines.Add(i);
+                        }
                     }
                 }
-                else if(line.Item1.Y <= selection.Bottom && line.Item1.Y >= selection.Top)
+                else if (line.Item1.Y <= selection.Bottom && line.Item1.Y >= selection.Top)
                 {
-                    if(line.Item2.Y == line.Item1.Y)
+                    //     
+                    //  |----|
+                    // 1|    |
+                    //  |____|
+                    //    
+                    if (line.Item1.X < selection.Left)
                     {
-                        selectedLines.Add(i);
+                        //     
+                        //  |----|
+                        // 1|    |  2
+                        //  |____|
+                        // 
+                        if (line.Item2.X > selection.Right)
+                        {
+                            selectedLines.Add(i);
+                        }
                     }
-                }
-                else if(selection.Contains(Point.Round(line.Item2)))
-                {
-                    selectedLines.Add(i);
-                }
-                else if (line.Item2.X <= selection.Right && line.Item2.X >= selection.Left)
-                {
-                    if (line.Item2.X == line.Item1.X)
+                    //     
+                    //  |----|
+                    //  |    | 1
+                    //  |____|
+                    // 
+                    else if (line.Item1.X > selection.Right)
                     {
-                        selectedLines.Add(i);
-                    }
-                }
-                else if (line.Item2.Y <= selection.Bottom && line.Item2.Y >= selection.Top)
-                {
-                    if (line.Item2.Y == line.Item1.Y)
-                    {
-                        selectedLines.Add(i);
+                        //     
+                        //  |----|
+                        // 2|    | 1
+                        //  |____|
+                        // 
+                        if (line.Item2.X < selection.Left)
+                        {
+                            selectedLines.Add(i);
+                        }
                     }
                 }
             }
@@ -450,6 +506,13 @@ namespace workspace_test
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
+
+            if (clickOff == e.Location || selecting)
+            {
+                selectedLines.Clear();
+                clickOff = Point.Empty;
+            }
+
             if (drawing && !start.IsEmpty && !end.IsEmpty)
             {
                 if (pointerMode == "rectangle")
@@ -463,7 +526,6 @@ namespace workspace_test
                 drawing = false;
                 start = PointF.Empty;
                 end = PointF.Empty;
-                Invalidate();
             }
             else if (dragging) dragging = false;
             else if (selecting)
@@ -474,13 +536,9 @@ namespace workspace_test
                 start = PointF.Empty;
                 end = PointF.Empty;
                 selection = Rectangle.Empty;
-                Invalidate();
             }
-            if(clickOff == e.Location || selecting)
-            {
-                selectedLines.Clear();
-                clickOff = Point.Empty;
-            }
+
+            Invalidate();
         }
 
         // move end location if mouse moves
