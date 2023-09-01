@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.ComponentModel;
+using System.Collections.Specialized;
+using System.Configuration;
+using System.Data.SqlClient;
 
 namespace workspace_test
 {
@@ -52,7 +55,7 @@ namespace workspace_test
         private StringFormat formatwx = new StringFormat();
         private StringFormat formatwy = new StringFormat();
 
-        
+        private ContextMenuStrip cm;
 
         // default constructor
         public DrawPanel()
@@ -84,6 +87,45 @@ namespace workspace_test
 
             formatwy.Alignment = StringAlignment.Near;
             formatwy.LineAlignment = StringAlignment.Center;
+
+            cm = new ContextMenuStrip();
+            this.ContextMenuStrip = cm;
+
+            //cm.Opening += new System.ComponentModel.CancelEventHandler(cms_Opening);
+            cm.Items.Add("Create Rectangle");
+            cm.Items.Add("Oranges");
+            cm.Items.Add("Pears");
+
+            cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
+        }
+
+        //void cms_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        //{
+        //    Control c = cm.SourceControl as Control;
+
+        //    cm.Items.Clear();
+
+        //    cm.Items.Add("Create Rectangle");
+        //    cm.Items.Add("Oranges");
+        //    cm.Items.Add("Pears");
+
+        //    e.Cancel = false;
+        //}
+
+        void contextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            ToolStripItem item = e.ClickedItem;
+            System.Console.WriteLine(item.Text);
+            if(item.Text == "Create Rectangle")
+            {
+                RectangleF rect = CreateRectangle();
+
+                if(!rect.IsEmpty)
+                {
+                    rects.Add(new Tuple<RectangleF, ShearData>(rect, new ShearData()));
+                    Invalidate();
+                }
+            }
         }
 
         public void SetPointerMode(string mode)
@@ -118,6 +160,61 @@ namespace workspace_test
             rects[i] = temp;
             Invalidate();
             return data;
+        }
+
+        private RectangleF CreateRectangle()
+        {
+            if(selectedLines.Count != 4)
+            {
+                return RectangleF.Empty;
+            }
+
+            selectedLines.Sort();
+
+            List<PointF> points = new List<PointF>();
+            foreach (var (pos, i) in selectedLines.Select((value, i) => (value, i)))
+            {
+                Tuple<PointF, PointF> currLine = lines[pos - i];
+                if(!points.Contains(currLine.Item1))
+                {
+                    points.Add(currLine.Item1);
+
+                }
+                if (!points.Contains(currLine.Item2))
+                {
+                    points.Add(currLine.Item2);
+                }
+
+                lines.RemoveAt(pos - i);
+            }
+
+            if(isRectangle(points))
+            {
+                points = points.OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
+                foreach(var point in points)
+                {
+                    System.Console.WriteLine(point.X + ", " + point.Y);
+                }
+
+                return (new RectangleF(points[0], new Size((int)(points[3].X - points[0].X), (int)(points[3].Y - points[0].Y))));
+            }
+
+            return RectangleF.Empty;
+        }
+
+        private bool isRectangle(List<PointF> points)
+        {
+            if (points.Count != 4) return false;
+
+            double cx = (points[0].X + points[1].X + points[2].X + points[3].X) / 4;
+            double cy = (points[0].Y + points[1].Y + points[2].Y + points[3].Y) / 4;
+
+            double dd1 = Math.Pow(cx - points[0].X, 2) + Math.Pow(cy - points[0].Y, 2);
+            double dd2 = Math.Pow(cx - points[1].X, 2) + Math.Pow(cy - points[1].Y, 2);
+            double dd3 = Math.Pow(cx - points[2].X, 2) + Math.Pow(cy - points[2].Y, 2);
+            double dd4 = Math.Pow(cx - points[3].X, 2) + Math.Pow(cy - points[3].Y, 2);
+
+            return Math.Abs(dd1 - dd2) < 1E-6 && Math.Abs(dd1 - dd3) < 1E-6 && Math.Abs(dd1 - dd4) < 1E-6;
         }
 
         private void checkSelection()
@@ -431,6 +528,7 @@ namespace workspace_test
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
+
             if (pointerMode == "pen" && drawing)
             {
                 lines.Add(new Tuple<PointF, PointF>(start, end));
@@ -490,6 +588,9 @@ namespace workspace_test
                     clickOff = e.Location;
                 }
             }
+            else if (e.Button == MouseButtons.Right)
+            {
+            }
             else
             {
                 dragging = false;
@@ -497,6 +598,9 @@ namespace workspace_test
                 start = PointF.Empty;
                 clickOff = Point.Empty;
             }
+
+
+
 
             end = PointF.Empty;
             Invalidate();
