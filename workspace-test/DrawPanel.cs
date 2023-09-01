@@ -60,6 +60,11 @@ namespace workspace_test
 
         private ContextMenuStrip cm;
 
+        //private List<int> vertical = new List<int>();
+        //private List<int> horizontal = new List<int>();
+        private List<Tuple<PointF, PointF>> vertical = new List<Tuple<PointF, PointF>>();
+        private List<Tuple<PointF, PointF>> horizontal = new List<Tuple<PointF, PointF>>();
+
         // default constructor
         public DrawPanel()
         {
@@ -99,7 +104,7 @@ namespace workspace_test
 
             //cm.Opening += new System.ComponentModel.CancelEventHandler(cms_Opening);
             cm.Items.Add("Create Rectangle");
-            cm.Items.Add("Oranges");
+            cm.Items.Add("Run Shear Reaction");
             cm.Items.Add("Pears");
 
             cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
@@ -117,22 +122,6 @@ namespace workspace_test
 
         //    e.Cancel = false;
         //}
-
-        private void contextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-            ToolStripItem item = e.ClickedItem;
-            System.Console.WriteLine(item.Text);
-            if(item.Text == "Create Rectangle")
-            {
-                RectangleF rect = CreateRectangle();
-
-                if(!rect.IsEmpty)
-                {
-                    rects.Add(new Tuple<RectangleF, ShearData>(rect, new ShearData()));
-                    Invalidate();
-                }
-            }
-        }
 
         public void SetPointerMode(string mode)
         {
@@ -241,6 +230,54 @@ namespace workspace_test
             double dd4 = Math.Pow(cx - points[3].X, 2) + Math.Pow(cy - points[3].Y, 2);
 
             return Math.Abs(dd1 - dd2) < 1E-6 && Math.Abs(dd1 - dd3) < 1E-6 && Math.Abs(dd1 - dd4) < 1E-6;
+        }
+        private void contextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            ToolStripItem item = e.ClickedItem;
+            System.Console.WriteLine(item.Text);
+            if (item.Text == "Create Rectangle")
+            {
+                RectangleF rect = CreateRectangle();
+
+                if (!rect.IsEmpty)
+                {
+                    rects.Add(new Tuple<RectangleF, ShearData>(rect, new ShearData()));
+                    Invalidate();
+                }
+            }
+            else if (item.Text == "Run Shear Reaction")
+            {
+                Algorithm();
+                selectedLines.Clear();
+            }
+        }
+
+        private void Algorithm()
+        {
+            List<Tuple<PointF, PointF>> shearLines = new List<Tuple<PointF, PointF>>();
+            //List<Tuple<PointF, PointF>> vertical = new List<Tuple<PointF, PointF>>();
+            //List<Tuple<PointF, PointF>> horizontal = new List<Tuple<PointF, PointF>>();
+            foreach (var pos in selectedLines)
+            {
+                Tuple<PointF, PointF> temp = lines[pos];
+                string direction = getDirection(temp.Item1, temp.Item2);
+                if (direction == "vertical") vertical.Add(temp);
+                else horizontal.Add(temp);
+            }
+            //shearLines = shearLines.OrderBy(p => p.Item1.X).ThenBy(p => p.Item1.Y).ToList();
+            vertical = vertical.OrderBy(p => p.Item1.X).ThenBy(p => p.Item1.Y).ThenBy(p => p.Item2.X).ThenBy(p => p.Item2.Y).ToList();
+            horizontal = horizontal.OrderBy(p => p.Item1.X).ThenBy(p => p.Item1.Y).ThenBy(p => p.Item2.X).ThenBy(p => p.Item2.Y).ToList();
+
+            Console.WriteLine("Vertical lines:");
+            foreach (var line in vertical)
+            {
+                Console.WriteLine("(" + line.Item1.X + ", " + line.Item1.Y + ") -> (" + line.Item2.X + ", " + line.Item2.Y + ")");
+            }
+            Console.WriteLine("Horizontal lines:");
+            foreach (var line in horizontal)
+            {
+                Console.WriteLine("(" + line.Item1.X + ", " + line.Item1.Y + ") -> (" + line.Item2.X + ", " + line.Item2.Y + ")");
+            }
         }
 
         private void checkSelection()
@@ -787,6 +824,15 @@ namespace workspace_test
                     DrawLine(e, line, Color.Blue);
                 }
                 else DrawLine(e, line, Color.Black);
+            }
+            foreach(var line in vertical)
+            {
+                DrawLine(e, line, Color.Green);
+                
+            }
+            foreach(var line in horizontal)
+            {
+                DrawLine(e, line, Color.Red);
             }
 
             if (!start.IsEmpty && !end.IsEmpty)
