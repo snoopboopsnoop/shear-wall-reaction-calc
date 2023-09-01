@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -116,6 +117,31 @@ namespace workspace_test
                 radioButton3.Checked = true;
                 workspace.SetPointerMode("pen");
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if(openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                workspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), 0.5F);
+            }
+        }
+
+        public Image SetImageOpacity(Image image, float opacity)
+        {
+            Bitmap bmp = new Bitmap(image.Width, image.Height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                ColorMatrix matrix = new ColorMatrix();
+                matrix.Matrix33 = opacity;
+                ImageAttributes attributes = new ImageAttributes();
+                attributes.SetColorMatrix(matrix, ColorMatrixFlag.Default,
+                                                  ColorAdjustType.Bitmap);
+                g.DrawImage(image, new Rectangle(0, 0, bmp.Width, bmp.Height),
+                                   0, 0, image.Width, image.Height,
+                                   GraphicsUnit.Pixel, attributes);
+            }
+            return bmp;
         }
     }
 }

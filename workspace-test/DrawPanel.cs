@@ -67,6 +67,7 @@ namespace workspace_test
             DoubleBuffered = true;
             BorderStyle = BorderStyle.FixedSingle;
             this.GotFocus += workspace_GotFocus;
+            
         }
 
         // named panel constructor
@@ -76,7 +77,9 @@ namespace workspace_test
             DoubleBuffered = true;
             BorderStyle = BorderStyle.FixedSingle;
             Name = name;
-            BackColor = Color.White;
+            //BackColor = Color.FromArgb(10, Color.White);
+            BackColor = Color.Transparent;
+            BackgroundImageLayout = ImageLayout.Center;
 
             // string formatting settings
             formatWidth.Alignment = StringAlignment.Center;
