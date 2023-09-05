@@ -148,5 +148,29 @@ namespace workspace_test
         {
             workspace.BackgroundImage = null;
         }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                workspace.SetLA(float.Parse(textBox1.Text));
+            }
+            catch(FormatException)
+            {
+                return;
+            }
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                workspace.SetLD(float.Parse(textBox2.Text));
+            }
+            catch (FormatException)
+            {
+                return;
+            }
+        }
     }
 }

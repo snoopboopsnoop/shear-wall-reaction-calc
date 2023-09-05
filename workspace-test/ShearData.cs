@@ -28,9 +28,11 @@ namespace workspace_test
             LD = paramLD;
             LS = LA * LD;
             wx = LS * rect.Width;
-            wy = LS * rect.Height;
+            //wy = LS * rect.Height;
+            wy = 0;
             rx1 = (float)0.5 * wx * rect.Height;
-            ry1 = (float)0.5 * wy * rect.Width;
+            //ry1 = (float)0.5 * wy * rect.Width;
+            ry1 = 0;
         }
 
         public RectangleF rect { get; }

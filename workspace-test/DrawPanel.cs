@@ -60,10 +60,18 @@ namespace workspace_test
 
         private ContextMenuStrip cm;
 
+        // temporary members while i figure out how tf to do this shear stuff
         //private List<int> vertical = new List<int>();
         //private List<int> horizontal = new List<int>();
-        private List<Tuple<PointF, PointF>> vertical = new List<Tuple<PointF, PointF>>();
-        private List<Tuple<PointF, PointF>> horizontal = new List<Tuple<PointF, PointF>>();
+        private List<int> vertical = new List<int>();
+        private List<int> horizontal = new List<int>();
+        private List<int> left = new List<int>();
+        private List<int> right = new List<int>();
+        private List<int> y = new List<int>();
+        private List<int> x = new List<int>();
+
+        private float LA = 0;
+        private float LD = 0;
 
         // default constructor
         public DrawPanel()
@@ -127,6 +135,16 @@ namespace workspace_test
         {
             System.Console.WriteLine("switching pointer to mode " + mode);
             pointerMode = mode;
+        }
+
+        public void SetLA(float paramLA)
+        {
+            LA = paramLA;
+        }
+
+        public void SetLD(float paramLD)
+        {
+            LD = paramLD;
         }
 
         public int GetCurrentlySelected()
@@ -254,6 +272,29 @@ namespace workspace_test
 
         private void Algorithm()
         {
+            foreach(var pos in selectedLines)
+            {
+                if (!y.Contains((int)lines[pos].Item1.Y))
+                {
+                    y.Add((int)lines[pos].Item1.Y);
+                }
+                if (!y.Contains((int)lines[pos].Item2.Y))
+                {
+                    y.Add((int)lines[pos].Item2.Y);
+                }
+                if (!x.Contains((int)lines[pos].Item1.X))
+                {
+                    x.Add((int)lines[pos].Item1.X);
+                }
+                if (!x.Contains((int)lines[pos].Item2.X))
+                {
+                    x.Add((int)lines[pos].Item2.X);
+                }
+            }
+
+            //Point min = new Point(9999, 9999);
+            //Point max = Point.Empty;
+
             List<Tuple<PointF, PointF>> shearLines = new List<Tuple<PointF, PointF>>();
             //List<Tuple<PointF, PointF>> vertical = new List<Tuple<PointF, PointF>>();
             //List<Tuple<PointF, PointF>> horizontal = new List<Tuple<PointF, PointF>>();
@@ -261,23 +302,155 @@ namespace workspace_test
             {
                 Tuple<PointF, PointF> temp = lines[pos];
                 string direction = getDirection(temp.Item1, temp.Item2);
-                if (direction == "vertical") vertical.Add(temp);
-                else horizontal.Add(temp);
+                if (direction == "vertical") vertical.Add(pos);
+                else horizontal.Add(pos);
             }
             //shearLines = shearLines.OrderBy(p => p.Item1.X).ThenBy(p => p.Item1.Y).ToList();
-            vertical = vertical.OrderBy(p => p.Item1.X).ThenBy(p => p.Item1.Y).ThenBy(p => p.Item2.X).ThenBy(p => p.Item2.Y).ToList();
-            horizontal = horizontal.OrderBy(p => p.Item1.X).ThenBy(p => p.Item1.Y).ThenBy(p => p.Item2.X).ThenBy(p => p.Item2.Y).ToList();
+            vertical.Sort();
+            horizontal.Sort();
+            y.Sort();
 
-            Console.WriteLine("Vertical lines:");
-            foreach (var line in vertical)
+
+            //List<RectangleF> shearRects = new List<RectangleF>();
+            for(int i = 0; i < y.Count - 1; i++)
             {
-                Console.WriteLine("(" + line.Item1.X + ", " + line.Item1.Y + ") -> (" + line.Item2.X + ", " + line.Item2.Y + ")");
+                Tuple<int, int> range = new Tuple<int, int>(y[i], y[i + 1]);
+                List<int> lookAt = new List<int>();
+
+                foreach(var pos in vertical)
+                {
+                    if((range.Item1 >= lines[pos].Item1.Y && range.Item2 <= lines[pos].Item2.Y) ||
+                        range.Item1 >= lines[pos].Item2.Y && range.Item2 <= lines[pos].Item1.Y)
+                    {
+                        lookAt.Add(pos);
+                    }
+                }
+
+                Console.WriteLine("From y=" + range.Item1 + " to y=" + range.Item2 + ", look at lines " + lines[lookAt[0]] + " and " + lines[lookAt[1]]);
+
+                Tuple<PointF, PointF> a = lines[lookAt[0]];
+                Tuple<PointF, PointF> b = lines[lookAt[1]];
+
+                if (a.Item1.X > b.Item1.X)
+                {
+                    RectangleF tempRect = new RectangleF((int)b.Item1.X, range.Item1, a.Item1.X - b.Item1.X, range.Item2 - range.Item1);
+                    rects.Add(new Tuple<RectangleF, ShearData>(tempRect, new ShearData(tempRect, LA, LD)));
+                }
+                else
+                {
+                    RectangleF tempRect = new RectangleF((int)a.Item1.X, range.Item1, b.Item1.X - a.Item1.X, range.Item2 - range.Item1);
+                    rects.Add(new Tuple<RectangleF, ShearData>(tempRect, new ShearData(tempRect, LA, LD)));
+                }
             }
-            Console.WriteLine("Horizontal lines:");
-            foreach (var line in horizontal)
-            {
-                Console.WriteLine("(" + line.Item1.X + ", " + line.Item1.Y + ") -> (" + line.Item2.X + ", " + line.Item2.Y + ")");
-            }
+
+            //// only need to look at the vertical lines to find max coords because math
+            //foreach(var line in vertical)
+            //{
+            //    if (line.Item1.X < min.X) min.X = (int)line.Item1.X;
+            //    else if (line.Item1.X > max.X) max.X = (int)line.Item1.X;
+            //    if (line.Item1.Y < min.Y) min.Y = (int)line.Item1.Y;
+            //    else if (line.Item1.Y > max.Y) max.Y = (int)line.Item1.Y;
+            //    if (line.Item2.X < min.X) min.X = (int)line.Item2.X;
+            //    else if (line.Item2.X > max.X) max.X = (int)line.Item2.X;
+            //    if (line.Item2.Y < min.Y) min.Y = (int)line.Item2.Y;
+            //    else if (line.Item2.Y > max.Y) max.Y = (int)line.Item2.Y;
+            //}
+
+            //int yMin = -1;
+            //int yMax = -1;
+            //// get all left components of a wall using more math
+            //foreach (var (line, i) in vertical.Select((value, i) => (value, i)))
+            //{
+            //    Console.WriteLine("Min coord: (" + min.X + ", " + min.Y + ")");
+            //    Console.WriteLine("Max coord: (" + max.X + ", " + max.Y + ")");
+            //    Console.WriteLine("start Y: min " + yMin + ", max " + yMax);
+            //    // point A has a new y max
+            //    if(yMax < 0 || yMin < 0)
+            //    {
+            //        if(line.Item1.Y > line.Item2.Y)
+            //        {
+            //            yMax = (int)line.Item1.Y;
+            //            yMin = (int)line.Item2.Y;
+            //            left.Add(i);
+            //        }
+            //        else
+            //        {
+            //            yMax = (int)line.Item2.Y;
+            //            yMin = (int)line.Item1.Y;
+            //            left.Add(i);
+            //        }
+            //    }
+            //    else if (line.Item1.Y > yMax)
+            //    {
+            //        Console.WriteLine("Adding (" + line.Item1.X + ", " + line.Item1.Y + ") -> (" + line.Item2.X + ", " + line.Item2.Y + ") to left 1");
+            //        left.Add(i);
+            //        yMax = (int)line.Item1.Y;
+            //        if (line.Item2.Y < yMin || yMin < 0) yMin = (int)line.Item2.Y;
+            //    }
+            //    //point B has a new y max
+            //    else if (line.Item2.Y > yMax)
+            //    {
+            //        Console.WriteLine("Adding (" + line.Item1.X + ", " + line.Item1.Y + ") -> (" + line.Item2.X + ", " + line.Item2.Y + ") to left 2");
+            //        left.Add(i);
+            //        yMax = (int)line.Item2.Y;
+            //        if (line.Item1.Y < yMin || yMin < 0) yMin = (int)line.Item1.Y;
+            //    }
+            //    // point A has a new y min
+            //    else if (line.Item1.Y < yMin) 
+            //    {
+            //        Console.WriteLine("Adding (" + line.Item1.X + ", " + line.Item1.Y + ") -> (" + line.Item2.X + ", " + line.Item2.Y + ") to left 3");
+            //        left.Add(i);
+            //        yMin = (int)line.Item1.Y;
+            //        // might as well check the max
+            //        if (line.Item2.Y > yMax || yMax < 0) yMax = (int)line.Item2.Y;
+            //    }
+            //    //point B has a new y min
+            //    else if(line.Item2.Y < yMin)
+            //    {
+            //        Console.WriteLine("Adding (" + line.Item1.X + ", " + line.Item1.Y + ") -> (" + line.Item2.X + ", " + line.Item2.Y + ") to left 4");
+            //        left.Add(i);
+            //        yMin = (int)line.Item2.Y;
+            //        if (line.Item1.Y > yMax || yMax < 0) yMax = (int)line.Item1.Y;
+            //    }
+
+
+
+            //    Console.WriteLine("Min coord: (" + min.X + ", " + min.Y + ")");
+            //    Console.WriteLine("Max coord: (" + max.X + ", " + max.Y + ")");
+            //    Console.WriteLine("end Y: min " + yMin + ", max " + yMax);
+
+
+            //    Console.Write(yMin + " = " + min.Y + " and " + yMax + " = " + max.Y + "?");
+            //    if (yMin == min.Y && yMax == max.Y)
+            //    {
+            //        Console.WriteLine("found");
+
+            //        break;
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine("not found");
+            //    }
+            //}
+
+            //Console.WriteLine("Vertical lines:");
+            //foreach (var line in vertical)
+            //{
+            //    Console.WriteLine("(" + line.Item1.X + ", " + line.Item1.Y + ") -> (" + line.Item2.X + ", " + line.Item2.Y + ")");
+            //}
+            //Console.WriteLine("Horizontal lines:");
+            //foreach (var line in horizontal)
+            //{
+            //    Console.WriteLine("(" + line.Item1.X + ", " + line.Item1.Y + ") -> (" + line.Item2.X + ", " + line.Item2.Y + ")");
+            //}
+
+            //Console.WriteLine("Min coord: (" + min.X + ", " + min.Y + ")");
+            //Console.WriteLine("Max coord: (" + max.X + ", " + max.Y + ")");
+
+            //foreach (var (line, i) in vertical.Select((value, i) => (value, i)))
+            //{
+            //    if (!left.Contains(i)) right.Add(i);
+            //}
         }
 
         private void checkSelection()
@@ -495,7 +668,7 @@ namespace workspace_test
             e.Graphics.DrawString(paramRect.Height.ToString() + "ft", font, brush,
                 paramRect.X + paramRect.Width + 5, paramRect.Y + paramRect.Height/2, formatHeight);
 
-            if (data.wx != 0 && data.wy != 0)
+            if (data.wx != 0 || data.wy != 0)
             {
                 // wx box
                 e.Graphics.DrawRectangle(Pens.Red, paramRect.X - (data.wx + 20), paramRect.Y, data.wx, paramRect.Height);
@@ -804,19 +977,21 @@ namespace workspace_test
             SolidBrush selectBrush = new SolidBrush(color);
             SolidBrush solidBrush = new SolidBrush(Color.White);
 
-            if(!suggestLine.IsEmpty)
+            foreach (var ys in y)
+            {
+                DrawLine(e, new Tuple<PointF, PointF>(new PointF(0, ys), new PointF(1920, ys)), Color.Blue);
+            }
+            foreach (var xs in x)
+            {
+                DrawLine(e, new Tuple<PointF, PointF>(new PointF(xs, 0), new PointF(xs, 1080)), Color.Blue);
+            }
+
+            if (!suggestLine.IsEmpty)
             {
                 e.Graphics.DrawLine(Pens.Red, end, suggestLine);
             }
 
-            foreach (var (rectangle, i) in rects.Select((value, i) => (value, i)))
-            {
-                if(i == currentlySelected)
-                {
-                    DrawRect(e, rectangle, Color.Blue);
-                }
-                else DrawRect(e, rectangle, Color.Black);
-            }
+            
             foreach (var (line, i) in lines.Select((value, i) => (value, i)))
             {
                 if(selectedLines.Contains(i))
@@ -825,15 +1000,33 @@ namespace workspace_test
                 }
                 else DrawLine(e, line, Color.Black);
             }
-            foreach(var line in vertical)
+
+            foreach (var (rectangle, i) in rects.Select((value, i) => (value, i)))
             {
-                DrawLine(e, line, Color.Green);
-                
+                if (i == currentlySelected)
+                {
+                    DrawRect(e, rectangle, Color.Blue);
+                }
+                else DrawRect(e, rectangle, Color.Red);
             }
-            foreach(var line in horizontal)
-            {
-                DrawLine(e, line, Color.Red);
-            }
+
+            //foreach(var (line, i) in vertical.Select((value, i) => (value, i)))
+            //{
+            //    if(left.Contains(i))
+            //    {
+            //        DrawLine(e, line, Color.Purple);
+            //    }
+            //    else if(right.Contains(i))
+            //    {
+            //        DrawLine(e, line, Color.Orange);
+            //    }
+            //    else DrawLine(e, line, Color.Green);
+
+            //}
+            //foreach (var (line, i) in horizontal.Select((value, i) => (value, i)))
+            //{
+            //    DrawLine(e, line, Color.Red);
+            //}
 
             if (!start.IsEmpty && !end.IsEmpty)
             {
