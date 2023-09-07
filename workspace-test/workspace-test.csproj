@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Shear.cs" />
     <Compile Include="ShearData.cs" />
     <Compile Include="DrawPanel.cs">
       <SubType>Component</SubType>
