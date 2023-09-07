@@ -19,60 +19,67 @@ namespace workspace_test
 {
     public class DrawPanel : Panel
     {
-        // select | rectangle |
+        // select | rectangle | pen
         private string pointerMode = "select";
+
+        // mouse statuses
         private Boolean drawing = false;
         private Boolean dragging = false;
         private Boolean selecting = false;
         private Boolean selected = false;
+        
+        // used to check if mouse clicked in one spot
         private PointF clickOff = Point.Empty;
 
+        // previous mouse position, for stuff
         private PointF lastPos = PointF.Empty;
 
         // start end points for mouse drag
         private PointF start = PointF.Empty;
         private PointF end = PointF.Empty;
 
+        // which point is currently being hovered over, draws bigger one over it later
         private PointF hover = PointF.Empty;
 
+        // the funny red line that tells you if you're lined up
         private PointF suggestLine = PointF.Empty;
 
         //index of currently selected rectangle
         private int currentlySelected = -1;
 
+        // the funny blue rectangle when you drag to select
         private Rectangle selection = Rectangle.Empty;
 
         // List containing drawn rectangles
-        //private List<RectangleF> rects = new List<RectangleF>();
-        //private List<Tuple<RectangleF, ShearData>> analyzed = new List<Tuple<RectangleF, ShearData>>();
         private List<Tuple<RectangleF, ShearData>> rects = new List<Tuple<RectangleF, ShearData>>();
+
+        // List containing drawn lines
         private List<Tuple<PointF, PointF>> lines = new List<Tuple<PointF, PointF>>();
+
+        // list containing positions of drawn lines that are currently selected
         private List<int> selectedLines = new List<int>();
 
+        // how big to make the vertex dots
         private int dotSize = 6;
 
+        // default font
         private Font font = new Font("Arial", 8);
 
+        // formatting for measurement display text
         private StringFormat formatWidth = new StringFormat();
         private StringFormat formatHeight = new StringFormat();
         private StringFormat formatwx = new StringFormat();
         private StringFormat formatwy = new StringFormat();
 
+        // right click menu
         private ContextMenuStrip cm;
 
-        // temporary members while i figure out how tf to do this shear stuff
-        //private List<int> vertical = new List<int>();
-        //private List<int> horizontal = new List<int>();
-        private List<int> vertical = new List<int>();
-        private List<int> horizontal = new List<int>();
-        private List<int> left = new List<int>();
-        private List<int> right = new List<int>();
-        private List<int> y = new List<int>();
-        private List<int> x = new List<int>();
-
+        // calculator values
         private float LA = 0;
         private float LD = 0;
 
+        // i should change its name but it's just all the shear data collected
+        // when analysis is performed on a compound object
         private Shear test = new Shear();
 
         // default constructor
@@ -81,8 +88,6 @@ namespace workspace_test
             Dock = DockStyle.Fill;
             DoubleBuffered = true;
             BorderStyle = BorderStyle.FixedSingle;
-            this.GotFocus += workspace_GotFocus;
-            
         }
 
         // named panel constructor
@@ -92,7 +97,8 @@ namespace workspace_test
             DoubleBuffered = true;
             BorderStyle = BorderStyle.FixedSingle;
             Name = name;
-            //BackColor = Color.FromArgb(10, Color.White);
+            
+            // settings to allow importing images behind
             BackColor = Color.Transparent;
             BackgroundImageLayout = ImageLayout.Center;
 
@@ -109,29 +115,17 @@ namespace workspace_test
             formatwy.Alignment = StringAlignment.Center;
             formatwy.LineAlignment = StringAlignment.Near;
 
+
+            // basic right click menu code that i stole from stack overflow and modified
             cm = new ContextMenuStrip();
             this.ContextMenuStrip = cm;
 
-            //cm.Opening += new System.ComponentModel.CancelEventHandler(cms_Opening);
             cm.Items.Add("Create Rectangle");
             cm.Items.Add("Run Shear Reaction");
             cm.Items.Add("Pears");
 
             cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
         }
-
-        //void cms_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-        //{
-        //    Control c = cm.SourceControl as Control;
-
-        //    cm.Items.Clear();
-
-        //    cm.Items.Add("Create Rectangle");
-        //    cm.Items.Add("Oranges");
-        //    cm.Items.Add("Pears");
-
-        //    e.Cancel = false;
-        //}
 
         public void SetPointerMode(string mode)
         {
@@ -189,6 +183,7 @@ namespace workspace_test
             return data;
         }
 
+        // makes a rectangle out of 4 selected lines if possible, kind of a useless feature now but it's still cool
         private RectangleF CreateRectangle()
         {
             if(selectedLines.Count != 4)
@@ -198,6 +193,7 @@ namespace workspace_test
 
             selectedLines.Sort();
 
+            // get the unique points from the lines, should be 4 if it's a rectangle
             List<PointF> points = new List<PointF>();
             foreach (var pos in selectedLines)
             {
@@ -213,6 +209,8 @@ namespace workspace_test
                 }
             }
 
+            // wait this might be superfluous but i'll come back to it because this feature sucks
+            // don't need this code right why don't you just check if points.count == 4 if not then it can't be a rectangle if so then it must be a rectangle
             if (isRectangle(points))
             {
                 points = points.OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
@@ -233,8 +231,10 @@ namespace workspace_test
             return RectangleF.Empty;
         }
 
+        // returns if 4 coordinates from a rectangle
         private bool isRectangle(List<PointF> points)
         {
+            // this cool math i foundo n stack overflow might be useless, see function above
             if (points.Count != 4)
             {
                 Console.WriteLine("not enough points");
@@ -251,6 +251,8 @@ namespace workspace_test
 
             return Math.Abs(dd1 - dd2) < 1E-6 && Math.Abs(dd1 - dd3) < 1E-6 && Math.Abs(dd1 - dd4) < 1E-6;
         }
+
+        // deal with right click menu selections
         private void contextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             ToolStripItem item = e.ClickedItem;
@@ -274,8 +276,14 @@ namespace workspace_test
             }
         }
 
+        // all the shear wall stuff in one bundle
         private void Algorithm()
         {
+            // splits all unique vertices by drawing a line through the x and y values
+            // (theoretically, though it actually just stores all the unique x and ys)
+            List<int> y = new List<int>();
+            List<int> x = new List<int>();
+
             foreach (var pos in selectedLines)
             {
                 if (!y.Contains((int)lines[pos].Item1.Y))
@@ -296,9 +304,12 @@ namespace workspace_test
                 }
             }
 
-            List<Tuple<PointF, PointF>> shearLines = new List<Tuple<PointF, PointF>>();
-            //List<Tuple<PointF, PointF>> vertical = new List<Tuple<PointF, PointF>>();
-            //List<Tuple<PointF, PointF>> horizontal = new List<Tuple<PointF, PointF>>();
+            // vertical: all the vertical line poisitions
+            // horizontal: all the horziontal line positions
+            List<int> vertical = new List<int>();
+            List<int> horizontal = new List<int>();
+
+            // initilize the horiozntal and verticals
             foreach (var pos in selectedLines)
             {
                 Tuple<PointF, PointF> temp = lines[pos];
@@ -315,6 +326,8 @@ namespace workspace_test
             Point min = new Point(9999, 9999);
             Point max = Point.Empty;
 
+            // get minimum and max points to form a big rectangle around the shape
+            // useless rn but will be useful for the r value implementation (i hope)
             foreach (var pos in vertical)
             {
                 var line = lines[pos];
@@ -328,6 +341,8 @@ namespace workspace_test
                 else if (line.Item2.Y > max.Y) max.Y = (int)line.Item2.Y;
             }
 
+            // get all the rectangles to shear by forming a rectangle out of the fake lines and the real lines
+            // its a lot and tbh i forgot most of the logic
             List<RectangleF> leftRects = new List<RectangleF>();
             for(int i = 0; i < y.Count - 1; i++)
             {
@@ -361,6 +376,7 @@ namespace workspace_test
                 leftRects.Add(tempRect);
             }
 
+            // same thing but do it using the vertical lines along the x axis
             List<RectangleF> bottomRects = new List<RectangleF>();
             for (int i = 0; i < x.Count - 1; i++)
             {
@@ -394,6 +410,7 @@ namespace workspace_test
                 bottomRects.Add(tempRect);
             }
 
+            // take all that and send it somewhere else
             test = new Shear(new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), GetRectangle(min, max), LA, LD);
 
             Invalidate();
@@ -671,6 +688,7 @@ namespace workspace_test
             //arrowPen.Dispose();
         }
 
+        // draws line lmao
         private void DrawLine(PaintEventArgs e, Tuple<PointF, PointF> line, Color color)
         {
             Font font = new Font("Arial", 8);
@@ -680,6 +698,7 @@ namespace workspace_test
 
             e.Graphics.DrawLine(pen, line.Item1, line.Item2);
 
+            // 2 vertices
             e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item1.X - dotSize/2, line.Item1.Y - dotSize/2, dotSize, dotSize));
             e.Graphics.DrawEllipse(pen, new RectangleF(line.Item1.X - dotSize / 2, line.Item1.Y - dotSize / 2, dotSize, dotSize));
 
@@ -688,6 +707,7 @@ namespace workspace_test
 
             double magnitude = Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
 
+            // text display depends on if the line is horizontal or vertical
             if (line.Item1.X == line.Item2.X)
             {
                 e.Graphics.DrawString(magnitude.ToString("0.###"), font, brush, line.Item1.X + 5, line.Item1.Y + (line.Item2.Y - line.Item1.Y) / 2, formatHeight);
@@ -792,9 +812,6 @@ namespace workspace_test
                 clickOff = Point.Empty;
             }
 
-
-
-
             end = PointF.Empty;
             Invalidate();
         }
@@ -871,7 +888,6 @@ namespace workspace_test
                 }
             }
 
-
             foreach (var line in lines)
             {
                 if(Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 10)
@@ -920,13 +936,7 @@ namespace workspace_test
                     }
                 }
             }
-
             Invalidate();
-        }
-
-        private void workspace_GotFocus(Object sender, EventArgs e)
-        {
-            System.Console.WriteLine("focused");
         }
 
         // paint solid rectangles and currently drawing rectangles
@@ -936,20 +946,10 @@ namespace workspace_test
             SolidBrush selectBrush = new SolidBrush(color);
             SolidBrush solidBrush = new SolidBrush(Color.White);
 
-            //foreach (var ys in y)
-            //{
-            //    DrawLine(e, new Tuple<PointF, PointF>(new PointF(0, ys), new PointF(1920, ys)), Color.Blue);
-            //}
-            //foreach (var xs in x)
-            //{
-            //    DrawLine(e, new Tuple<PointF, PointF>(new PointF(xs, 0), new PointF(xs, 1080)), Color.Blue);
-            //}
-
             if (!suggestLine.IsEmpty)
             {
                 e.Graphics.DrawLine(Pens.Red, end, suggestLine);
             }
-
             
             foreach (var (line, i) in lines.Select((value, i) => (value, i)))
             {
@@ -968,25 +968,6 @@ namespace workspace_test
                 }
                 else DrawRect(e, rectangle, Color.Red);
             }
-
-            //foreach(var (line, i) in vertical.Select((value, i) => (value, i)))
-            //{
-            //    if(left.Contains(i))
-            //    {
-            //        DrawLine(e, line, Color.Purple);
-            //    }
-            //    else if(right.Contains(i))
-            //    {
-            //        DrawLine(e, line, Color.Orange);
-            //    }
-            //    else DrawLine(e, line, Color.Green);
-
-            //}
-            //foreach (var (line, i) in horizontal.Select((value, i) => (value, i)))
-            //{
-            //    DrawLine(e, line, Color.Red);
-            //}
-
 
             Tuple<List<RectangleF>, List<RectangleF>> data = test.GetData();
             Tuple<List<ShearData>, List<ShearData>> shearData = test.GetShearData();
@@ -1020,7 +1001,6 @@ namespace workspace_test
             {
                 e.Graphics.FillEllipse(solidBrush, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
                 e.Graphics.DrawEllipse(Pens.Black, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
-
             }
 
             e.Graphics.FillRectangle(selectBrush, selection);
