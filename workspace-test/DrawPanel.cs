@@ -71,6 +71,8 @@ namespace workspace_test
         private StringFormat formatHeight = new StringFormat();
         private StringFormat formatwx = new StringFormat();
         private StringFormat formatwy = new StringFormat();
+        private StringFormat formatrx = new StringFormat();
+        private StringFormat formatry = new StringFormat();
 
         private int arrowDist = 10;
         private int arrowLength = 20;
@@ -121,6 +123,11 @@ namespace workspace_test
             formatwy.Alignment = StringAlignment.Center;
             formatwy.LineAlignment = StringAlignment.Near;
 
+            formatrx.Alignment = StringAlignment.Center;
+            formatrx.LineAlignment = StringAlignment.Far;
+
+            formatry.Alignment = StringAlignment.Near;
+            formatry.LineAlignment = StringAlignment.Center;
 
             // basic right click menu code that i stole from stack overflow and modified
             cm = new ContextMenuStrip();
@@ -714,7 +721,7 @@ namespace workspace_test
             {
                 e.Graphics.DrawLine(arrowPen, x, outline.Y - (arrowLength + arrowDist), x, outline.Y - arrowDist);
                 e.Graphics.DrawString("R" + (char)(65 + i), font, brush,
-                    x, outline.Y - (arrowLength + arrowDist + 5), formatwx);
+                    x, outline.Y - (arrowLength + arrowDist + 5), formatrx);
             }
 
             foreach (var (y, i) in ys.Select((y, i) => (y, i)))
@@ -723,7 +730,7 @@ namespace workspace_test
                     outline.X + outline.Width + (arrowLength + arrowDist), y,
                     outline.X + outline.Width + (arrowDist), y);
                 e.Graphics.DrawString("R" + i, font, brush,
-                    outline.X + outline.Width + (arrowLength + arrowDist + 5), y, formatwy);
+                    outline.X + outline.Width + (arrowLength + arrowDist + 5), y, formatry);
             }
         }
 
