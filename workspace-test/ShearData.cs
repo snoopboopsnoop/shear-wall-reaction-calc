@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,7 +21,7 @@ namespace workspace_test
             rx1 = 0;
             ry1 = 0;
         }
-        public ShearData(RectangleF paramRect, float paramLS, string direction = "both")
+        public ShearData(RectangleF paramRect, float paramLS, string direction = "both", string name = "", string outputPath = "")
         {
             rect = paramRect;
             LS = paramLS;
@@ -34,6 +36,15 @@ namespace workspace_test
             //ry1 = (float)0.5 * wy * rect.Width;
             rx1 = 0;
             ry1 = 0;
+
+            using(StreamWriter output = new StreamWriter(outputPath, true))
+            {
+                output.Write(name + " = ");
+                if (direction == "bottom") output.WriteLine(LS + " * " + rect.Height + " = " + wy + " PLF");
+                else if (direction == "left") output.WriteLine(LS + " * " + rect.Width + " = " + wx + " PLF");
+                output.WriteLine();
+            }
+
         }
 
         public RectangleF rect { get; }

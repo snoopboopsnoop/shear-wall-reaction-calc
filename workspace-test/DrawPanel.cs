@@ -14,6 +14,7 @@ using System.Collections.Specialized;
 using System.Configuration;
 using System.Data.SqlClient;
 using Microsoft.Win32;
+using System.IO;
 
 namespace workspace_test
 {
@@ -81,6 +82,8 @@ namespace workspace_test
         // i should change its name but it's just all the shear data collected
         // when analysis is performed on a compound object
         private Shear test = new Shear();
+
+        private string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "output/WriteLines.txt");
 
         // default constructor
         public DrawPanel()
@@ -411,7 +414,7 @@ namespace workspace_test
             }
 
             // take all that and send it somewhere else
-            test = new Shear(new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), GetRectangle(min, max), LA, LD);
+            test = new Shear(new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), GetRectangle(min, max), LA, LD, outputPath);
 
             Invalidate();
         }
@@ -585,7 +588,6 @@ namespace workspace_test
         //draws rectangle without any physics data
         private void DrawRect(PaintEventArgs e, RectangleF paramRect, Color color)
         {
-            
             Brush brush = new SolidBrush(color);
             Pen pen = new Pen(brush);
 
@@ -614,7 +616,7 @@ namespace workspace_test
         }
 
         // draws rectangle on screen from parameter data
-        private void DrawRect(PaintEventArgs e, Tuple<RectangleF, ShearData> rect, Color color, bool show = true)
+        private void DrawRect(PaintEventArgs e, Tuple<RectangleF, ShearData> rect, Color color, bool show = true, string name = "")
         {
             Color opaque = Color.FromArgb(25, Color.Blue);
             SolidBrush selectBrush = new SolidBrush(opaque);
@@ -639,20 +641,24 @@ namespace workspace_test
 
             if (data.wx != 0)
             {
-                Rectangle wxBox = new Rectangle((int)(paramRect.X - (data.wx + 5)), (int)paramRect.Y + 2, (int)data.wx, (int)paramRect.Height - 4);
+                Rectangle wxBox = new Rectangle((int)(paramRect.X - (data.wx + 5)), (int)paramRect.Y + 4, (int)data.wx, (int)paramRect.Height - 8);
                 // wx box
                 e.Graphics.FillRectangle(selectBrush, wxBox);
                 e.Graphics.DrawRectangle(Pens.Blue, wxBox);
-                e.Graphics.DrawString(data.wx.ToString("0.###") + "ft", font, Brushes.Blue,
+                //e.Graphics.DrawString(data.wx.ToString("0.###") + "ft", font, Brushes.Blue,
+                //    paramRect.X - (data.wx + 7), (paramRect.Y + paramRect.Height / 2), formatwx);
+                e.Graphics.DrawString(name, font, Brushes.Blue,
                     paramRect.X - (data.wx + 7), (paramRect.Y + paramRect.Height / 2), formatwx);
             }
             if (data.wy != 0)
             {
-                Rectangle wyBox = new Rectangle((int)paramRect.X + 10, (int)(paramRect.Y + 5 + paramRect.Height), (int)paramRect.Width - 20, (int)data.wy);
+                Rectangle wyBox = new Rectangle((int)paramRect.X + 4, (int)(paramRect.Y + 5 + paramRect.Height), (int)paramRect.Width - 8, (int)data.wy);
                 // wy box
                 e.Graphics.FillRectangle(selectBrush, wyBox);
                 e.Graphics.DrawRectangle(Pens.Blue, wyBox);
-                e.Graphics.DrawString(data.wy.ToString("0.###") + "ft", font, Brushes.Blue,
+                //e.Graphics.DrawString(data.wy.ToString("0.###") + "ft", font, Brushes.Blue,
+                //    paramRect.X + paramRect.Width / 2, paramRect.Y + paramRect.Height + data.wy + 7, formatwy);
+                e.Graphics.DrawString(name, font, Brushes.Blue,
                     paramRect.X + paramRect.Width / 2, paramRect.Y + paramRect.Height + data.wy + 7, formatwy);
             }
                 //// for arrows
@@ -976,11 +982,11 @@ namespace workspace_test
                 //Console.WriteLine("not empty data");
                 foreach (var (rect, i) in data.Item1.Select((rect, i) => (rect, i)))
                 {
-                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, false);
+                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, false, "Wx" + i);
                 }
                 foreach (var (rect, i) in data.Item2.Select((rect, i) => (rect, i)))
                 {
-                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, false);
+                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, false, "Wy" + i);
                 }
             }
 
