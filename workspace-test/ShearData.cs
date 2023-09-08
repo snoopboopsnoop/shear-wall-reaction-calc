@@ -40,8 +40,8 @@ namespace workspace_test
             using(StreamWriter output = new StreamWriter(outputPath, true))
             {
                 output.Write(name + " = ");
-                if (direction == "bottom") output.WriteLine(LS + " * " + rect.Height + " = " + wy + " PLF");
-                else if (direction == "left") output.WriteLine(LS + " * " + rect.Width + " = " + wx + " PLF");
+                if (direction == "bottom") output.WriteLine(LS + "PSF x " + rect.Height + "\' = " + wy + " PLF");
+                else if (direction == "left") output.WriteLine(LS + "PSF x " + rect.Width + "\' = " + wx + " PLF");
                 output.WriteLine();
             }
 

@@ -72,6 +72,9 @@ namespace workspace_test
         private StringFormat formatwx = new StringFormat();
         private StringFormat formatwy = new StringFormat();
 
+        private int arrowDist = 10;
+        private int arrowLength = 20;
+
         // right click menu
         private ContextMenuStrip cm;
 
@@ -414,7 +417,7 @@ namespace workspace_test
             }
 
             // take all that and send it somewhere else
-            test = new Shear(new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), GetRectangle(min, max), LA, LD, outputPath);
+            test = new Shear(new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), new Tuple<List<int>, List<int>>(x, y), GetRectangle(min, max), LA, LD, outputPath);
 
             Invalidate();
         }
@@ -616,7 +619,7 @@ namespace workspace_test
         }
 
         // draws rectangle on screen from parameter data
-        private void DrawRect(PaintEventArgs e, Tuple<RectangleF, ShearData> rect, Color color, bool show = true, string name = "")
+        private void DrawRect(PaintEventArgs e, Tuple<RectangleF, ShearData> rect, Color color, bool show = true, string name = "", int refMeasure = 1)
         {
             Color opaque = Color.FromArgb(25, Color.Blue);
             SolidBrush selectBrush = new SolidBrush(opaque);
@@ -641,25 +644,27 @@ namespace workspace_test
 
             if (data.wx != 0)
             {
-                Rectangle wxBox = new Rectangle((int)(paramRect.X - (data.wx + 5)), (int)paramRect.Y + 4, (int)data.wx, (int)paramRect.Height - 8);
+                int width = (int)data.wx / refMeasure;
+                Rectangle wxBox = new Rectangle((int)(paramRect.X - (width + 5)), (int)paramRect.Y + 4, width, (int)paramRect.Height - 8);
                 // wx box
                 e.Graphics.FillRectangle(selectBrush, wxBox);
                 e.Graphics.DrawRectangle(Pens.Blue, wxBox);
                 //e.Graphics.DrawString(data.wx.ToString("0.###") + "ft", font, Brushes.Blue,
                 //    paramRect.X - (data.wx + 7), (paramRect.Y + paramRect.Height / 2), formatwx);
                 e.Graphics.DrawString(name, font, Brushes.Blue,
-                    paramRect.X - (data.wx + 7), (paramRect.Y + paramRect.Height / 2), formatwx);
+                    paramRect.X - (width + 7), (paramRect.Y + paramRect.Height / 2), formatwx);
             }
             if (data.wy != 0)
             {
-                Rectangle wyBox = new Rectangle((int)paramRect.X + 4, (int)(paramRect.Y + 5 + paramRect.Height), (int)paramRect.Width - 8, (int)data.wy);
+                int height = (int)data.wy / refMeasure;
+                Rectangle wyBox = new Rectangle((int)paramRect.X + 4, (int)(paramRect.Y + 5 + paramRect.Height), (int)paramRect.Width - 8, height);
                 // wy box
                 e.Graphics.FillRectangle(selectBrush, wyBox);
                 e.Graphics.DrawRectangle(Pens.Blue, wyBox);
                 //e.Graphics.DrawString(data.wy.ToString("0.###") + "ft", font, Brushes.Blue,
                 //    paramRect.X + paramRect.Width / 2, paramRect.Y + paramRect.Height + data.wy + 7, formatwy);
                 e.Graphics.DrawString(name, font, Brushes.Blue,
-                    paramRect.X + paramRect.Width / 2, paramRect.Y + paramRect.Height + data.wy + 7, formatwy);
+                    paramRect.X + paramRect.Width / 2, paramRect.Y + paramRect.Height + height + 7, formatwy);
             }
                 //// for arrows
                 //Pen arrowPen = pen;
@@ -692,6 +697,34 @@ namespace workspace_test
             pen.Dispose();
             selectBrush.Dispose();
             //arrowPen.Dispose();
+        }
+        private void DrawArrows(PaintEventArgs e, RectangleF outline, Tuple<List<int>, List<int>> levels)
+        {
+            Brush brush = new SolidBrush(Color.Black);
+            Pen pen = new Pen(brush);
+
+            // for arrows
+            Pen arrowPen = pen;
+            arrowPen.CustomEndCap = new AdjustableArrowCap(2, 2);
+
+            List<int> xs = levels.Item1;
+            List<int> ys = levels.Item2;
+
+            foreach (var (x, i) in xs.Select((x, i) => (x, i)))
+            {
+                e.Graphics.DrawLine(arrowPen, x, outline.Y - (arrowLength + arrowDist), x, outline.Y - arrowDist);
+                e.Graphics.DrawString("R" + (char)(65 + i), font, brush,
+                    x, outline.Y - (arrowLength + arrowDist + 5), formatwx);
+            }
+
+            foreach (var (y, i) in ys.Select((y, i) => (y, i)))
+            {
+                e.Graphics.DrawLine(arrowPen,
+                    outline.X + outline.Width + (arrowLength + arrowDist), y,
+                    outline.X + outline.Width + (arrowDist), y);
+                e.Graphics.DrawString("R" + i, font, brush,
+                    outline.X + outline.Width + (arrowLength + arrowDist + 5), y, formatwy);
+            }
         }
 
         // draws line lmao
@@ -979,15 +1012,25 @@ namespace workspace_test
             Tuple<List<ShearData>, List<ShearData>> shearData = test.GetShearData();
 
             if(data != null) {
+                int wxMeasure = shearData.Item1.Min(p => (int)p.wx);
+                int wyMeasure = shearData.Item2.Min(p => (int)p.wy);
+
+                int refMeasure = (wxMeasure > wyMeasure) ? wyMeasure : wxMeasure;
+                 
+                Console.WriteLine("ref: " + refMeasure);
+
                 //Console.WriteLine("not empty data");
                 foreach (var (rect, i) in data.Item1.Select((rect, i) => (rect, i)))
                 {
-                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, false, "Wx" + i);
+                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, false, "Wx" + i, refMeasure);
                 }
                 foreach (var (rect, i) in data.Item2.Select((rect, i) => (rect, i)))
                 {
-                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, false, "Wy" + i);
+                   
+                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, false, "Wy" + i, refMeasure);
                 }
+
+                DrawArrows(e, test.GetDimensions(), test.GetReactions());
             }
 
             if (!start.IsEmpty && !end.IsEmpty)

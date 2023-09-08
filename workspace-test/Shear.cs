@@ -13,6 +13,7 @@ namespace workspace_test
         private RectangleF dimensions;
         private Tuple<List<RectangleF>, List<RectangleF>> data;
         private Tuple<List<ShearData>, List<ShearData>> shearData;
+        private Tuple<List<int>, List<int>> reactions;
         private float LA;
         private float LD;
         private float LS;
@@ -28,9 +29,10 @@ namespace workspace_test
         }
 
         // paramData: 2 lists of rectangles in form <lefts, bottoms> for drawing boxes
-        public Shear(Tuple<List<RectangleF>, List<RectangleF>> paramData, RectangleF paramDims, float paramLA, float paramLD, string outputPath)
+        public Shear(Tuple<List<RectangleF>, List<RectangleF>> paramData, Tuple<List<int>, List<int>> paramReacts, RectangleF paramDims, float paramLA, float paramLD, string outputPath)
         {
             dimensions = paramDims;
+            reactions = paramReacts;
             data = paramData;
             LA = paramLA;
             LD = paramLD;
@@ -44,11 +46,11 @@ namespace workspace_test
 
                 output.WriteLine("LA = " + LA + " g");
                 output.WriteLine("LD = " + LD + " PSF");
-                output.WriteLine("LS = LA * LD = " + LA + " * " + LD + " = " + LA * LD + " PSF");
+                output.WriteLine("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF");
                 output.WriteLine();
 
-                output.WriteLine("Wx = LS * dimX");
-                output.WriteLine("Wy = LS * dimY");
+                output.WriteLine("Wx = LS x dimX");
+                output.WriteLine("Wy = LS x dimY");
                 output.WriteLine();
             }
 
@@ -76,6 +78,16 @@ namespace workspace_test
         public Tuple<List<ShearData>, List<ShearData>> GetShearData()
         {
             return shearData;
+        }
+
+        public RectangleF GetDimensions()
+        {
+            return dimensions;
+        }
+
+        public Tuple<List<int>, List<int>> GetReactions()
+        {
+            return reactions;
         }
     }
 }
