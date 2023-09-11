@@ -172,5 +172,10 @@ namespace workspace_test
                 return;
             }
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            workspace.Export();
+        }
     }
 }

@@ -15,6 +15,7 @@ using System.Configuration;
 using System.Data.SqlClient;
 using Microsoft.Win32;
 using System.IO;
+using System.Drawing.Imaging;
 
 namespace workspace_test
 {
@@ -88,7 +89,7 @@ namespace workspace_test
         // when analysis is performed on a compound object
         private Shear test = new Shear();
 
-        private string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "output/WriteLines.txt");
+        private string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "output/.txt");
 
         // default constructor
         public DrawPanel()
@@ -196,6 +197,23 @@ namespace workspace_test
             return data;
         }
 
+        public void Export()
+        {
+            SaveFileDialog sf = new SaveFileDialog();
+            sf.Filter = " JPEG Image(.jpeg) | *.jpeg | Png Image(.png) | *.png | Gif Image(.gif) | *.gif | Bitmap Image(.bmp) | *.bmp | Tiff Image(.tiff) | *.tiff | Wmf Image(.wmf) | *.wmf";
+            if (sf.ShowDialog() == DialogResult.OK)
+            {
+                var path = sf.FileName;
+
+                Bitmap bm = new Bitmap(this.Width, this.Height);
+                this.DrawToBitmap(bm, new Rectangle(0, 0, this.Width, this.Height));
+
+                bm.Save(path);
+
+                bm.Dispose();
+            }
+        }
+
         // makes a rectangle out of 4 selected lines if possible, kind of a useless feature now but it's still cool
         private RectangleF CreateRectangle()
         {
@@ -283,8 +301,17 @@ namespace workspace_test
             else if (item.Text == "Run Shear Reaction")
             {
                 if (!(LA == 0 || LD == 0)) {
-                    Algorithm();
-                    selectedLines.Clear();
+                    cm.Close();
+
+                    SaveFileDialog sf = new SaveFileDialog();
+                    sf.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                    if(sf.ShowDialog() == DialogResult.OK)
+                    {
+                        outputPath = sf.FileName;
+
+                        Algorithm();
+                        selectedLines.Clear();
+                    }
                 }
             }
         }
@@ -1024,7 +1051,7 @@ namespace workspace_test
 
                 int refMeasure = (wxMeasure > wyMeasure) ? wyMeasure : wxMeasure;
                  
-                Console.WriteLine("ref: " + refMeasure);
+                //Console.WriteLine("ref: " + refMeasure);
 
                 //Console.WriteLine("not empty data");
                 foreach (var (rect, i) in data.Item1.Select((rect, i) => (rect, i)))

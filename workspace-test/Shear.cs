@@ -73,6 +73,8 @@ namespace workspace_test
 
             using(StreamWriter output = new StreamWriter(outputPath, true))
             {
+                output.WriteLine("REACTIONS @ SHEAR LINES");
+                output.WriteLine();
                 //output.WriteLine("Rx = 0.5 * wx * dimY lbs");
                 //output.WriteLine();
 
@@ -84,7 +86,7 @@ namespace workspace_test
                     {
                         output.WriteLine("R1 = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
 
-                        output.Write("R" + (i + 2) + " = 0.5 x " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
+                        output.Write("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
                     }
                     else
                     {
@@ -92,7 +94,7 @@ namespace workspace_test
 
                         output.Write("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
 
-                        if(i == reactions.Item1.Count() - 1)
+                        if(i == paramData.Item1.Count() - 1)
                         {
                             output.WriteLine(" LBS");
                         }
@@ -100,11 +102,30 @@ namespace workspace_test
 
                 }
 
+                output.WriteLine();
                 //output.WriteLine("Ry = 0.5 * wy * dimX lbs");
                 //output.WriteLine();
-
                 foreach (var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
                 {
+                    ShearData temp = tempBottoms[i];
+
+                    if (i == 0)
+                    {
+                        output.WriteLine("RA = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
+
+                        output.Write("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
+                    }
+                    else
+                    {
+                        output.WriteLine(" + 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
+
+                        output.Write("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
+
+                        if (i == paramData.Item2.Count() - 1)
+                        {
+                            output.WriteLine(" LBS");
+                        }
+                    }
                 }
             }
 
