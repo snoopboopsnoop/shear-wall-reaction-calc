@@ -14,6 +14,7 @@ namespace workspace_test
         private Tuple<List<RectangleF>, List<RectangleF>> data;
         private Tuple<List<ShearData>, List<ShearData>> shearData;
         private Tuple<List<int>, List<int>> reactions;
+        private List<int> reactionVals;
         private float LA;
         private float LD;
         private float LS;
@@ -38,6 +39,8 @@ namespace workspace_test
             LD = paramLD;
             LS = LA * LD;
 
+            List<int> reactionValsLeft = new List<int>(paramData.Item1.Count() + 1);
+
             using (StreamWriter output = new StreamWriter(outputPath))
             {
                 output.WriteLine("SEISMIC WT @ ROOF");
@@ -61,10 +64,48 @@ namespace workspace_test
             {
                 Console.WriteLine("adding new data");
                 tempLefts.Add(new ShearData(left, LS, "left", "Wx" + (i + 1), outputPath));
+
             }
             foreach(var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
             {
                 tempBottoms.Add(new ShearData(bottom, LS, "bottom", "Wy" + (i + 1), outputPath));
+            }
+
+            using(StreamWriter output = new StreamWriter(outputPath, true))
+            {
+                //output.WriteLine("Rx = 0.5 * wx * dimY lbs");
+                //output.WriteLine();
+
+                foreach (var (left, i) in paramData.Item1.Select((left, i) => (left, i)))
+                {
+                    ShearData temp = tempLefts[i];
+
+                    if (i == 0)
+                    {
+                        output.WriteLine("R1 = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
+
+                        output.Write("R" + (i + 2) + " = 0.5 x " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
+                    }
+                    else
+                    {
+                        output.WriteLine(" + 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
+
+                        output.Write("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
+
+                        if(i == reactions.Item1.Count() - 1)
+                        {
+                            output.WriteLine(" LBS");
+                        }
+                    }
+
+                }
+
+                //output.WriteLine("Ry = 0.5 * wy * dimX lbs");
+                //output.WriteLine();
+
+                foreach (var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
+                {
+                }
             }
 
             shearData = new Tuple<List<ShearData>, List<ShearData>>(tempLefts, tempBottoms);

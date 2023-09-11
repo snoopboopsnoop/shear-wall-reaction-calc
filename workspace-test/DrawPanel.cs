@@ -729,7 +729,7 @@ namespace workspace_test
                 e.Graphics.DrawLine(arrowPen,
                     outline.X + outline.Width + (arrowLength + arrowDist), y,
                     outline.X + outline.Width + (arrowDist), y);
-                e.Graphics.DrawString("R" + i, font, brush,
+                e.Graphics.DrawString("R" + (i + 1), font, brush,
                     outline.X + outline.Width + (arrowLength + arrowDist + 5), y, formatry);
             }
         }
