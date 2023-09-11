@@ -15,6 +15,7 @@ namespace workspace_test
     {
         private DrawPanel workspace;
         private RadioButton selectedRb;
+        private float opacity = 0.0F;
 
         public Form1()
         {
@@ -123,7 +124,7 @@ namespace workspace_test
         {
             if(openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                workspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), 0.5F);
+                workspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
             }
         }
 
@@ -176,6 +177,16 @@ namespace workspace_test
         private void button4_Click(object sender, EventArgs e)
         {
             workspace.Export();
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            label3.Text = "Opacity: " + trackBar1.Value / 10.0;
+            opacity = trackBar1.Value / 10.0F;
+            if (openFileDialog1.FileName != null)
+            {
+                workspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
+            }
         }
     }
 }

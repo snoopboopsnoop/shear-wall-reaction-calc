@@ -93,15 +93,11 @@ namespace workspace_test
                         output.WriteLine(" + 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
 
                         output.Write("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
-
-                        if(i == paramData.Item1.Count() - 1)
-                        {
-                            output.WriteLine(" LBS");
-                        }
                     }
 
                 }
 
+                output.WriteLine(" LBS");
                 output.WriteLine();
                 //output.WriteLine("Ry = 0.5 * wy * dimX lbs");
                 //output.WriteLine();
@@ -120,13 +116,9 @@ namespace workspace_test
                         output.WriteLine(" + 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
 
                         output.Write("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
-
-                        if (i == paramData.Item2.Count() - 1)
-                        {
-                            output.WriteLine(" LBS");
-                        }
                     }
                 }
+                output.WriteLine(" LBS");
             }
 
             shearData = new Tuple<List<ShearData>, List<ShearData>>(tempLefts, tempBottoms);
