@@ -11,6 +11,7 @@ namespace workspace_test
     internal class Shear
     {
         private RectangleF dimensions;
+        private List<Tuple<PointF, PointF>> lines;
         private Tuple<List<RectangleF>, List<RectangleF>> data;
         private Tuple<List<ShearData>, List<ShearData>> shearData;
         private Tuple<List<int>, List<int>> reactions;
@@ -30,8 +31,9 @@ namespace workspace_test
         }
 
         // paramData: 2 lists of rectangles in form <lefts, bottoms> for drawing boxes
-        public Shear(Tuple<List<RectangleF>, List<RectangleF>> paramData, Tuple<List<int>, List<int>> paramReacts, RectangleF paramDims, float paramLA, float paramLD, string outputPath)
+        public Shear(List<Tuple<PointF, PointF>> paramLines, Tuple<List<RectangleF>, List<RectangleF>> paramData, Tuple<List<int>, List<int>> paramReacts, RectangleF paramDims, float paramLA, float paramLD, string outputPath)
         {
+            lines = paramLines;
             dimensions = paramDims;
             reactions = paramReacts;
             data = paramData;
@@ -101,6 +103,7 @@ namespace workspace_test
                 output.WriteLine();
                 //output.WriteLine("Ry = 0.5 * wy * dimX lbs");
                 //output.WriteLine();
+
                 foreach (var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
                 {
                     ShearData temp = tempBottoms[i];
@@ -127,6 +130,11 @@ namespace workspace_test
         public Tuple<List<RectangleF>, List<RectangleF>> GetData()
         {
             return data;
+        }
+
+        public List<Tuple<PointF, PointF>> GetLines()
+        {
+            return lines;
         }
 
         public Tuple<List<ShearData>, List<ShearData>> GetShearData()

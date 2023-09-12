@@ -183,7 +183,8 @@ namespace workspace_test
         {
             label3.Text = "Opacity: " + trackBar1.Value / 10.0;
             opacity = trackBar1.Value / 10.0F;
-            if (openFileDialog1.FileName != null)
+            //Console.WriteLine( "\"" + openFileDialog1.FileName + "\"");
+            if (openFileDialog1.FileName != "openFileDialog1")
             {
                 workspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
             }

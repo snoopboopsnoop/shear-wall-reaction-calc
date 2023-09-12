@@ -87,7 +87,7 @@ namespace workspace_test
 
         // i should change its name but it's just all the shear data collected
         // when analysis is performed on a compound object
-        private Shear test = new Shear();
+        private List<Shear> shears = new List<Shear>();
 
         private string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "output/.txt");
 
@@ -348,18 +348,38 @@ namespace workspace_test
             // horizontal: all the horziontal line positions
             List<int> vertical = new List<int>();
             List<int> horizontal = new List<int>();
+            List<Tuple<PointF, PointF>> selectLines = new List<Tuple<PointF, PointF>>();
+
+            int shift = 0;
 
             // initilize the horiozntal and verticals
             foreach (var pos in selectedLines)
             {
-                Tuple<PointF, PointF> temp = lines[pos];
+                Tuple<PointF, PointF> temp = lines[pos - shift];
+                lines.Remove(temp);
+                selectLines.Add(temp);
                 string direction = getDirection(temp.Item1, temp.Item2);
-                if (direction == "vertical") vertical.Add(pos);
-                else horizontal.Add(pos);
+                if (direction == "vertical") vertical.Add(selectLines.Count() - 1);
+                else horizontal.Add(selectLines.Count() - 1);
+
+                ++shift;
             }
 
-            vertical.Sort();
-            horizontal.Sort();
+            vertical = vertical.OrderBy(p => selectLines[p].Item1.X).ToList();
+            horizontal = horizontal.OrderBy(p => selectLines[p].Item1.Y).ToList();
+
+            foreach(var i in vertical)
+            {
+                Console.WriteLine("line " + selectLines[i].Item1 + " => " + selectLines[i].Item2);
+            }
+
+            Console.WriteLine("horizontal: ");
+
+            foreach (var i in horizontal)
+            {
+                Console.WriteLine("line " + selectLines[i].Item1 + " => " + selectLines[i].Item2);
+            }
+
             x.Sort();
             y.Sort();
 
@@ -370,7 +390,7 @@ namespace workspace_test
             // useless rn but will be useful for the r value implementation (i hope)
             foreach (var pos in vertical)
             {
-                var line = lines[pos];
+                var line = selectLines[pos];
                 if (line.Item1.X < min.X) min.X = (int)line.Item1.X;
                 else if (line.Item1.X > max.X) max.X = (int)line.Item1.X;
                 if (line.Item1.Y < min.Y) min.Y = (int)line.Item1.Y;
@@ -391,29 +411,33 @@ namespace workspace_test
 
                 foreach(var pos in vertical)
                 {
-                    if((range.Item1 >= lines[pos].Item1.Y && range.Item2 <= lines[pos].Item2.Y) ||
-                        range.Item1 >= lines[pos].Item2.Y && range.Item2 <= lines[pos].Item1.Y)
+                    if((range.Item1 >= selectLines[pos].Item1.Y && range.Item2 <= selectLines[pos].Item2.Y) ||
+                        range.Item1 >= selectLines[pos].Item2.Y && range.Item2 <= selectLines[pos].Item1.Y)
                     {
                         lookAt.Add(pos);
                     }
                 }
 
-                Console.WriteLine("From y=" + range.Item1 + " to y=" + range.Item2 + ", look at lines " + lines[lookAt[0]] + " and " + lines[lookAt[1]]);
-
-                Tuple<PointF, PointF> a = lines[lookAt[0]];
-                Tuple<PointF, PointF> b = lines[lookAt[1]];
+                //Console.WriteLine("From y=" + range.Item1 + " to y=" + range.Item2 + ", look at lines " + selectLines[lookAt[0]] + " and " + selectLines[lookAt[1]]);
 
                 RectangleF tempRect;
 
-                if (a.Item1.X > b.Item1.X)
+                for(int j = 0; j < lookAt.Count() - 1; j += 2)
                 {
-                    tempRect = new RectangleF((int)b.Item1.X, range.Item1, a.Item1.X - b.Item1.X, range.Item2 - range.Item1);
+                    Tuple<PointF, PointF> a = selectLines[lookAt[j]];
+                    Tuple<PointF, PointF> b = selectLines[lookAt[j+1]];
+
+                    if (a.Item1.X > b.Item1.X)
+                    {
+                        tempRect = new RectangleF((int)b.Item1.X, range.Item1, a.Item1.X - b.Item1.X, range.Item2 - range.Item1);
+                    }
+                    else
+                    {
+                        tempRect = new RectangleF((int)a.Item1.X, range.Item1, b.Item1.X - a.Item1.X, range.Item2 - range.Item1);
+                    }
+                    leftRects.Add(tempRect);
                 }
-                else
-                {
-                    tempRect = new RectangleF((int)a.Item1.X, range.Item1, b.Item1.X - a.Item1.X, range.Item2 - range.Item1);
-                }
-                leftRects.Add(tempRect);
+
             }
 
             // same thing but do it using the vertical lines along the x axis
@@ -425,33 +449,36 @@ namespace workspace_test
 
                 foreach (var pos in horizontal)
                 {
-                    if ((range.Item1 >= lines[pos].Item1.X && range.Item2 <= lines[pos].Item2.X) ||
-                        range.Item1 >= lines[pos].Item2.X && range.Item2 <= lines[pos].Item1.X)
+                    if ((range.Item1 >= selectLines[pos].Item1.X && range.Item2 <= selectLines[pos].Item2.X) ||
+                        range.Item1 >= selectLines[pos].Item2.X && range.Item2 <= selectLines[pos].Item1.X)
                     {
                         lookAt.Add(pos);
                     }
                 }
 
-                Console.WriteLine("From x=" + range.Item1 + " to x=" + range.Item2 + ", look at lines " + lines[lookAt[0]] + " and " + lines[lookAt[1]]);
-
-                Tuple<PointF, PointF> a = lines[lookAt[0]];
-                Tuple<PointF, PointF> b = lines[lookAt[1]];
+                //Console.WriteLine("From x=" + range.Item1 + " to x=" + range.Item2 + ", look at lines " + selectLines[lookAt[0]] + " and " + selectLines[lookAt[1]]);
 
                 RectangleF tempRect;
 
-                if (a.Item1.Y > b.Item1.Y)
+                for (int j = 0; j < lookAt.Count() - 1; j += 2)
                 {
-                    tempRect = new RectangleF((int)range.Item1, b.Item1.Y, range.Item2 - range.Item1, a.Item1.Y - b.Item2.Y);
+                    Tuple<PointF, PointF> a = selectLines[lookAt[j]];
+                    Tuple<PointF, PointF> b = selectLines[lookAt[j + 1]];
+
+                    if (a.Item1.Y > b.Item1.Y)
+                    {
+                        tempRect = new RectangleF((int)range.Item1, b.Item1.Y, range.Item2 - range.Item1, a.Item1.Y - b.Item2.Y);
+                    }
+                    else
+                    {
+                        tempRect = new RectangleF((int)range.Item1, a.Item1.Y, range.Item2 - range.Item1, b.Item1.Y - a.Item1.Y);
+                    }
+                    bottomRects.Add(tempRect);
                 }
-                else
-                {
-                    tempRect = new RectangleF((int)range.Item1, a.Item1.Y, range.Item2 - range.Item1, b.Item1.Y - a.Item1.Y);
-                }
-                bottomRects.Add(tempRect);
             }
 
             // take all that and send it somewhere else
-            test = new Shear(new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), new Tuple<List<int>, List<int>>(x, y), GetRectangle(min, max), LA, LD, outputPath);
+            shears.Add(new Shear(selectLines, new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), new Tuple<List<int>, List<int>>(x, y), GetRectangle(min, max), LA, LD, outputPath));
 
             Invalidate();
         }
@@ -1042,29 +1069,38 @@ namespace workspace_test
                 else DrawRect(e, rectangle, Color.Red);
             }
 
-            Tuple<List<RectangleF>, List<RectangleF>> data = test.GetData();
-            Tuple<List<ShearData>, List<ShearData>> shearData = test.GetShearData();
-
-            if(data != null) {
-                int wxMeasure = shearData.Item1.Min(p => (int)p.wx);
-                int wyMeasure = shearData.Item2.Min(p => (int)p.wy);
-
-                int refMeasure = (wxMeasure > wyMeasure) ? wyMeasure : wxMeasure;
-                 
-                //Console.WriteLine("ref: " + refMeasure);
-
-                //Console.WriteLine("not empty data");
-                foreach (var (rect, i) in data.Item1.Select((rect, i) => (rect, i)))
+            foreach (var shear in shears)
+            {
+                foreach (var (line, i) in shear.GetLines().Select((value, i) => (value, i)))
                 {
-                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, false, "Wx" + i, refMeasure);
-                }
-                foreach (var (rect, i) in data.Item2.Select((rect, i) => (rect, i)))
-                {
-                   
-                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, false, "Wy" + i, refMeasure);
+                    DrawLine(e, line, Color.Black);
                 }
 
-                DrawArrows(e, test.GetDimensions(), test.GetReactions());
+                Tuple<List<RectangleF>, List<RectangleF>> data = shear.GetData();
+                Tuple<List<ShearData>, List<ShearData>> shearData = shear.GetShearData();
+
+                if (data != null)
+                {
+                    int wxMeasure = shearData.Item1.Min(p => (int)p.wx);
+                    int wyMeasure = shearData.Item2.Min(p => (int)p.wy);
+
+                    int refMeasure = (wxMeasure > wyMeasure) ? wyMeasure : wxMeasure;
+
+                    //Console.WriteLine("ref: " + refMeasure);
+
+                    //Console.WriteLine("not empty data");
+                    foreach (var (rect, i) in data.Item1.Select((rect, i) => (rect, i)))
+                    {
+                        DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, false, "Wx" + (i+1), refMeasure);
+                    }
+                    foreach (var (rect, i) in data.Item2.Select((rect, i) => (rect, i)))
+                    {
+
+                        DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, false, "Wy" + (i+1), refMeasure);
+                    }
+
+                    DrawArrows(e, shear.GetDimensions(), shear.GetReactions());
+                }
             }
 
             if (!start.IsEmpty && !end.IsEmpty)
