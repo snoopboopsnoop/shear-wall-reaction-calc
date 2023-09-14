@@ -11,3 +11,4 @@ C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form2.resources
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form3.resources
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form4.resources
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.csproj.ResolveComReference.cache

@@ -17,6 +17,12 @@ namespace workspace_test
             InitializeComponent();
         }
 
+        public Form2(string errorText)
+        {
+            InitializeComponent();
+            label1.Text = errorText;
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             this.Close();

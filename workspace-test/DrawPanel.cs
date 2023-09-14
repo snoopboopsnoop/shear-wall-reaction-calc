@@ -17,6 +17,8 @@ using Microsoft.Win32;
 using System.IO;
 using System.Drawing.Imaging;
 
+using Word = Microsoft.Office.Interop.Word;
+
 namespace workspace_test
 {
     public class DrawPanel : Panel
@@ -29,7 +31,10 @@ namespace workspace_test
         private Boolean dragging = false;
         private Boolean selecting = false;
         private Boolean selected = false;
-        
+
+        private double scale = 1;
+        private string unit;
+
         // used to check if mouse clicked in one spot
         private PointF clickOff = Point.Empty;
 
@@ -81,6 +86,8 @@ namespace workspace_test
         // right click menu
         private ContextMenuStrip cm;
 
+        private Label scaleLabel;
+
         // calculator values
         private float LA = 0;
         private float LD = 0;
@@ -90,6 +97,8 @@ namespace workspace_test
         private List<Shear> shears = new List<Shear>();
 
         private string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "output/.txt");
+
+        private string docPath = Path.Combine(Application.StartupPath);
 
         // default constructor
         public DrawPanel()
@@ -136,9 +145,18 @@ namespace workspace_test
 
             cm.Items.Add("Create Rectangle");
             cm.Items.Add("Run Shear Reaction");
-            cm.Items.Add("Pears");
+            cm.Items.Add("Set Scale");
 
             cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
+
+            scaleLabel = new Label();
+            scaleLabel.Location = new Point(0, 0);
+            scaleLabel.AutoSize = true;
+            scaleLabel.Padding = new Padding(5);
+            scaleLabel.Text = $"Scale: 1 pixel = {scale}{unit}";
+            this.Controls.Add(scaleLabel);
+
+            Console.WriteLine(docPath);
         }
 
         public void SetPointerMode(string mode)
@@ -199,19 +217,48 @@ namespace workspace_test
 
         public void Export()
         {
-            SaveFileDialog sf = new SaveFileDialog();
-            sf.Filter = " JPEG Image(.jpeg) | *.jpeg | Png Image(.png) | *.png | Gif Image(.gif) | *.gif | Bitmap Image(.bmp) | *.bmp | Tiff Image(.tiff) | *.tiff | Wmf Image(.wmf) | *.wmf";
-            if (sf.ShowDialog() == DialogResult.OK)
-            {
-                var path = sf.FileName;
+            object oMissing = System.Reflection.Missing.Value;
+            object oEndofDoc = "\\endofdoc";
 
-                Bitmap bm = new Bitmap(this.Width, this.Height);
-                this.DrawToBitmap(bm, new Rectangle(0, 0, this.Width, this.Height));
+            Word._Application oWord;
+            Word._Document oDoc;
+            oWord = new Word.Application();
+            oWord.Visible = true;
 
-                bm.Save(path);
+            oDoc = oWord.Documents.Add(ref oMissing, ref oMissing, ref oMissing, ref oMissing);
 
-                bm.Dispose();
-            }
+            Word.Paragraph oPara1;
+            oPara1 = oDoc.Content.Paragraphs.Add(ref oMissing);
+            oPara1.Range.Text = "Heading 1";
+            oPara1.Range.Font.Bold = 1;
+            oPara1.Format.SpaceAfter = 24;
+            oPara1.Range.InsertParagraphAfter();
+
+            //SaveFileDialog sf = new SaveFileDialog();
+            //sf.Filter = " JPEG Image(.jpeg) | *.jpeg | Png Image(.png) | *.png | Gif Image(.gif) | *.gif | Bitmap Image(.bmp) | *.bmp | Tiff Image(.tiff) | *.tiff | Wmf Image(.wmf) | *.wmf";
+            //if (sf.ShowDialog() == DialogResult.OK)
+            //{
+            //    var path = sf.FileName;
+
+            //    Bitmap bm = new Bitmap(this.Width, this.Height);
+            //    this.DrawToBitmap(bm, new Rectangle(0, 0, this.Width, this.Height));
+                
+            //    bm.Save(path);
+
+            //    bm.Dispose();
+            //}
+        }
+
+        public void SetScale(double value, string paramUnit)
+        {
+            scale = value;
+            unit = paramUnit;
+            scaleLabel.Text = $"Scale: 1 pixel = {scale.ToString("N2")}{unit}";
+        }
+
+        private double Magnitude(Tuple<PointF, PointF> line)
+        {
+            return Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
         }
 
         // makes a rectangle out of 4 selected lines if possible, kind of a useless feature now but it's still cool
@@ -312,6 +359,19 @@ namespace workspace_test
                         Algorithm();
                         selectedLines.Clear();
                     }
+                }
+            }
+            else if(item.Text == "Set Scale")
+            {
+                if (selectedLines.Count() != 1)
+                {
+                    Form2 error = new Form2("Error: Need to select 1 line to set scale");
+                    error.ShowDialog();
+                }
+                else
+                {
+                    Form4 scaleForm = new Form4(this, (int)Magnitude(lines[selectedLines[0]]), unit);
+                    scaleForm.ShowDialog();
                 }
             }
         }
@@ -805,16 +865,16 @@ namespace workspace_test
             e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item2.X - dotSize / 2, line.Item2.Y - dotSize / 2, dotSize, dotSize));
             e.Graphics.DrawEllipse(pen, new RectangleF(line.Item2.X - dotSize / 2, line.Item2.Y - dotSize / 2, dotSize, dotSize));
 
-            double magnitude = Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
+            double magnitude = Magnitude(line);
 
             // text display depends on if the line is horizontal or vertical
             if (line.Item1.X == line.Item2.X)
             {
-                e.Graphics.DrawString(magnitude.ToString("0.###"), font, brush, line.Item1.X + 5, line.Item1.Y + (line.Item2.Y - line.Item1.Y) / 2, formatHeight);
+                e.Graphics.DrawString((Math.Round((magnitude * scale)/0.5) * 0.5).ToString("0.###") + unit, font, brush, line.Item1.X + 5, line.Item1.Y + (line.Item2.Y - line.Item1.Y) / 2, formatHeight);
             }
             else
             {
-                e.Graphics.DrawString(magnitude.ToString("0.###"), font, brush, line.Item1.X + (line.Item2.X - line.Item1.X) / 2, line.Item1.Y - 5, formatWidth);
+                e.Graphics.DrawString((Math.Round((magnitude * scale)/0.5)*0.5).ToString("0.###") + unit, font, brush, line.Item1.X + (line.Item2.X - line.Item1.X) / 2, line.Item1.Y - 5, formatWidth);
             }
         }
 
