@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Word = Microsoft.Office.Interop.Word;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -6,6 +7,9 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Microsoft.Office.Interop.Word;
 
 namespace workspace_test
 {
@@ -21,7 +25,7 @@ namespace workspace_test
             rx1 = 0;
             ry1 = 0;
         }
-        public ShearData(RectangleF paramRect, float paramLS, string direction = "both", string name = "", string outputPath = "")
+        public ShearData(RectangleF paramRect, float paramLS, string direction = "both", string name = "", Word._Document doc = null)
         {
             rect = paramRect;
             LS = paramLS;
@@ -37,12 +41,20 @@ namespace workspace_test
             rx1 = 0;
             ry1 = 0;
 
-            using(StreamWriter output = new StreamWriter(outputPath, true))
+            //using(StreamWriter output = new StreamWriter(outputPath, true))
+            //{
+            //    output.Write(name + " = ");
+            //    if (direction == "bottom") output.WriteLine(LS + "PSF x " + rect.Height + "\' = " + wy + " PLF");
+            //    else if (direction == "left") output.WriteLine(LS + "PSF x " + rect.Width + "\' = " + wx + " PLF");
+            //    output.WriteLine();
+            //}
+
+            if(doc != null)
             {
-                output.Write(name + " = ");
-                if (direction == "bottom") output.WriteLine(LS + "PSF x " + rect.Height + "\' = " + wy + " PLF");
-                else if (direction == "left") output.WriteLine(LS + "PSF x " + rect.Width + "\' = " + wx + " PLF");
-                output.WriteLine();
+                Word.Range range = doc.Bookmarks.get_Item("\\endofdoc").Range;
+                range.InsertAfter(name + " = ");
+                if (direction == "bottom") range.InsertAfter(LS + "PSF x " + rect.Height + "\' = " + wy + " PLF\n");
+                else if (direction == "left") range.InsertAfter(LS + "PSF x " + rect.Width + "\' = " + wx + " PLF\n");
             }
 
         }

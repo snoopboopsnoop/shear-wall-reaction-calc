@@ -1,10 +1,15 @@
-﻿using System;
+﻿using Microsoft.Office.Core;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+
+using Word = Microsoft.Office.Interop.Word;
 
 namespace workspace_test
 {
@@ -19,6 +24,7 @@ namespace workspace_test
         private float LA;
         private float LD;
         private float LS;
+        private Word.Range range;
 
         public Shear()
         {
@@ -31,7 +37,7 @@ namespace workspace_test
         }
 
         // paramData: 2 lists of rectangles in form <lefts, bottoms> for drawing boxes
-        public Shear(List<Tuple<PointF, PointF>> paramLines, Tuple<List<RectangleF>, List<RectangleF>> paramData, Tuple<List<int>, List<int>> paramReacts, RectangleF paramDims, float paramLA, float paramLD, string outputPath)
+        public Shear(List<Tuple<PointF, PointF>> paramLines, Tuple<List<RectangleF>, List<RectangleF>> paramData, Tuple<List<int>, List<int>> paramReacts, RectangleF paramDims, float paramLA, float paramLD, Word._Document doc = null)
         {
             lines = paramLines;
             dimensions = paramDims;
@@ -43,20 +49,36 @@ namespace workspace_test
 
             List<int> reactionValsLeft = new List<int>(paramData.Item1.Count() + 1);
 
-            using (StreamWriter output = new StreamWriter(outputPath))
+            //using (StreamWriter output = new StreamWriter(outputPath))
+            //{
+            //    output.WriteLine("SEISMIC WT @ ROOF");
+
+            //    output.WriteLine();
+
+            //    output.WriteLine("LA = " + LA + " g");
+            //    output.WriteLine("LD = " + LD + " PSF");
+            //    output.WriteLine("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF");
+            //    output.WriteLine();
+
+            //    output.WriteLine("Wx = LS x dimX");
+            //    output.WriteLine("Wy = LS x dimY");
+            //    output.WriteLine();
+            //}
+
+            if(doc != null)
             {
-                output.WriteLine("SEISMIC WT @ ROOF");
-
-                output.WriteLine();
-
-                output.WriteLine("LA = " + LA + " g");
-                output.WriteLine("LD = " + LD + " PSF");
-                output.WriteLine("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF");
-                output.WriteLine();
-
-                output.WriteLine("Wx = LS x dimX");
-                output.WriteLine("Wy = LS x dimY");
-                output.WriteLine();
+                Word.Paragraph intro;
+                intro = doc.Content.Paragraphs.Add();
+                intro.Range.Text = ("LA = " + LA + " g");
+                intro.Format.SpaceBefore = 0;
+                intro.Format.SpaceAfter = 0;
+                intro.Range.Font.Bold = 0;
+                intro.Range.Font.Size = 12;
+                intro.Range.Text += ("LD = " + LD + " PSF");
+                intro.Range.Text += ("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF\n");
+                intro.Range.Text += ("Wx = LS x dimX");
+                intro.Range.Text += ("Wy = LS x dimY\n");
+                intro.Range.InsertParagraphAfter();
             }
 
             List<ShearData> tempLefts = new List<ShearData>();
@@ -65,44 +87,72 @@ namespace workspace_test
             foreach (var (left, i) in paramData.Item1.Select((left, i) => (left, i)))
             {
                 Console.WriteLine("adding new data");
-                tempLefts.Add(new ShearData(left, LS, "left", "Wx" + (i + 1), outputPath));
+                tempLefts.Add(new ShearData(left, LS, "left", "Wx" + (i + 1), doc));
 
             }
+
+            if(doc != null)
+            {
+                range = doc.Bookmarks.get_Item("\\endofdoc").Range;
+                range.InsertParagraphAfter();
+            }
+
             foreach(var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
             {
-                tempBottoms.Add(new ShearData(bottom, LS, "bottom", "Wy" + (i + 1), outputPath));
+                tempBottoms.Add(new ShearData(bottom, LS, "bottom", "Wy" + (i + 1), doc));
             }
 
-            using(StreamWriter output = new StreamWriter(outputPath, true))
+            if (doc != null)
             {
-                output.WriteLine("REACTIONS @ SHEAR LINES");
-                output.WriteLine();
-                //output.WriteLine("Rx = 0.5 * wx * dimY lbs");
-                //output.WriteLine();
+                range = doc.Bookmarks.get_Item("\\endofdoc").Range;
+                range.InsertBreak(Word.WdBreakType.wdPageBreak);
+                //range.InsertParagraphAfter();
 
+                Word.Paragraph reactionHeader;
+                reactionHeader = doc.Content.Paragraphs.Add();
+                reactionHeader.Range.Underline = Word.WdUnderline.wdUnderlineSingle;
+                reactionHeader.Range.Font.Size = 18;
+                reactionHeader.Range.Font.Bold = 1;
+                
+
+                reactionHeader.Range.Text = "REACTIONS @ SHEAR LINES";
+                reactionHeader.Format.SpaceAfter = 16;
+
+                reactionHeader.Range.InsertParagraphAfter();
+
+                Word.Paragraph reaction;
+                reaction = doc.Content.Paragraphs.Add();
+                reaction.Range.Text = ("Rx = 0.5 * wx * dimY lbs");
+                reaction.Format.SpaceAfter = 0;
+                reaction.Format.SpaceBefore = 0;
+                reaction.Range.Font.Bold = 0;
+                reaction.Range.Font.Size = 12;
+                reaction.Range.Text += "";
+
+                string buffer = "";
                 foreach (var (left, i) in paramData.Item1.Select((left, i) => (left, i)))
                 {
                     ShearData temp = tempLefts[i];
 
                     if (i == 0)
                     {
-                        output.WriteLine("R1 = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
+                        reaction.Range.Text += ("R1 = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
 
-                        output.Write("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
+                        buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
                     }
                     else
                     {
-                        output.WriteLine(" + 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
+                        buffer += (" + 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
+                        reaction.Range.Text += buffer;
 
-                        output.Write("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
+                        buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
                     }
-
                 }
 
-                output.WriteLine(" LBS");
-                output.WriteLine();
-                //output.WriteLine("Ry = 0.5 * wy * dimX lbs");
-                //output.WriteLine();
+                buffer += (" LBS\n");
+                reaction.Range.Text += buffer;
+
+                reaction.Range.Text += ("Ry = 0.5 * wy * dimX lbs\n");
 
                 foreach (var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
                 {
@@ -110,19 +160,23 @@ namespace workspace_test
 
                     if (i == 0)
                     {
-                        output.WriteLine("RA = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
+                        reaction.Range.Text += ("RA = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
 
-                        output.Write("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
+                        buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
                     }
                     else
                     {
-                        output.WriteLine(" + 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
+                        buffer += (" + 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
+                        reaction.Range.Text += buffer;
 
-                        output.Write("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
+                        buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
                     }
                 }
-                output.WriteLine(" LBS");
+                buffer += (" LBS");
+                reaction.Range.Text += buffer;
+                reaction.Range.InsertParagraphAfter();
             }
+
 
             shearData = new Tuple<List<ShearData>, List<ShearData>>(tempLefts, tempBottoms);
         }

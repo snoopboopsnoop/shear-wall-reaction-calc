@@ -96,9 +96,17 @@ namespace workspace_test
         // when analysis is performed on a compound object
         private List<Shear> shears = new List<Shear>();
 
-        private string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "output/.txt");
+        private string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "output/");
 
-        private string docPath = Path.Combine(Application.StartupPath);
+        //private string projectPath = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName;
+        private object docPath = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/template.docx");
+
+        private string tempFile = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/temp.jpg");
+
+        private Word._Application word;
+        private Word._Document doc;
+        private object missing = System.Reflection.Missing.Value;
+        private object eod = "\\endofdoc";
 
         // default constructor
         public DrawPanel()
@@ -157,6 +165,23 @@ namespace workspace_test
             this.Controls.Add(scaleLabel);
 
             Console.WriteLine(docPath);
+
+            word = new Word.Application();
+            doc = word.Documents.Add(ref docPath, ref missing, ref missing, ref missing);
+            word.Visible = false;
+        }
+
+        public void CloseWord()
+        {
+            try
+            {
+                doc.Close();
+                word.Quit();
+            }
+            catch(COMException)
+            {
+                return;
+            }
         }
 
         public void SetPointerMode(string mode)
@@ -217,36 +242,163 @@ namespace workspace_test
 
         public void Export()
         {
-            object oMissing = System.Reflection.Missing.Value;
-            object oEndofDoc = "\\endofdoc";
+            //Word.Paragraph oPara1;
+            //oPara1 = oDoc.Content.Paragraphs.Add(ref oMissing);
+            //oPara1.Range.Text = "Heading 1";
+            //oPara1.Range.Font.Bold = 1;
+            //oPara1.Format.SpaceAfter = 24;
+            //oPara1.Range.InsertParagraphAfter();
 
-            Word._Application oWord;
-            Word._Document oDoc;
-            oWord = new Word.Application();
-            oWord.Visible = true;
+            //Word.Paragraph oPara2;
+            //object oRng = oDoc.Bookmarks.get_Item(ref oEndofDoc).Range;
+            //oPara2 = oDoc.Content.Paragraphs.Add(ref oRng);
+            //oPara2.Range.Text = "Heading 2";
+            //oPara2.Format.SpaceAfter = 6;
+            //oPara2.Range.InsertParagraphAfter();
 
-            oDoc = oWord.Documents.Add(ref oMissing, ref oMissing, ref oMissing, ref oMissing);
+            //Word.Paragraph oPara3;
+            //oRng = oDoc.Bookmarks.get_Item(oEndofDoc).Range;
+            //oPara3 = oDoc.Content.Paragraphs.Add(ref oRng);
+            //oPara3.Range.Text = "This is a sentence of normal text. Now here is a table:";
+            //oPara3.Range.Font.Bold = 0;
+            //oPara3.Format.SpaceAfter = 24;
+            //oPara3.Range.InsertParagraphAfter();
 
-            Word.Paragraph oPara1;
-            oPara1 = oDoc.Content.Paragraphs.Add(ref oMissing);
-            oPara1.Range.Text = "Heading 1";
-            oPara1.Range.Font.Bold = 1;
-            oPara1.Format.SpaceAfter = 24;
-            oPara1.Range.InsertParagraphAfter();
+            //Word.Table oTable;
+            //Word.Range wrdRng = oDoc.Bookmarks.get_Item(ref oEndofDoc).Range;
+            //oTable = oDoc.Tables.Add(wrdRng, 3, 5, ref oMissing, ref oMissing);
+            //oTable.Range.ParagraphFormat.SpaceAfter = 6;
+            //int r, c;
+            //string strText;
+            //for(r = 1; r <= 3; r++)
+            //{
+            //    for(c = 1; c <= 5; c++)
+            //    {
+            //        strText = "r" + r + "c" + c;
+            //        oTable.Cell(r, c).Range.Text = strText;
+            //    }
+
+            //}
+            //oTable.Rows[1].Range.Font.Bold = 1;
+            //oTable.Rows[1].Range.Font.Italic = 1;
+
+            //object oPos;
+            //double dPos = oWord.InchesToPoints(7);
+            //oDoc.Bookmarks.get_Item(ref oEndofDoc).Range.InsertParagraphAfter();
+            //do
+            //{
+            //    wrdRng = oDoc.Bookmarks.get_Item(ref oEndofDoc).Range;
+            //    wrdRng.ParagraphFormat.SpaceAfter = 6;
+            //    wrdRng.InsertAfter("A line of text");
+            //    wrdRng.InsertParagraphAfter();
+            //    oPos = wrdRng.get_Information(Word.WdInformation.wdVerticalPositionRelativeToPage);
+            //}
+            //while (dPos >= Convert.ToDouble(oPos));
+
+            //object oCollapseEnd = Word.WdCollapseDirection.wdCollapseEnd;
+            //object oPageBreak = Word.WdBreakType.wdPageBreak;
+            //wrdRng.Collapse(ref oCollapseEnd);
+            //wrdRng.InsertBreak(ref oPageBreak);
+            //wrdRng.InsertAfter("Were now on page 2. Here's my chart: ");
+            //wrdRng.InsertParagraphAfter();
+
+            //Word.InlineShape oShape;
+            //object oClassType = "MSGraph.Chart.8";
+            //wrdRng = oDoc.Bookmarks.get_Item(ref oEndofDoc).Range;
+            //oShape = wrdRng.InlineShapes.AddOLEObject(ref oClassType, ref oMissing,
+            //    ref oMissing, ref oMissing, ref oMissing,
+            //    ref oMissing, ref oMissing, ref oMissing);
 
             //SaveFileDialog sf = new SaveFileDialog();
             //sf.Filter = " JPEG Image(.jpeg) | *.jpeg | Png Image(.png) | *.png | Gif Image(.gif) | *.gif | Bitmap Image(.bmp) | *.bmp | Tiff Image(.tiff) | *.tiff | Wmf Image(.wmf) | *.wmf";
             //if (sf.ShowDialog() == DialogResult.OK)
             //{
-            //    var path = sf.FileName;
+            //var path = sf.FileName;
 
-            //    Bitmap bm = new Bitmap(this.Width, this.Height);
-            //    this.DrawToBitmap(bm, new Rectangle(0, 0, this.Width, this.Height));
+            Bitmap bm;
+
+            if (shears.Count != 0)
+            {
+                RectangleF dims = shears[0].GetDimensions();
+                rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(((int)dims.Left) - 50, ((int)dims.Top) - 50, ((int)dims.Width) + 100, ((int)dims.Height) + 100), new ShearData()));
+
+                Rectangle bounds = new Rectangle(((int)dims.Left) - 100, ((int)dims.Top) - 100, ((int)dims.Width) + 200, ((int)dims.Height) + 200);
+
+                bm = new Bitmap(bounds.Width, bounds.Height);
+                Graphics g = Graphics.FromImage(bm);
+
+                Console.WriteLine("control: " + this.Left + ", " + this.Top);
+
+                g.CopyFromScreen(bounds.Left + this.Left, bounds.Top + this.Top, 0, 0, bm.Size, CopyPixelOperation.SourceCopy);
+
+                Console.WriteLine("rectangel: " + dims.Width + " x " + dims.Height);
+                Console.WriteLine("location: " + dims.Left + ", " + dims.Top);
                 
-            //    bm.Save(path);
+                Console.WriteLine("bitmap: " + bm.PhysicalDimension);
+            }
+            else
+            {
+                bm = new Bitmap(this.Width, this.Height);
+                rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(0, 0, this.Width, this.Height), new ShearData()));
+                this.DrawToBitmap(bm, new Rectangle(0, 0, this.Width, this.Height));
+            }
+            Invalidate();
 
-            //    bm.Dispose();
-            //}
+            if(bm.Width > bm.Height)
+            {
+                bm.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            }
+
+            bm.Save(tempFile, ImageFormat.Jpeg);
+
+            Word.Paragraph image;
+            object range = doc.Content.Start;
+            Word.Range top = doc.Range(range, range);
+
+            image = doc.Content.Paragraphs.Add(top);
+
+            image.Format.SpaceBefore = 16;
+
+            image.Range.Underline = Word.WdUnderline.wdUnderlineNone;
+
+            word.Visible = true;
+
+            Word.InlineShape shape = image.Range.InlineShapes.AddPicture(tempFile, missing, missing, top);
+
+            shape.Range.Underline = Word.WdUnderline.wdUnderlineNone;
+            shape.Range.Font.Bold = 0;
+            image.Format.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
+
+            Console.WriteLine("Height: " + shape.Height + ", measure: " + word.InchesToPoints(8.5F) + ", scale: " + shape.ScaleHeight);
+
+            shape.ScaleHeight = shape.ScaleHeight * (word.InchesToPoints(8.5F) / shape.Height);
+
+            Console.WriteLine(shape.ScaleWidth);
+
+            shape.ScaleWidth = shape.ScaleHeight;
+
+            Console.WriteLine("top1: " + top.Text);
+
+            top.Underline = Word.WdUnderline.wdUnderlineNone;
+
+            top.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+
+            // this needs to be here or else it breaks and i don't know why
+            top.Text = "bbobr";
+
+            Console.WriteLine("top2: " + top.Text);
+
+            top.Underline = Word.WdUnderline.wdUnderlineNone;
+
+            //top.Text = "bobr";
+            Console.WriteLine("top3: " + top.Text);
+
+            top.InsertBreak(Word.WdBreakType.wdPageBreak);
+
+            //top.Text = "bob";
+
+            bm.Dispose();
+            File.Delete(tempFile);
         }
 
         public void SetScale(double value, string paramUnit)
@@ -349,16 +501,8 @@ namespace workspace_test
             {
                 if (!(LA == 0 || LD == 0)) {
                     cm.Close();
-
-                    SaveFileDialog sf = new SaveFileDialog();
-                    sf.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-                    if(sf.ShowDialog() == DialogResult.OK)
-                    {
-                        outputPath = sf.FileName;
-
                         Algorithm();
                         selectedLines.Clear();
-                    }
                 }
             }
             else if(item.Text == "Set Scale")
@@ -379,6 +523,18 @@ namespace workspace_test
         // all the shear wall stuff in one bundle
         private void Algorithm()
         {
+            word.Visible = true;
+
+            Word.Paragraph header;
+            header = doc.Content.Paragraphs.Add();
+            header.Range.Underline = Word.WdUnderline.wdUnderlineSingle;
+            header.Range.Font.Size = 18;
+            header.Range.Text = "SEISMIC WT @ ROOF";
+            header.Range.Font.Bold = 1;
+            header.Format.SpaceAfter = 16;
+            
+            header.Range.InsertParagraphAfter();
+
             // splits all unique vertices by drawing a line through the x and y values
             // (theoretically, though it actually just stores all the unique x and ys)
             List<int> y = new List<int>();
@@ -538,7 +694,7 @@ namespace workspace_test
             }
 
             // take all that and send it somewhere else
-            shears.Add(new Shear(selectLines, new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), new Tuple<List<int>, List<int>>(x, y), GetRectangle(min, max), LA, LD, outputPath));
+            shears.Add(new Shear(selectLines, new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), new Tuple<List<int>, List<int>>(x, y), GetRectangle(min, max), LA, LD, doc));
 
             Invalidate();
         }

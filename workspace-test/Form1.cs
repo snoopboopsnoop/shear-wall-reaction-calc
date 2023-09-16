@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,8 +27,20 @@ namespace workspace_test
             radioButton2.CheckedChanged += radioButton_CheckedChanged;
             radioButton3.CheckedChanged += radioButton_CheckedChanged; 
             this.KeyDown += workspace_KeyDown;
+            this.FormClosing += Form1_Closing;
         }
 
+        private void Form1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Console.WriteLine("closing word");
+            //workspace.CloseWord();
+        }
+
+        public DrawPanel GetWorkspace()
+        {
+            return this.workspace;
+        }
+        
         void radioButton_CheckedChanged(object sender, EventArgs e)
         {
             RadioButton rb = sender as RadioButton;
