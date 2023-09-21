@@ -9,61 +9,69 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
-using Microsoft.Office.Interop.Word;
 
 namespace workspace_test
 {
-    public struct ShearData
+    public class ShearData
     {
+        public ShearData()
+        {
+            rect = RectangleF.Empty;
+            visual = Rectangle.Empty;
+            direction = "both";
+            LS = 0;
+            wx = 0;
+            wy = 0;
+        }
 
         public ShearData(RectangleF paramRect)
         {
             rect = paramRect;
+            visual = Rectangle.Empty;
+            direction = "both";
             LS = 0;
             wx = 0;
             wy = 0;
-            rx1 = 0;
-            ry1 = 0;
         }
-        public ShearData(RectangleF paramRect, float paramLS, string direction = "both", string name = "", Word._Document doc = null)
+        public ShearData(RectangleF paramRect, float paramLS, string paramDirection = "both", string name = "", Word._Document doc = null)
         {
             rect = paramRect;
             LS = paramLS;
+            direction = paramDirection;
 
             wx = (direction == "bottom") ? 0 : LS * rect.Width;
             Console.WriteLine("wx: " + wx);
             wy = (direction == "left") ? 0 : LS * rect.Height;
             Console.WriteLine("wy: " + wy);
-            //wx = LS * rect.Width;
-            //wy = LS * rect.Height;
-            //rx1 = (float)0.5 * wx * rect.Height;
-            //ry1 = (float)0.5 * wy * rect.Width;
-            rx1 = 0;
-            ry1 = 0;
 
-            //using(StreamWriter output = new StreamWriter(outputPath, true))
-            //{
-            //    output.Write(name + " = ");
-            //    if (direction == "bottom") output.WriteLine(LS + "PSF x " + rect.Height + "\' = " + wy + " PLF");
-            //    else if (direction == "left") output.WriteLine(LS + "PSF x " + rect.Width + "\' = " + wx + " PLF");
-            //    output.WriteLine();
-            //}
+            visual = Rectangle.Empty;
 
-            if(doc != null)
+            if (doc != null)
             {
                 Word.Range range = doc.Bookmarks.get_Item("\\endofdoc").Range;
                 range.InsertAfter(name + " = ");
                 if (direction == "bottom") range.InsertAfter(LS + "PSF x " + rect.Height + "\' = " + wy + " PLF\n");
                 else if (direction == "left") range.InsertAfter(LS + "PSF x " + rect.Width + "\' = " + wx + " PLF\n");
             }
+        }
 
+        public void UpdateVisual()
+        {
+            Console.WriteLine("wx ref " + wx / Globals.refMeasure);
+            Console.WriteLine("wy ref " + wy / Globals.refMeasure);
+
+            visual = (direction == "bottom") ?
+                new Rectangle((int)rect.X + 4, (int)(rect.Y + 5 + rect.Height), (int)rect.Width - 8, (int)wy / Globals.refMeasure + 10) :
+                new Rectangle((int)(rect.X - ((int)wx / Globals.refMeasure + 10)), (int)rect.Y + 4, (int)wx / Globals.refMeasure + 5, (int)rect.Height - 8);
+
+            Console.WriteLine("updating w visual to " + visual);
         }
 
         public RectangleF rect { get; }
+        public Rectangle visual { get; set; }
         public float LS { get; set; }
         public float wx { get; set; }
         public float wy { get; set; }
-        public float rx1 { get; set; }
-        public float ry1 { get; set; }
+        public string direction { get; }
     }
 }

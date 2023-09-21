@@ -242,85 +242,12 @@ namespace workspace_test
 
         public void Export()
         {
-            //Word.Paragraph oPara1;
-            //oPara1 = oDoc.Content.Paragraphs.Add(ref oMissing);
-            //oPara1.Range.Text = "Heading 1";
-            //oPara1.Range.Font.Bold = 1;
-            //oPara1.Format.SpaceAfter = 24;
-            //oPara1.Range.InsertParagraphAfter();
-
-            //Word.Paragraph oPara2;
-            //object oRng = oDoc.Bookmarks.get_Item(ref oEndofDoc).Range;
-            //oPara2 = oDoc.Content.Paragraphs.Add(ref oRng);
-            //oPara2.Range.Text = "Heading 2";
-            //oPara2.Format.SpaceAfter = 6;
-            //oPara2.Range.InsertParagraphAfter();
-
-            //Word.Paragraph oPara3;
-            //oRng = oDoc.Bookmarks.get_Item(oEndofDoc).Range;
-            //oPara3 = oDoc.Content.Paragraphs.Add(ref oRng);
-            //oPara3.Range.Text = "This is a sentence of normal text. Now here is a table:";
-            //oPara3.Range.Font.Bold = 0;
-            //oPara3.Format.SpaceAfter = 24;
-            //oPara3.Range.InsertParagraphAfter();
-
-            //Word.Table oTable;
-            //Word.Range wrdRng = oDoc.Bookmarks.get_Item(ref oEndofDoc).Range;
-            //oTable = oDoc.Tables.Add(wrdRng, 3, 5, ref oMissing, ref oMissing);
-            //oTable.Range.ParagraphFormat.SpaceAfter = 6;
-            //int r, c;
-            //string strText;
-            //for(r = 1; r <= 3; r++)
-            //{
-            //    for(c = 1; c <= 5; c++)
-            //    {
-            //        strText = "r" + r + "c" + c;
-            //        oTable.Cell(r, c).Range.Text = strText;
-            //    }
-
-            //}
-            //oTable.Rows[1].Range.Font.Bold = 1;
-            //oTable.Rows[1].Range.Font.Italic = 1;
-
-            //object oPos;
-            //double dPos = oWord.InchesToPoints(7);
-            //oDoc.Bookmarks.get_Item(ref oEndofDoc).Range.InsertParagraphAfter();
-            //do
-            //{
-            //    wrdRng = oDoc.Bookmarks.get_Item(ref oEndofDoc).Range;
-            //    wrdRng.ParagraphFormat.SpaceAfter = 6;
-            //    wrdRng.InsertAfter("A line of text");
-            //    wrdRng.InsertParagraphAfter();
-            //    oPos = wrdRng.get_Information(Word.WdInformation.wdVerticalPositionRelativeToPage);
-            //}
-            //while (dPos >= Convert.ToDouble(oPos));
-
-            //object oCollapseEnd = Word.WdCollapseDirection.wdCollapseEnd;
-            //object oPageBreak = Word.WdBreakType.wdPageBreak;
-            //wrdRng.Collapse(ref oCollapseEnd);
-            //wrdRng.InsertBreak(ref oPageBreak);
-            //wrdRng.InsertAfter("Were now on page 2. Here's my chart: ");
-            //wrdRng.InsertParagraphAfter();
-
-            //Word.InlineShape oShape;
-            //object oClassType = "MSGraph.Chart.8";
-            //wrdRng = oDoc.Bookmarks.get_Item(ref oEndofDoc).Range;
-            //oShape = wrdRng.InlineShapes.AddOLEObject(ref oClassType, ref oMissing,
-            //    ref oMissing, ref oMissing, ref oMissing,
-            //    ref oMissing, ref oMissing, ref oMissing);
-
-            //SaveFileDialog sf = new SaveFileDialog();
-            //sf.Filter = " JPEG Image(.jpeg) | *.jpeg | Png Image(.png) | *.png | Gif Image(.gif) | *.gif | Bitmap Image(.bmp) | *.bmp | Tiff Image(.tiff) | *.tiff | Wmf Image(.wmf) | *.wmf";
-            //if (sf.ShowDialog() == DialogResult.OK)
-            //{
-            //var path = sf.FileName;
-
             Bitmap bm;
 
             if (shears.Count != 0)
             {
                 RectangleF dims = shears[0].GetDimensions();
-                rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(((int)dims.Left) - 50, ((int)dims.Top) - 50, ((int)dims.Width) + 100, ((int)dims.Height) + 100), new ShearData()));
+                //rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(((int)dims.Left) - 50, ((int)dims.Top) - 50, ((int)dims.Width) + 100, ((int)dims.Height) + 100), new ShearData()));
 
                 Rectangle bounds = new Rectangle(((int)dims.Left) - 100, ((int)dims.Top) - 100, ((int)dims.Width) + 200, ((int)dims.Height) + 200);
 
@@ -339,7 +266,6 @@ namespace workspace_test
             else
             {
                 bm = new Bitmap(this.Width, this.Height);
-                rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(0, 0, this.Width, this.Height), new ShearData()));
                 this.DrawToBitmap(bm, new Rectangle(0, 0, this.Width, this.Height));
             }
             Invalidate();
@@ -371,11 +297,17 @@ namespace workspace_test
 
             Console.WriteLine("Height: " + shape.Height + ", measure: " + word.InchesToPoints(8.5F) + ", scale: " + shape.ScaleHeight);
 
-            shape.ScaleHeight = shape.ScaleHeight * (word.InchesToPoints(8.5F) / shape.Height);
+            float scale = (word.InchesToPoints(8.5F) / shape.Height);
+
+            if(shape.Width * ((shape.ScaleWidth * scale) / 100) >= word.InchesToPoints(6.0F))
+            {
+                scale = word.InchesToPoints(6.0F) / shape.Width;
+            }
+
+            shape.ScaleHeight = shape.ScaleHeight * scale;
+            shape.ScaleWidth = shape.ScaleHeight;
 
             Console.WriteLine(shape.ScaleWidth);
-
-            shape.ScaleWidth = shape.ScaleHeight;
 
             Console.WriteLine("top1: " + top.Text);
 
@@ -896,7 +828,7 @@ namespace workspace_test
         }
 
         // draws rectangle on screen from parameter data
-        private void DrawRect(PaintEventArgs e, Tuple<RectangleF, ShearData> rect, Color color, bool show = true, string name = "", int refMeasure = 1)
+        private void DrawRect(PaintEventArgs e, Tuple<RectangleF, ShearData> rect, Color color, bool show = true, string name = "")
         {
             Color opaque = Color.FromArgb(25, Color.Blue);
             SolidBrush selectBrush = new SolidBrush(opaque);
@@ -919,61 +851,24 @@ namespace workspace_test
                     paramRect.X + paramRect.Width + 5, paramRect.Y + paramRect.Height / 2, formatHeight);
             }
 
+            e.Graphics.FillRectangle(selectBrush, data.visual);
+            e.Graphics.DrawRectangle(Pens.Blue, data.visual);
+            Console.WriteLine("drawing " + data.visual);
+
             if (data.wx != 0)
             {
-                int width = (int)data.wx / refMeasure;
-                Rectangle wxBox = new Rectangle((int)(paramRect.X - (width + 5)), (int)paramRect.Y + 4, width, (int)paramRect.Height - 8);
-                // wx box
-                e.Graphics.FillRectangle(selectBrush, wxBox);
-                e.Graphics.DrawRectangle(Pens.Blue, wxBox);
-                //e.Graphics.DrawString(data.wx.ToString("0.###") + "ft", font, Brushes.Blue,
-                //    paramRect.X - (data.wx + 7), (paramRect.Y + paramRect.Height / 2), formatwx);
                 e.Graphics.DrawString(name, font, Brushes.Blue,
-                    paramRect.X - (width + 7), (paramRect.Y + paramRect.Height / 2), formatwx);
+                    paramRect.X - (data.visual.Width + 7), (paramRect.Y + paramRect.Height / 2), formatwx);
             }
             if (data.wy != 0)
             {
-                int height = (int)data.wy / refMeasure;
-                Rectangle wyBox = new Rectangle((int)paramRect.X + 4, (int)(paramRect.Y + 5 + paramRect.Height), (int)paramRect.Width - 8, height);
-                // wy box
-                e.Graphics.FillRectangle(selectBrush, wyBox);
-                e.Graphics.DrawRectangle(Pens.Blue, wyBox);
-                //e.Graphics.DrawString(data.wy.ToString("0.###") + "ft", font, Brushes.Blue,
-                //    paramRect.X + paramRect.Width / 2, paramRect.Y + paramRect.Height + data.wy + 7, formatwy);
                 e.Graphics.DrawString(name, font, Brushes.Blue,
-                    paramRect.X + paramRect.Width / 2, paramRect.Y + paramRect.Height + height + 7, formatwy);
+                    paramRect.X + paramRect.Width / 2, paramRect.Y + paramRect.Height + data.visual.Height + 7, formatwy);
             }
-                //// for arrows
-                //Pen arrowPen = pen;
-                //arrowPen.CustomEndCap = new AdjustableArrowCap(2, 2);
-
-
-                //// rx1
-                //e.Graphics.DrawLine(arrowPen,
-                //    paramRect.X + paramRect.Width + 15, paramRect.Y + paramRect.Height,
-                //    paramRect.X + paramRect.Width + 5, paramRect.Y + paramRect.Height);
-                //e.Graphics.DrawString(data.rx1.ToString("0.###") + "lbs", font, brush,
-                //    paramRect.X + paramRect.Width + 20, paramRect.Y + paramRect.Height, formatwy);
-                //// rx2
-                //e.Graphics.DrawLine(arrowPen,
-                //    paramRect.X + paramRect.Width + 15, paramRect.Y,
-                //    paramRect.X + paramRect.Width + 5, paramRect.Y);
-                //e.Graphics.DrawString("rx2", font, brush,
-                //    paramRect.X + paramRect.Width + 20, paramRect.Y, formatwy);
-                //// ry1
-                //e.Graphics.DrawLine(arrowPen, paramRect.X, paramRect.Y - 15, paramRect.X, paramRect.Y - 5);
-                //e.Graphics.DrawString(data.ry1.ToString("0.###") + "lbs", font, brush,
-                //    paramRect.X, paramRect.Y - 20, formatwx);
-
-                //// ry2
-                //e.Graphics.DrawLine(arrowPen, paramRect.X + paramRect.Width, paramRect.Y - 15, paramRect.X + paramRect.Width, paramRect.Y - 5);
-                //e.Graphics.DrawString("ry2", font, brush,
-                //    paramRect.X + paramRect.Width, paramRect.Y - 20, formatwx);
             
             brush.Dispose();
             pen.Dispose();
             selectBrush.Dispose();
-            //arrowPen.Dispose();
         }
         private void DrawArrows(PaintEventArgs e, RectangleF outline, Tuple<List<int>, List<int>> levels)
         {
@@ -1034,6 +929,34 @@ namespace workspace_test
             }
         }
 
+        private void DrawShear(PaintEventArgs e, Shear shear)
+        {
+            foreach (var (line, i) in shear.GetLines().Select((value, i) => (value, i)))
+            {
+                DrawLine(e, line, Color.Black);
+            }
+
+            Tuple<List<RectangleF>, List<RectangleF>> data = shear.GetData();
+            Tuple<List<ShearData>, List<ShearData>> shearData = shear.GetShearData();
+
+            Console.WriteLine("test: " + shearData.Item1[0].visual);
+
+            if (data != null)
+            {
+                //Console.WriteLine("not empty data");
+                foreach (var (rect, i) in data.Item1.Select((rect, i) => (rect, i)))
+                {
+                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, false, "Wx" + (i + 1));
+                }
+                foreach (var (rect, i) in data.Item2.Select((rect, i) => (rect, i)))
+                {
+
+                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, false, "Wy" + (i + 1));
+                }
+
+                DrawArrows(e, shear.GetDimensions(), shear.GetReactions());
+            }
+        }
 
         // move currently selected rectangle by values given by translation Point
         public void moveSelected(PointF translation)
@@ -1058,15 +981,27 @@ namespace workspace_test
         // begin new rectangle if mouse down while rectangle selection
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            suggestLine = PointF.Empty;
             base.OnMouseDown(e);
+
+            if(e.Button == MouseButtons.Right)
+            {
+                return;
+            }
 
             if (pointerMode == "pen" && drawing)
             {
-                suggestLine = PointF.Empty;
-                lines.Add(new Tuple<PointF, PointF>(start, end));
+                if (start == end)
+                {
+                    drawing = false;
+                    start = PointF.Empty;
+                }
+                else
+                {
+                    lines.Add(new Tuple<PointF, PointF>(start, end));
+                    start = end;
+                }
 
-                drawing = false;
-                start = PointF.Empty;
                 end = PointF.Empty;
                 Invalidate();
             }
@@ -1204,50 +1139,64 @@ namespace workspace_test
                 }
             }
 
-            foreach (var line in lines)
+            if(start != end)
             {
-                if(Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 10)
+                foreach (var line in lines)
                 {
-                    hover = line.Item1;
-                    if(drawing)
+                    if (Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 10)
                     {
-                        end = hover;
+                        hover = line.Item1;
+                        if (drawing)
+                        {
+                            end = hover;
+                        }
                     }
-                }
-                else if (Math.Sqrt(Math.Pow(line.Item2.X - e.Location.X, 2) + Math.Pow(line.Item2.Y - e.Location.Y, 2)) <= 10)
-                {
-                    hover = line.Item2;
-                    if (drawing)
+                    else if (Math.Sqrt(Math.Pow(line.Item2.X - e.Location.X, 2) + Math.Pow(line.Item2.Y - e.Location.Y, 2)) <= 10)
                     {
-                        end = hover;
+                        hover = line.Item2;
+                        if (drawing)
+                        {
+                            end = hover;
+                        }
                     }
-                }
 
-                if(pointerMode == "pen" && drawing)
-                {
-                    if(!line.Item1.Equals(e.Location) && !line.Item2.Equals(e.Location))
+                    if (pointerMode == "pen" && drawing)
                     {
-                        string direction = getDirection(start, e.Location);
+                        if (!line.Item1.Equals(end) && !line.Item2.Equals(end))
+                        {
+                            string direction = getDirection(start, e.Location);
 
-                        if (Math.Abs(line.Item1.Y - e.Location.Y) <= 5 && direction == "vertical")
-                        {
-                            suggestLine = line.Item1;
-                            end = new PointF(start.X, line.Item1.Y);
-                        }
-                        else if (Math.Abs(line.Item1.X - e.Location.X) <= 5 && direction == "horizontal")
-                        {
-                            suggestLine = line.Item1;
-                            end = new PointF(line.Item1.X, start.Y);
-                        }
-                        else if (Math.Abs(line.Item2.Y - e.Location.Y) <= 5 && direction == "vertical")
-                        {
-                            suggestLine = line.Item2;
-                            end = new PointF(start.X, line.Item2.Y);
-                        }
-                        else if (Math.Abs(line.Item2.X - e.Location.X) <= 5 && direction == "horizontal")
-                        {
-                            suggestLine = line.Item2;
-                            end = new PointF(line.Item2.X, start.Y);
+                            if (direction == "vertical")
+                            {
+                                if (Math.Abs(line.Item1.Y - e.Location.Y) <= 5)
+                                {
+                                    suggestLine = line.Item1;
+                                    Console.WriteLine("suggest point " + suggestLine);
+                                    end = new PointF(start.X, line.Item1.Y);
+                                }
+                                else if (Math.Abs(line.Item2.Y - e.Location.Y) <= 5)
+                                {
+                                    suggestLine = line.Item2;
+                                    Console.WriteLine("suggest point " + suggestLine);
+                                    end = new PointF(start.X, line.Item2.Y);
+                                }
+                            }
+                            else if (direction == "horizontal")
+                            {
+                                if (Math.Abs(line.Item1.X - e.Location.X) <= 5)
+                                {
+                                    suggestLine = line.Item1;
+                                    Console.WriteLine("suggest point " + suggestLine);
+                                    end = new PointF(line.Item1.X, start.Y);
+                                }
+
+                                else if (Math.Abs(line.Item2.X - e.Location.X) <= 5)
+                                {
+                                    suggestLine = line.Item2;
+                                    Console.WriteLine("suggest point " + suggestLine);
+                                    end = new PointF(line.Item2.X, start.Y);
+                                }
+                            }
                         }
                     }
                 }
@@ -1264,9 +1213,10 @@ namespace workspace_test
 
             if (!suggestLine.IsEmpty)
             {
+                Console.WriteLine("suggest point " +  suggestLine);
                 e.Graphics.DrawLine(Pens.Red, end, suggestLine);
             }
-            
+
             foreach (var (line, i) in lines.Select((value, i) => (value, i)))
             {
                 if(selectedLines.Contains(i))
@@ -1287,36 +1237,7 @@ namespace workspace_test
 
             foreach (var shear in shears)
             {
-                foreach (var (line, i) in shear.GetLines().Select((value, i) => (value, i)))
-                {
-                    DrawLine(e, line, Color.Black);
-                }
-
-                Tuple<List<RectangleF>, List<RectangleF>> data = shear.GetData();
-                Tuple<List<ShearData>, List<ShearData>> shearData = shear.GetShearData();
-
-                if (data != null)
-                {
-                    int wxMeasure = shearData.Item1.Min(p => (int)p.wx);
-                    int wyMeasure = shearData.Item2.Min(p => (int)p.wy);
-
-                    int refMeasure = (wxMeasure > wyMeasure) ? wyMeasure : wxMeasure;
-
-                    //Console.WriteLine("ref: " + refMeasure);
-
-                    //Console.WriteLine("not empty data");
-                    foreach (var (rect, i) in data.Item1.Select((rect, i) => (rect, i)))
-                    {
-                        DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, false, "Wx" + (i+1), refMeasure);
-                    }
-                    foreach (var (rect, i) in data.Item2.Select((rect, i) => (rect, i)))
-                    {
-
-                        DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, false, "Wy" + (i+1), refMeasure);
-                    }
-
-                    DrawArrows(e, shear.GetDimensions(), shear.GetReactions());
-                }
+                DrawShear(e, shear);
             }
 
             if (!start.IsEmpty && !end.IsEmpty)

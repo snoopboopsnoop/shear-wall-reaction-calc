@@ -54,6 +54,7 @@
     <Compile Include="Form4.Designer.cs">
       <DependentUpon>Form4.cs</DependentUpon>
     </Compile>
+    <Compile Include="Globals.cs" />
     <Compile Include="Shear.cs" />
     <Compile Include="ShearData.cs" />
     <Compile Include="DrawPanel.cs">

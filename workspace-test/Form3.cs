@@ -70,9 +70,6 @@ namespace workspace_test
                 ls.Text = data.LS.ToString();
                 wx.Text = data.wx.ToString();
                 wy.Text = data.wy.ToString();
-                rx1.Text = data.rx1.ToString();
-                ry1.Text = data.ry1.ToString();
-
             }
             catch (FormatException)
             {

@@ -3,9 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,7 +23,6 @@ namespace workspace_test
         private Tuple<List<RectangleF>, List<RectangleF>> data;
         private Tuple<List<ShearData>, List<ShearData>> shearData;
         private Tuple<List<int>, List<int>> reactions;
-        private List<int> reactionVals;
         private float LA;
         private float LD;
         private float LS;
@@ -48,22 +50,6 @@ namespace workspace_test
             LS = LA * LD;
 
             List<int> reactionValsLeft = new List<int>(paramData.Item1.Count() + 1);
-
-            //using (StreamWriter output = new StreamWriter(outputPath))
-            //{
-            //    output.WriteLine("SEISMIC WT @ ROOF");
-
-            //    output.WriteLine();
-
-            //    output.WriteLine("LA = " + LA + " g");
-            //    output.WriteLine("LD = " + LD + " PSF");
-            //    output.WriteLine("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF");
-            //    output.WriteLine();
-
-            //    output.WriteLine("Wx = LS x dimX");
-            //    output.WriteLine("Wy = LS x dimY");
-            //    output.WriteLine();
-            //}
 
             if(doc != null)
             {
@@ -177,6 +163,25 @@ namespace workspace_test
                 reaction.Range.InsertParagraphAfter();
             }
 
+            int wxMeasure = tempLefts.Min(p => (int)p.wx);
+            int wyMeasure = tempBottoms.Min(p => (int)p.wy);
+
+            Globals.refMeasure = (wxMeasure > wyMeasure) ? wyMeasure : wxMeasure;
+            Console.WriteLine("refmeasure: " + Globals.refMeasure);
+
+            foreach (var shearData in tempLefts)
+            {
+                shearData.UpdateVisual();
+            }
+            foreach (var shearData in tempBottoms)
+            {
+                shearData.UpdateVisual();
+            }
+
+            Console.WriteLine("sheardata left size: " + tempLefts.Count);
+            Console.WriteLine("sheardata bottom size: " + tempBottoms.Count);
+
+            Console.WriteLine("test0: " + tempLefts[0].visual);
 
             shearData = new Tuple<List<ShearData>, List<ShearData>>(tempLefts, tempBottoms);
         }
