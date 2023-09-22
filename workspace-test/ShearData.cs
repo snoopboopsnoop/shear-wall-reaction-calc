@@ -57,14 +57,14 @@ namespace workspace_test
 
         public void UpdateVisual()
         {
-            Console.WriteLine("wx ref " + wx / Globals.refMeasure);
-            Console.WriteLine("wy ref " + wy / Globals.refMeasure);
+            //Console.WriteLine("wx ref " + wx / Globals.refMeasure);
+            //Console.WriteLine("wy ref " + wy / Globals.refMeasure);
 
             visual = (direction == "bottom") ?
                 new Rectangle((int)rect.X + 4, (int)(rect.Y + 5 + rect.Height), (int)rect.Width - 8, (int)wy / Globals.refMeasure + 10) :
                 new Rectangle((int)(rect.X - ((int)wx / Globals.refMeasure + 10)), (int)rect.Y + 4, (int)wx / Globals.refMeasure + 5, (int)rect.Height - 8);
 
-            Console.WriteLine("updating w visual to " + visual);
+            //Console.WriteLine("updating w visual to " + visual);
         }
 
         public RectangleF rect { get; }

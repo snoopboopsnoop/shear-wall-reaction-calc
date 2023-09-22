@@ -178,10 +178,10 @@ namespace workspace_test
                 shearData.UpdateVisual();
             }
 
-            Console.WriteLine("sheardata left size: " + tempLefts.Count);
-            Console.WriteLine("sheardata bottom size: " + tempBottoms.Count);
+            //Console.WriteLine("sheardata left size: " + tempLefts.Count);
+            //Console.WriteLine("sheardata bottom size: " + tempBottoms.Count);
 
-            Console.WriteLine("test0: " + tempLefts[0].visual);
+            //Console.WriteLine("test0: " + tempLefts[0].visual);
 
             shearData = new Tuple<List<ShearData>, List<ShearData>>(tempLefts, tempBottoms);
         }

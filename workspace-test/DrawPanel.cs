@@ -18,6 +18,7 @@ using System.IO;
 using System.Drawing.Imaging;
 
 using Word = Microsoft.Office.Interop.Word;
+using System.Windows.Forms.VisualStyles;
 
 namespace workspace_test
 {
@@ -47,6 +48,7 @@ namespace workspace_test
 
         // which point is currently being hovered over, draws bigger one over it later
         private PointF hover = PointF.Empty;
+        private RectangleF hoverWeight = Rectangle.Empty;
 
         // the funny red line that tells you if you're lined up
         private PointF suggestLine = PointF.Empty;
@@ -154,8 +156,11 @@ namespace workspace_test
             cm.Items.Add("Create Rectangle");
             cm.Items.Add("Run Shear Reaction");
             cm.Items.Add("Set Scale");
+            ToolStripItem weightButton = cm.Items.Add("Add Weight...");
+            weightButton.Enabled = false;
 
             cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
+            cm.Opening += contextMenu_Opening;
 
             scaleLabel = new Label();
             scaleLabel.Location = new Point(0, 0);
@@ -449,6 +454,18 @@ namespace workspace_test
                     Form4 scaleForm = new Form4(this, (int)Magnitude(lines[selectedLines[0]]), unit);
                     scaleForm.ShowDialog();
                 }
+            }
+            else if(item.Text == "Add Weight...")
+            {
+                Console.WriteLine("bobr");
+            }
+        }
+
+        private void contextMenu_Opening(object sender, EventArgs e)
+        {
+            if (hoverWeight != RectangleF.Empty)
+            {
+                cm.Items[3].Enabled = true;
             }
         }
 
@@ -828,13 +845,15 @@ namespace workspace_test
         }
 
         // draws rectangle on screen from parameter data
-        private void DrawRect(PaintEventArgs e, Tuple<RectangleF, ShearData> rect, Color color, bool show = true, string name = "")
+        private void DrawRect(PaintEventArgs e, Tuple<RectangleF, ShearData> rect, Color color, Color weightColor = default(Color), bool show = true, string name = "")
         {
-            Color opaque = Color.FromArgb(25, Color.Blue);
+            Color opaque = (weightColor != Color.Empty) ? Color.FromArgb(25, weightColor) : Color.FromArgb(25, Color.Blue);
             SolidBrush selectBrush = new SolidBrush(opaque);
             Font font = new Font("Arial", 8);
-            Brush brush = new SolidBrush(color);
+            SolidBrush brush = new SolidBrush(color);
+            SolidBrush textBrush = new SolidBrush(weightColor);
             Pen pen = new Pen(brush);
+            Pen weightPen = new Pen(textBrush);
             
             RectangleF paramRect = rect.Item1;
             ShearData data = rect.Item2;
@@ -851,24 +870,37 @@ namespace workspace_test
                     paramRect.X + paramRect.Width + 5, paramRect.Y + paramRect.Height / 2, formatHeight);
             }
 
-            e.Graphics.FillRectangle(selectBrush, data.visual);
-            e.Graphics.DrawRectangle(Pens.Blue, data.visual);
-            Console.WriteLine("drawing " + data.visual);
+            if(data.visual == hoverWeight)
+            {
+                selectBrush.Color = Color.FromArgb(25, Color.Red);
+                textBrush.Color = Color.Red;
+                e.Graphics.FillRectangle(selectBrush, data.visual);
+                e.Graphics.DrawRectangle(Pens.Red, data.visual);
+            }
+            else
+            {
+                e.Graphics.FillRectangle(selectBrush, data.visual);
+                e.Graphics.DrawRectangle(weightPen, data.visual);
+            }
+            
+            //Console.WriteLine("drawing " + data.visual);
 
             if (data.wx != 0)
             {
-                e.Graphics.DrawString(name, font, Brushes.Blue,
+                e.Graphics.DrawString(name, font, textBrush,
                     paramRect.X - (data.visual.Width + 7), (paramRect.Y + paramRect.Height / 2), formatwx);
             }
             if (data.wy != 0)
             {
-                e.Graphics.DrawString(name, font, Brushes.Blue,
+                e.Graphics.DrawString(name, font, textBrush,
                     paramRect.X + paramRect.Width / 2, paramRect.Y + paramRect.Height + data.visual.Height + 7, formatwy);
             }
             
             brush.Dispose();
             pen.Dispose();
+            weightPen.Dispose();
             selectBrush.Dispose();
+            textBrush.Dispose();
         }
         private void DrawArrows(PaintEventArgs e, RectangleF outline, Tuple<List<int>, List<int>> levels)
         {
@@ -939,19 +971,20 @@ namespace workspace_test
             Tuple<List<RectangleF>, List<RectangleF>> data = shear.GetData();
             Tuple<List<ShearData>, List<ShearData>> shearData = shear.GetShearData();
 
-            Console.WriteLine("test: " + shearData.Item1[0].visual);
+            //Console.WriteLine("test: " + shearData.Item1[0].visual);
 
             if (data != null)
             {
                 //Console.WriteLine("not empty data");
                 foreach (var (rect, i) in data.Item1.Select((rect, i) => (rect, i)))
                 {
-                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, false, "Wx" + (i + 1));
+                    //if(rect.Equals(hoverWeight)) DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, Color.Red, false, "Wx" + (i + 1));
+                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item1[i]), Color.Black, Color.Blue, false, "Wx" + (i + 1));
                 }
                 foreach (var (rect, i) in data.Item2.Select((rect, i) => (rect, i)))
                 {
-
-                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, false, "Wy" + (i + 1));
+                    //if (rect.Equals(hoverWeight)) DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, Color.Red, false, "Wy" + (i + 1));
+                    DrawRect(e, new Tuple<RectangleF, ShearData>(rect, shearData.Item2[i]), Color.Black, Color.Blue, false, "Wy" + (i + 1));
                 }
 
                 DrawArrows(e, shear.GetDimensions(), shear.GetReactions());
@@ -1109,9 +1142,11 @@ namespace workspace_test
         // move end location if mouse moves
         protected override void OnMouseMove(MouseEventArgs e)
         {
+            hoverWeight = RectangleF.Empty;
             suggestLine = PointF.Empty;
             hover = PointF.Empty;
             base.OnMouseMove(e);
+
             if (e.Button == MouseButtons.Left)
             {
                 if (drawing) end = e.Location;
@@ -1139,68 +1174,90 @@ namespace workspace_test
                 }
             }
 
-            if(start != end)
+            foreach (var line in lines)
             {
-                foreach (var line in lines)
+                if (Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 10)
                 {
-                    if (Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 10)
+                    hover = line.Item1;
+                    if (drawing)
                     {
-                        hover = line.Item1;
-                        if (drawing)
-                        {
-                            end = hover;
-                        }
+                        end = hover;
                     }
-                    else if (Math.Sqrt(Math.Pow(line.Item2.X - e.Location.X, 2) + Math.Pow(line.Item2.Y - e.Location.Y, 2)) <= 10)
+                }
+                else if (Math.Sqrt(Math.Pow(line.Item2.X - e.Location.X, 2) + Math.Pow(line.Item2.Y - e.Location.Y, 2)) <= 10)
+                {
+                    hover = line.Item2;
+                    if (drawing)
                     {
-                        hover = line.Item2;
-                        if (drawing)
-                        {
-                            end = hover;
-                        }
+                        end = hover;
                     }
+                }
 
-                    if (pointerMode == "pen" && drawing)
+                if (pointerMode == "pen" && drawing)
+                {
+                    if (!line.Item1.Equals(end) && !line.Item2.Equals(end))
                     {
-                        if (!line.Item1.Equals(end) && !line.Item2.Equals(end))
-                        {
-                            string direction = getDirection(start, e.Location);
+                        string direction = getDirection(start, e.Location);
 
-                            if (direction == "vertical")
+                        if (direction == "vertical")
+                        {
+                            if (Math.Abs(line.Item1.Y - e.Location.Y) <= 5)
                             {
-                                if (Math.Abs(line.Item1.Y - e.Location.Y) <= 5)
-                                {
-                                    suggestLine = line.Item1;
-                                    Console.WriteLine("suggest point " + suggestLine);
-                                    end = new PointF(start.X, line.Item1.Y);
-                                }
-                                else if (Math.Abs(line.Item2.Y - e.Location.Y) <= 5)
-                                {
-                                    suggestLine = line.Item2;
-                                    Console.WriteLine("suggest point " + suggestLine);
-                                    end = new PointF(start.X, line.Item2.Y);
-                                }
+                                end = new PointF(start.X, line.Item1.Y);
+
+                                if(!start.Equals(end)) suggestLine = line.Item1;
                             }
-                            else if (direction == "horizontal")
+                            else if (Math.Abs(line.Item2.Y - e.Location.Y) <= 5)
                             {
-                                if (Math.Abs(line.Item1.X - e.Location.X) <= 5)
-                                {
-                                    suggestLine = line.Item1;
-                                    Console.WriteLine("suggest point " + suggestLine);
-                                    end = new PointF(line.Item1.X, start.Y);
-                                }
+                                end = new PointF(start.X, line.Item2.Y);
 
-                                else if (Math.Abs(line.Item2.X - e.Location.X) <= 5)
-                                {
-                                    suggestLine = line.Item2;
-                                    Console.WriteLine("suggest point " + suggestLine);
-                                    end = new PointF(line.Item2.X, start.Y);
-                                }
+                                if (!start.Equals(end)) suggestLine = line.Item2;
+                            }
+                        }
+                        else if (direction == "horizontal")
+                        {
+                            if (Math.Abs(line.Item1.X - e.Location.X) <= 5)
+                            {
+                                end = new PointF(line.Item1.X, start.Y);
+
+                                if (!start.Equals(end)) suggestLine = line.Item1;
+                            }
+
+                            else if (Math.Abs(line.Item2.X - e.Location.X) <= 5)
+                            {
+                                end = new PointF(line.Item2.X, start.Y);
+
+                                if (!start.Equals(end)) suggestLine = line.Item1;
                             }
                         }
                     }
                 }
             }
+
+            if (pointerMode == "select")
+            {
+                foreach (var shear in shears)
+                {
+                    List<ShearData> lefts = shear.GetShearData().Item1;
+                    List<ShearData> bottoms = shear.GetShearData().Item2;
+
+                    foreach (var data in lefts)
+                    {
+                        if (data.visual.Contains(e.Location))
+                        {
+                            hoverWeight = data.visual;
+                        }
+                    }
+                    foreach (var data in bottoms)
+                    {
+                        if (data.visual.Contains(e.Location))
+                        {
+                            hoverWeight = data.visual;
+                        }
+                    }
+                }
+            }
+
             Invalidate();
         }
 
@@ -1213,7 +1270,6 @@ namespace workspace_test
 
             if (!suggestLine.IsEmpty)
             {
-                Console.WriteLine("suggest point " +  suggestLine);
                 e.Graphics.DrawLine(Pens.Red, end, suggestLine);
             }
 
