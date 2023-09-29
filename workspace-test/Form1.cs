@@ -72,16 +72,16 @@ namespace workspace_test
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if(workspace.GetCurrentlySelected() < 0)
-            {
-                Form2 error = new Form2();
-                error.ShowDialog();
-            }
-            else
-            {
-                Form3 analysis = new Form3(workspace);
-                analysis.Show();
-            }
+            //if(workspace.GetCurrentlySelected() < 0)
+            //{
+            //    Form2 error = new Form2();
+            //    error.ShowDialog();
+            //}
+            //else
+            //{
+            //    Form3 analysis = new Form3(workspace);
+            //    analysis.Show();
+            //}
         }
 
         // this kind of works but it sucks

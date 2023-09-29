@@ -32,6 +32,7 @@ namespace workspace_test
         private Boolean dragging = false;
         private Boolean selecting = false;
         private Boolean selected = false;
+        private Boolean menu = false;
 
         private double scale = 1;
         private string unit;
@@ -161,6 +162,7 @@ namespace workspace_test
 
             cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
             cm.Opening += contextMenu_Opening;
+            cm.Closing += contextMenu_Closing;
 
             scaleLabel = new Label();
             scaleLabel.Location = new Point(0, 0);
@@ -457,16 +459,55 @@ namespace workspace_test
             }
             else if(item.Text == "Add Weight...")
             {
-                Console.WriteLine("bobr");
+                float addW = 0;
+                Form3 addWeight = new Form3(LD);
+                if(addWeight.ShowDialog() == DialogResult.OK)
+                {
+                    addW = addWeight.GetWAdd();
+                    Console.WriteLine("adding weight " + addW);
+                }
+                foreach (var shear in shears)
+                {
+                    List<ShearData> lefts = shear.GetShearData().Item1;
+                    List<ShearData> bottoms = shear.GetShearData().Item2;
+
+                    for(int i = 0; i < lefts.Count; ++i)
+                    //foreach (var data in lefts)
+                    {
+                        if (lefts[i].visual == hoverWeight)
+                        {
+                            lefts[i].UpdateVisual(addW);
+                            Console.WriteLine("added " + addW + " to wx");
+                            Invalidate();
+                        }
+                    }
+                    for (int i = 0; i < bottoms.Count; ++i)
+                    //foreach (var data in bottoms)
+                    {
+                        if (bottoms[i].visual == hoverWeight)
+                        {
+                            bottoms[i].UpdateVisual(addW);
+                            Console.WriteLine("added " + addW + " to wy");
+                            Invalidate();
+                        }
+                    }
+                }
             }
         }
 
         private void contextMenu_Opening(object sender, EventArgs e)
         {
+            Console.WriteLine("cm openieng event");
+            menu = true;
             if (hoverWeight != RectangleF.Empty)
             {
                 cm.Items[3].Enabled = true;
             }
+        }
+
+        private void contextMenu_Closing(object sender, EventArgs e)
+        {
+            menu = false;
         }
 
         // all the shear wall stuff in one bundle
@@ -1142,7 +1183,11 @@ namespace workspace_test
         // move end location if mouse moves
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            hoverWeight = RectangleF.Empty;
+            if(pointerMode != "menu")
+            {
+                hoverWeight = RectangleF.Empty;
+            }
+
             suggestLine = PointF.Empty;
             hover = PointF.Empty;
             base.OnMouseMove(e);
