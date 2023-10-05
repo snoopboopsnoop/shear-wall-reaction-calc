@@ -34,7 +34,7 @@ namespace workspace_test
             wx = 0;
             wy = 0;
         }
-        public ShearData(RectangleF paramRect, float paramLS, string paramDirection = "both", string name = "", Word._Document doc = null)
+        public ShearData(RectangleF paramRect, float paramLS, string paramDirection = "both", string name = "")
         {
             rect = paramRect;
             LS = paramLS;
@@ -47,13 +47,10 @@ namespace workspace_test
 
             visual = Rectangle.Empty;
 
-            if (doc != null)
-            {
-                Word.Range range = doc.Bookmarks.get_Item("\\endofdoc").Range;
-                range.InsertAfter(name + " = ");
-                if (direction == "bottom") range.InsertAfter(LS + "PSF x " + rect.Height + "\' = " + wy + " PLF\n");
-                else if (direction == "left") range.InsertAfter(LS + "PSF x " + rect.Width + "\' = " + wx + " PLF\n");
-            }
+            range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+            range.InsertAfter(name + " = ");
+            if (direction == "bottom") range.InsertAfter(LS + "PSF x " + rect.Height + "\' = " + wy + " PLF\n");
+            else if (direction == "left") range.InsertAfter(LS + "PSF x " + rect.Width + "\' = " + wx + " PLF\n");
         }
 
         public void UpdateVisual(float addW = 0)
@@ -68,8 +65,14 @@ namespace workspace_test
             //Console.WriteLine("updating w visual to " + visual);
         }
 
+        public void AddWeight(float addW)
+        {
+            
+        }
+
         public RectangleF rect { get; }
         public Rectangle visual { get; set; }
+        public Word.Range range { get; set; }
         public float LS { get; set; }
         public float wx { get; set; }
         public float wy { get; set; }

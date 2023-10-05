@@ -29,6 +29,8 @@ namespace workspace_test
 
         private bool same = false;
 
+        private string op = "";
+
         public Form3()
         {
             InitializeComponent();
@@ -223,6 +225,7 @@ namespace workspace_test
         {
             float w1 = LD * WW1 * (0.5F * (HA1 + HB1) + HP1 + HS1);
             float w2 = LD * WW2 * (0.5F * (HA2 + HB2) + HP2 + HS2);
+            op += LD + " * " + WW1 + " * (0.5 * (" + HA1 + " + " + HA2 + ") + " + HP1 + " + " + HS1 + ")";
 
             wAdd = w1 + w2;
 
@@ -233,6 +236,11 @@ namespace workspace_test
         public float GetWAdd()
         {
             return wAdd;
+        }
+
+        public string GetOp()
+        {
+            return op;
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)

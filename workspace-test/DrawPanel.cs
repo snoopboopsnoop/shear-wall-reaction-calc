@@ -18,7 +18,6 @@ using System.IO;
 using System.Drawing.Imaging;
 
 using Word = Microsoft.Office.Interop.Word;
-using System.Windows.Forms.VisualStyles;
 
 namespace workspace_test
 {
@@ -106,11 +105,6 @@ namespace workspace_test
 
         private string tempFile = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/temp.jpg");
 
-        private Word._Application word;
-        private Word._Document doc;
-        private object missing = System.Reflection.Missing.Value;
-        private object eod = "\\endofdoc";
-
         // default constructor
         public DrawPanel()
         {
@@ -170,20 +164,18 @@ namespace workspace_test
             scaleLabel.Padding = new Padding(5);
             scaleLabel.Text = $"Scale: 1 pixel = {scale}{unit}";
             this.Controls.Add(scaleLabel);
-
             Console.WriteLine(docPath);
 
-            word = new Word.Application();
-            doc = word.Documents.Add(ref docPath, ref missing, ref missing, ref missing);
-            word.Visible = false;
+            Globals.doc = Globals.word.Documents.Add(ref docPath, ref Globals.missing, ref Globals.missing, ref Globals.missing);
+            Globals.word.Visible = false;
         }
 
         public void CloseWord()
         {
             try
             {
-                doc.Close();
-                word.Quit();
+                Globals.doc.Close();
+                Globals.word.Quit();
             }
             catch(COMException)
             {
@@ -285,30 +277,30 @@ namespace workspace_test
             bm.Save(tempFile, ImageFormat.Jpeg);
 
             Word.Paragraph image;
-            object range = doc.Content.Start;
-            Word.Range top = doc.Range(range, range);
+            object range = Globals.doc.Content.Start;
+            Word.Range top = Globals.doc.Range(range, range);
 
-            image = doc.Content.Paragraphs.Add(top);
+            image = Globals.doc.Content.Paragraphs.Add(top);
 
             image.Format.SpaceBefore = 16;
 
             image.Range.Underline = Word.WdUnderline.wdUnderlineNone;
 
-            word.Visible = true;
+            Globals.word.Visible = true;
 
-            Word.InlineShape shape = image.Range.InlineShapes.AddPicture(tempFile, missing, missing, top);
+            Word.InlineShape shape = image.Range.InlineShapes.AddPicture(tempFile, Globals.missing, Globals.missing, top);
 
             shape.Range.Underline = Word.WdUnderline.wdUnderlineNone;
             shape.Range.Font.Bold = 0;
             image.Format.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
 
-            Console.WriteLine("Height: " + shape.Height + ", measure: " + word.InchesToPoints(8.5F) + ", scale: " + shape.ScaleHeight);
+            //Console.WriteLine("Height: " + shape.Height + ", measure: " + Globals.word.InchesToPoints(8.5F) + ", scale: " + shape.ScaleHeight);
 
-            float scale = (word.InchesToPoints(8.5F) / shape.Height);
+            float scale = (Globals.word.InchesToPoints(8.5F) / shape.Height);
 
-            if(shape.Width * ((shape.ScaleWidth * scale) / 100) >= word.InchesToPoints(6.0F))
+            if(shape.Width * ((shape.ScaleWidth * scale) / 100) >= Globals.word.InchesToPoints(6.0F))
             {
-                scale = word.InchesToPoints(6.0F) / shape.Width;
+                scale = Globals.word.InchesToPoints(6.0F) / shape.Width;
             }
 
             shape.ScaleHeight = shape.ScaleHeight * scale;
@@ -513,10 +505,10 @@ namespace workspace_test
         // all the shear wall stuff in one bundle
         private void Algorithm()
         {
-            word.Visible = true;
+            Globals.word.Visible = true;
 
             Word.Paragraph header;
-            header = doc.Content.Paragraphs.Add();
+            header = Globals.doc.Content.Paragraphs.Add();
             header.Range.Underline = Word.WdUnderline.wdUnderlineSingle;
             header.Range.Font.Size = 18;
             header.Range.Text = "SEISMIC WT @ ROOF";
@@ -684,7 +676,7 @@ namespace workspace_test
             }
 
             // take all that and send it somewhere else
-            shears.Add(new Shear(selectLines, new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), new Tuple<List<int>, List<int>>(x, y), GetRectangle(min, max), LA, LD, doc));
+            shears.Add(new Shear(selectLines, new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), new Tuple<List<int>, List<int>>(x, y), GetRectangle(min, max), LA, LD));
 
             Invalidate();
         }

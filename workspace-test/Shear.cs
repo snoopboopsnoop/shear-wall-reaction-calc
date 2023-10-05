@@ -39,7 +39,7 @@ namespace workspace_test
         }
 
         // paramData: 2 lists of rectangles in form <lefts, bottoms> for drawing boxes
-        public Shear(List<Tuple<PointF, PointF>> paramLines, Tuple<List<RectangleF>, List<RectangleF>> paramData, Tuple<List<int>, List<int>> paramReacts, RectangleF paramDims, float paramLA, float paramLD, Word._Document doc = null)
+        public Shear(List<Tuple<PointF, PointF>> paramLines, Tuple<List<RectangleF>, List<RectangleF>> paramData, Tuple<List<int>, List<int>> paramReacts, RectangleF paramDims, float paramLA, float paramLD)
         {
             lines = paramLines;
             dimensions = paramDims;
@@ -51,21 +51,18 @@ namespace workspace_test
 
             List<int> reactionValsLeft = new List<int>(paramData.Item1.Count() + 1);
 
-            if(doc != null)
-            {
-                Word.Paragraph intro;
-                intro = doc.Content.Paragraphs.Add();
-                intro.Range.Text = ("LA = " + LA + " g");
-                intro.Format.SpaceBefore = 0;
-                intro.Format.SpaceAfter = 0;
-                intro.Range.Font.Bold = 0;
-                intro.Range.Font.Size = 12;
-                intro.Range.Text += ("LD = " + LD + " PSF");
-                intro.Range.Text += ("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF\n");
-                intro.Range.Text += ("Wx = LS x dimX");
-                intro.Range.Text += ("Wy = LS x dimY\n");
-                intro.Range.InsertParagraphAfter();
-            }
+            Word.Paragraph intro;
+            intro = Globals.doc.Content.Paragraphs.Add();
+            intro.Range.Text = ("LA = " + LA + " g");
+            intro.Format.SpaceBefore = 0;
+            intro.Format.SpaceAfter = 0;
+            intro.Range.Font.Bold = 0;
+            intro.Range.Font.Size = 12;
+            intro.Range.Text += ("LD = " + LD + " PSF");
+            intro.Range.Text += ("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF\n");
+            intro.Range.Text += ("Wx = LS x dimX");
+            intro.Range.Text += ("Wy = LS x dimY\n");
+            intro.Range.InsertParagraphAfter();
 
             List<ShearData> tempLefts = new List<ShearData>();
             List<ShearData> tempBottoms = new List<ShearData>();
@@ -73,95 +70,90 @@ namespace workspace_test
             foreach (var (left, i) in paramData.Item1.Select((left, i) => (left, i)))
             {
                 Console.WriteLine("adding new data");
-                tempLefts.Add(new ShearData(left, LS, "left", "Wx" + (i + 1), doc));
+                tempLefts.Add(new ShearData(left, LS, "left", "Wx" + (i + 1)));
 
             }
 
-            if(doc != null)
-            {
-                range = doc.Bookmarks.get_Item("\\endofdoc").Range;
-                range.InsertParagraphAfter();
-            }
+
+            range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+            range.InsertParagraphAfter();
 
             foreach(var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
             {
-                tempBottoms.Add(new ShearData(bottom, LS, "bottom", "Wy" + (i + 1), doc));
+                tempBottoms.Add(new ShearData(bottom, LS, "bottom", "Wy" + (i + 1)));
             }
 
-            if (doc != null)
-            {
-                range = doc.Bookmarks.get_Item("\\endofdoc").Range;
-                range.InsertBreak(Word.WdBreakType.wdPageBreak);
-                //range.InsertParagraphAfter();
+            range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+            range.InsertBreak(Word.WdBreakType.wdPageBreak);
+            //range.InsertParagraphAfter();
 
-                Word.Paragraph reactionHeader;
-                reactionHeader = doc.Content.Paragraphs.Add();
-                reactionHeader.Range.Underline = Word.WdUnderline.wdUnderlineSingle;
-                reactionHeader.Range.Font.Size = 18;
-                reactionHeader.Range.Font.Bold = 1;
+            Word.Paragraph reactionHeader;
+            reactionHeader = Globals.doc.Content.Paragraphs.Add();
+            reactionHeader.Range.Underline = Word.WdUnderline.wdUnderlineSingle;
+            reactionHeader.Range.Font.Size = 18;
+            reactionHeader.Range.Font.Bold = 1;
                 
 
-                reactionHeader.Range.Text = "REACTIONS @ SHEAR LINES";
-                reactionHeader.Format.SpaceAfter = 16;
+            reactionHeader.Range.Text = "REACTIONS @ SHEAR LINES";
+            reactionHeader.Format.SpaceAfter = 16;
 
-                reactionHeader.Range.InsertParagraphAfter();
+            reactionHeader.Range.InsertParagraphAfter();
 
-                Word.Paragraph reaction;
-                reaction = doc.Content.Paragraphs.Add();
-                reaction.Range.Text = ("Rx = 0.5 * wx * dimY lbs");
-                reaction.Format.SpaceAfter = 0;
-                reaction.Format.SpaceBefore = 0;
-                reaction.Range.Font.Bold = 0;
-                reaction.Range.Font.Size = 12;
-                reaction.Range.Text += "";
+            Word.Paragraph reaction;
+            reaction = Globals.doc.Content.Paragraphs.Add();
+            reaction.Range.Text = ("Rx = 0.5 * wx * dimY lbs");
+            reaction.Format.SpaceAfter = 0;
+            reaction.Format.SpaceBefore = 0;
+            reaction.Range.Font.Bold = 0;
+            reaction.Range.Font.Size = 12;
+            reaction.Range.Text += "";
 
-                string buffer = "";
-                foreach (var (left, i) in paramData.Item1.Select((left, i) => (left, i)))
+            string buffer = "";
+            foreach (var (left, i) in paramData.Item1.Select((left, i) => (left, i)))
+            {
+                ShearData temp = tempLefts[i];
+
+                if (i == 0)
                 {
-                    ShearData temp = tempLefts[i];
+                    reaction.Range.Text += ("R1 = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
 
-                    if (i == 0)
-                    {
-                        reaction.Range.Text += ("R1 = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
-
-                        buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
-                    }
-                    else
-                    {
-                        buffer += (" + 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
-                        reaction.Range.Text += buffer;
-
-                        buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
-                    }
+                    buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
                 }
-
-                buffer += (" LBS\n");
-                reaction.Range.Text += buffer;
-
-                reaction.Range.Text += ("Ry = 0.5 * wy * dimX lbs\n");
-
-                foreach (var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
+                else
                 {
-                    ShearData temp = tempBottoms[i];
+                    buffer += (" + 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height + " LBS");
+                    reaction.Range.Text += buffer;
 
-                    if (i == 0)
-                    {
-                        reaction.Range.Text += ("RA = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
-
-                        buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
-                    }
-                    else
-                    {
-                        buffer += (" + 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
-                        reaction.Range.Text += buffer;
-
-                        buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
-                    }
+                    buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx + " * " + temp.rect.Height + " = " + 0.5 * temp.wx * temp.rect.Height);
                 }
-                buffer += (" LBS");
-                reaction.Range.Text += buffer;
-                reaction.Range.InsertParagraphAfter();
             }
+
+            buffer += (" LBS\n");
+            reaction.Range.Text += buffer;
+
+            reaction.Range.Text += ("Ry = 0.5 * wy * dimX lbs\n");
+
+            foreach (var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
+            {
+                ShearData temp = tempBottoms[i];
+
+                if (i == 0)
+                {
+                    reaction.Range.Text += ("RA = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
+
+                    buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
+                }
+                else
+                {
+                    buffer += (" + 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width + " LBS");
+                    reaction.Range.Text += buffer;
+
+                    buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy + " * " + temp.rect.Width + " = " + 0.5 * temp.wy * temp.rect.Width);
+                }
+            }
+            buffer += (" LBS");
+            reaction.Range.Text += buffer;
+            reaction.Range.InsertParagraphAfter();
 
             int wxMeasure = tempLefts.Min(p => (int)p.wx);
             int wyMeasure = tempBottoms.Min(p => (int)p.wy);
