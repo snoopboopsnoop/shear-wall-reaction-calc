@@ -96,7 +96,7 @@ namespace workspace_test
 
         // i should change its name but it's just all the shear data collected
         // when analysis is performed on a compound object
-        private List<Shear> shears = new List<Shear>();
+        private Shear shear = null;
 
         private string outputPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "output/");
 
@@ -243,9 +243,9 @@ namespace workspace_test
         {
             Bitmap bm;
 
-            if (shears.Count != 0)
+            if (shear != null)
             {
-                RectangleF dims = shears[0].GetDimensions();
+                RectangleF dims = shear.GetDimensions();
                 //rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(((int)dims.Left) - 50, ((int)dims.Top) - 50, ((int)dims.Width) + 100, ((int)dims.Height) + 100), new ShearData()));
 
                 Rectangle bounds = new Rectangle(((int)dims.Left) - 100, ((int)dims.Top) - 100, ((int)dims.Width) + 200, ((int)dims.Height) + 200);
@@ -460,30 +460,28 @@ namespace workspace_test
                     str = addWeight.GetOp();
                     Console.WriteLine("adding weight " + addW);
                 }
-                foreach (var shear in shears)
-                {
-                    List<ShearData> lefts = shear.GetShearData().Item1;
-                    List<ShearData> bottoms = shear.GetShearData().Item2;
 
-                    for(int i = 0; i < lefts.Count; ++i)
-                    //foreach (var data in lefts)
+                List<ShearData> lefts = shear.GetShearData().Item1;
+                List<ShearData> bottoms = shear.GetShearData().Item2;
+
+                for(int i = 0; i < lefts.Count; ++i)
+                //foreach (var data in lefts)
+                {
+                    if (lefts[i].visual == hoverWeight)
                     {
-                        if (lefts[i].visual == hoverWeight)
-                        {
-                            lefts[i].AddWeight(addW, str);
-                            Console.WriteLine("added " + addW + " to wx");
-                            Invalidate();
-                        }
+                        lefts[i].AddWeight(addW, str);
+                        Console.WriteLine("added " + addW + " to wx");
+                        Invalidate();
                     }
-                    for (int i = 0; i < bottoms.Count; ++i)
-                    //foreach (var data in bottoms)
+                }
+                for (int i = 0; i < bottoms.Count; ++i)
+                //foreach (var data in bottoms)
+                {
+                    if (bottoms[i].visual == hoverWeight)
                     {
-                        if (bottoms[i].visual == hoverWeight)
-                        {
-                            bottoms[i].AddWeight(addW, str);
-                            Console.WriteLine("added " + addW + " to wy");
-                            Invalidate();
-                        }
+                        bottoms[i].AddWeight(addW, str);
+                        Console.WriteLine("added " + addW + " to wy");
+                        Invalidate();
                     }
                 }
             }
@@ -682,7 +680,10 @@ namespace workspace_test
             }
 
             // take all that and send it somewhere else
-            shears.Add(new Shear(selectLines, new Tuple<List<RectangleF>, List<RectangleF>>(leftRects, bottomRects), new Tuple<List<int>, List<int>>(x, y), GetRectangle(min, max), LA, LD));
+            shear = new Shear(selectLines, new Tuple<List<RectangleF>,
+                              List<RectangleF>>(leftRects, bottomRects),
+                              new Tuple<List<int>, List<int>>(x, y),
+                              GetRectangle(min, max), LA, LD);
 
             Invalidate();
         }
@@ -1277,26 +1278,23 @@ namespace workspace_test
                 }
             }
 
-            if (pointerMode == "select")
+            if (pointerMode == "select" && shear != null)
             {
-                foreach (var shear in shears)
-                {
-                    List<ShearData> lefts = shear.GetShearData().Item1;
-                    List<ShearData> bottoms = shear.GetShearData().Item2;
+                List<ShearData> lefts = shear.GetShearData().Item1;
+                List<ShearData> bottoms = shear.GetShearData().Item2;
 
-                    foreach (var data in lefts)
+                foreach (var data in lefts)
+                {
+                    if (data.visual.Contains(e.Location))
                     {
-                        if (data.visual.Contains(e.Location))
-                        {
-                            hoverWeight = data.visual;
-                        }
+                        hoverWeight = data.visual;
                     }
-                    foreach (var data in bottoms)
+                }
+                foreach (var data in bottoms)
+                {
+                    if (data.visual.Contains(e.Location))
                     {
-                        if (data.visual.Contains(e.Location))
-                        {
-                            hoverWeight = data.visual;
-                        }
+                        hoverWeight = data.visual;
                     }
                 }
             }
@@ -1334,10 +1332,7 @@ namespace workspace_test
                 else DrawRect(e, rectangle, Color.Red);
             }
 
-            foreach (var shear in shears)
-            {
-                DrawShear(e, shear);
-            }
+            if(shear != null) DrawShear(e, shear);
 
             if (!start.IsEmpty && !end.IsEmpty)
             {
