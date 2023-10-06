@@ -247,6 +247,25 @@ namespace workspace_test
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             same = checkBox1.Checked;
+            if(same == true)
+            {
+                textBox6.Text = textBox1.Text;
+                textBox7.Text = textBox2.Text;
+                textBox8.Text = textBox3.Text;
+                textBox9.Text = textBox4.Text;
+                textBox10.Text = textBox5.Text;
+
+            }
+            textBox6.ReadOnly = same;
+            textBox6.Enabled = !same;
+            textBox7.ReadOnly = same;
+            textBox7.Enabled = !same;
+            textBox8.ReadOnly = same;
+            textBox8.Enabled = !same;
+            textBox9.ReadOnly = same;
+            textBox9.Enabled = !same;
+            textBox10.ReadOnly = same;
+            textBox10.Enabled = !same;
         }
     }
 }

@@ -497,6 +497,10 @@ namespace workspace_test
             {
                 cm.Items[3].Enabled = true;
             }
+            else
+            {
+                cm.Items[3].Enabled = false;
+            }
         }
 
         private void contextMenu_Closing(object sender, EventArgs e)
