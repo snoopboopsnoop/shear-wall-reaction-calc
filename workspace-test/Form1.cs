@@ -70,20 +70,6 @@ namespace workspace_test
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            //if(workspace.GetCurrentlySelected() < 0)
-            //{
-            //    Form2 error = new Form2();
-            //    error.ShowDialog();
-            //}
-            //else
-            //{
-            //    Form3 analysis = new Form3(workspace);
-            //    analysis.Show();
-            //}
-        }
-
         // this kind of works but it sucks
         private void workspace_KeyDown(object sender, KeyEventArgs e)
         {
@@ -200,6 +186,26 @@ namespace workspace_test
             if (openFileDialog1.FileName != "openFileDialog1")
             {
                 workspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
+            }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveDialog = new SaveFileDialog();
+            saveDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
+            if (saveDialog.ShowDialog() == DialogResult.OK)
+            {
+                workspace.Save(saveDialog.FileName);
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openDialog = new OpenFileDialog();
+            openDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
+            if (openDialog.ShowDialog() == DialogResult.OK)
+            {
+                workspace.LoadData(openDialog.FileName);
             }
         }
     }

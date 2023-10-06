@@ -13,19 +13,32 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Word = Microsoft.Office.Interop.Word;
+using System.Xml.Serialization;
+using Newtonsoft.Json;
+using System.Security.Cryptography;
 
 namespace workspace_test
 {
-    internal class Shear
+    [XmlRoot("Shear", Namespace = "bobr", IsNullable = true)]
+    [Serializable]
+    public class Shear
     {
-        private RectangleF dimensions;
-        private List<Tuple<PointF, PointF>> lines;
-        private Tuple<List<RectangleF>, List<RectangleF>> data;
-        private Tuple<List<ShearData>, List<ShearData>> shearData;
-        private Tuple<List<int>, List<int>> reactions;
-        private float LA;
-        private float LD;
-        private float LS;
+        [JsonProperty]
+        private RectangleF dimensions { get; set; }
+        [JsonProperty]
+        private List<Tuple<PointF, PointF>> lines { get; set; }
+        [JsonProperty]
+        private Tuple<List<RectangleF>, List<RectangleF>> data { get; set; }
+        [JsonProperty]
+        private Tuple<List<ShearData>, List<ShearData>> shearData { get; set; }
+        [JsonProperty]
+        private Tuple<List<int>, List<int>> reactions { get; set; }
+        [JsonProperty]
+        private float LA { get; set; }
+        [JsonProperty]
+        private float LD { get; set; }
+        [JsonProperty]
+        private float LS { get; set; }
 
         public Shear()
         {
@@ -175,6 +188,18 @@ namespace workspace_test
             //Console.WriteLine("test0: " + tempLefts[0].visual);
 
             shearData = new Tuple<List<ShearData>, List<ShearData>>(tempLefts, tempBottoms);
+        }
+
+        public void Load()
+        {
+            foreach(ShearData data in shearData.Item1)
+            {
+                data.Load();
+            }
+            foreach (ShearData data in shearData.Item2)
+            {
+                data.Load();
+            }
         }
 
         public Tuple<List<RectangleF>, List<RectangleF>> GetData()

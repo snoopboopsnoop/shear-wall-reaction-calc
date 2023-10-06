@@ -10,9 +10,11 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace workspace_test
 {
+    [Serializable]
     public class ShearData
     {
         public ShearData()
@@ -51,6 +53,8 @@ namespace workspace_test
             range.InsertAfter(name + " = ");
             if (direction == "bottom") range.InsertAfter(LS + "PSF x " + rect.Height + "\' = " + wy + " PLF\n");
             else if (direction == "left") range.InsertAfter(LS + "PSF x " + rect.Width + "\' = " + wx + " PLF\n");
+
+            rangeIndex = range.End;
         }
 
         public void UpdateVisual(float addW = 0)
@@ -79,12 +83,19 @@ namespace workspace_test
             UpdateVisual(addW);
         }
 
-        public RectangleF rect { get; }
+        public void Load()
+        {
+            range = Globals.doc.Range(rangeIndex, rangeIndex);
+        }
+
+        [JsonIgnore]
+        private Word.Range range { get; set; }
+        public RectangleF rect { get; set; }
         public Rectangle visual { get; set; }
-        public Word.Range range { get; set; }
+        public int rangeIndex { get; set; }
         public float LS { get; set; }
         public float wx { get; set; }
         public float wy { get; set; }
-        public string direction { get; }
+        public string direction { get; set; }
     }
 }

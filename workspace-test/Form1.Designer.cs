@@ -33,7 +33,6 @@
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
-            this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.label3 = new System.Windows.Forms.Label();
@@ -43,7 +42,9 @@
             this.label2 = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.button1 = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
@@ -70,7 +71,6 @@
             this.flowLayoutPanel1.Controls.Add(this.radioButton1);
             this.flowLayoutPanel1.Controls.Add(this.radioButton2);
             this.flowLayoutPanel1.Controls.Add(this.radioButton3);
-            this.flowLayoutPanel1.Controls.Add(this.button1);
             this.flowLayoutPanel1.Controls.Add(this.button2);
             this.flowLayoutPanel1.Controls.Add(this.trackBar1);
             this.flowLayoutPanel1.Controls.Add(this.label3);
@@ -80,6 +80,8 @@
             this.flowLayoutPanel1.Controls.Add(this.label2);
             this.flowLayoutPanel1.Controls.Add(this.textBox2);
             this.flowLayoutPanel1.Controls.Add(this.button4);
+            this.flowLayoutPanel1.Controls.Add(this.button5);
+            this.flowLayoutPanel1.Controls.Add(this.button1);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -128,21 +130,9 @@
             this.radioButton3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.radioButton3.UseVisualStyleBackColor = true;
             // 
-            // button1
-            // 
-            this.button1.AutoSize = true;
-            this.button1.Location = new System.Drawing.Point(318, 3);
-            this.button1.Margin = new System.Windows.Forms.Padding(100, 3, 3, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(206, 23);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "Perform Analysis on Selected Rectangle";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(530, 3);
+            this.button2.Location = new System.Drawing.Point(221, 3);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 7;
@@ -152,7 +142,8 @@
             // 
             // trackBar1
             // 
-            this.trackBar1.Location = new System.Drawing.Point(611, 3);
+            this.trackBar1.Location = new System.Drawing.Point(314, 3);
+            this.trackBar1.Margin = new System.Windows.Forms.Padding(15, 3, 3, 3);
             this.trackBar1.Name = "trackBar1";
             this.trackBar1.Size = new System.Drawing.Size(104, 45);
             this.trackBar1.TabIndex = 14;
@@ -162,7 +153,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(721, 0);
+            this.label3.Location = new System.Drawing.Point(424, 0);
             this.label3.Name = "label3";
             this.label3.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
             this.label3.Size = new System.Drawing.Size(64, 18);
@@ -171,7 +162,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(791, 3);
+            this.button3.Location = new System.Drawing.Point(494, 3);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 8;
@@ -182,7 +173,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(872, 0);
+            this.label1.Location = new System.Drawing.Point(575, 0);
             this.label1.Name = "label1";
             this.label1.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
             this.label1.Size = new System.Drawing.Size(23, 18);
@@ -191,9 +182,9 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(901, 3);
+            this.textBox1.Location = new System.Drawing.Point(604, 3);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(100, 20);
+            this.textBox1.Size = new System.Drawing.Size(44, 20);
             this.textBox1.TabIndex = 10;
             this.textBox1.Text = "0";
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
@@ -201,7 +192,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(1007, 0);
+            this.label2.Location = new System.Drawing.Point(654, 0);
             this.label2.Name = "label2";
             this.label2.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
             this.label2.Size = new System.Drawing.Size(24, 18);
@@ -210,16 +201,17 @@
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(1037, 3);
+            this.textBox2.Location = new System.Drawing.Point(684, 3);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(100, 20);
+            this.textBox2.Size = new System.Drawing.Size(40, 20);
             this.textBox2.TabIndex = 12;
             this.textBox2.Text = "0";
             this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(1143, 3);
+            this.button4.Location = new System.Drawing.Point(737, 3);
+            this.button4.Margin = new System.Windows.Forms.Padding(10, 3, 3, 3);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 23);
             this.button4.TabIndex = 13;
@@ -227,12 +219,32 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(818, 3);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(75, 23);
+            this.button5.TabIndex = 1;
+            this.button5.Text = "Save As...";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             this.openFileDialog1.Filter = "All files (*.*)|*.*|JPEG Files (*.jpg)|*.jpg|PNG Files (*.png)|*.png|BMP Files (*" +
     ".bmp)|*.bmp";
             this.openFileDialog1.Title = "Select a file";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(899, 3);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 16;
+            this.button1.Text = "Import";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
@@ -259,7 +271,6 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.RadioButton radioButton2;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
@@ -271,6 +282,8 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TrackBar trackBar1;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button1;
     }
 }
 

@@ -16,11 +16,17 @@ using System.Data.SqlClient;
 using Microsoft.Win32;
 using System.IO;
 using System.Drawing.Imaging;
+using System.Xml;
+//using System.Xml.Serialization;
+//using System.Text.Json;
+using Newtonsoft.Json;
 
 using Word = Microsoft.Office.Interop.Word;
+using Newtonsoft.Json.Converters;
 
 namespace workspace_test
 {
+    [Serializable]
     public class DrawPanel : Panel
     {
         // select | rectangle | pen
@@ -31,7 +37,6 @@ namespace workspace_test
         private Boolean dragging = false;
         private Boolean selecting = false;
         private Boolean selected = false;
-        private Boolean menu = false;
 
         private double scale = 1;
         private string unit;
@@ -156,7 +161,6 @@ namespace workspace_test
 
             cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
             cm.Opening += contextMenu_Opening;
-            cm.Closing += contextMenu_Closing;
 
             scaleLabel = new Label();
             scaleLabel.Location = new Point(0, 0);
@@ -166,7 +170,7 @@ namespace workspace_test
             this.Controls.Add(scaleLabel);
             Console.WriteLine(docPath);
 
-            Globals.doc = Globals.word.Documents.Add(ref docPath, ref Globals.missing, ref Globals.missing, ref Globals.missing);
+            //Globals.doc = Globals.word.Documents.Add(ref docPath, ref Globals.missing, ref Globals.missing, ref Globals.missing);
             Globals.word.Visible = false;
         }
 
@@ -180,6 +184,71 @@ namespace workspace_test
             catch(COMException)
             {
                 return;
+            }
+        }
+
+        public void Save(string path)
+        {
+            //if(shear != null)
+            //{
+            //    XmlSerializer serializer = new XmlSerializer(typeof(Shear));
+            //    TextWriter writer = new StreamWriter(path);
+            //    serializer.Serialize(writer, shear);
+            //    writer.Close();
+            //}
+            //if(shear != null)
+            //{
+            //    Stream stream = File.Create(path);
+            //    var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            //    binaryFormatter.Serialize(stream, shear);
+            //}
+            Output output = new Output(shear, Globals.doc.FullName, Globals.refMeasure, scale);
+
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.TypeNameHandling = TypeNameHandling.Auto;
+            serializer.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
+
+            using (StreamWriter sw = new StreamWriter(path))
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                serializer.Serialize(writer, output);
+            }
+            Console.WriteLine(Globals.doc.FullName);
+
+            //JsonSerializerOptions options = new JsonSerializerOptions();
+
+            //using (FileStream createStream = File.Create(path))
+            //{
+            //    await JsonSerializer.SerializeAsync(createStream, shear);
+            //}
+        }
+
+        public void LoadData(string path)
+        {
+            //using (FileStream openStream = File.OpenRead(path))
+            //{
+            //    Shear shear = await JsonSerializer.DeserializeAsync<Shear>(openStream);
+            //}
+            //XmlSerializer serializer = new XmlSerializer(typeof(Shear));
+            //FileStream fs = new FileStream(path, FileMode.Open);
+
+            //shear = (Shear)serializer.Deserialize(fs);
+            Output input;
+
+            using (StreamReader file = File.OpenText(path))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.TypeNameHandling = TypeNameHandling.Auto;
+                serializer.NullValueHandling = NullValueHandling.Ignore;
+
+                input = (Output)serializer.Deserialize(file, typeof(Output));
+
+                Globals.refMeasure = input.refMeasure;
+                if(Globals.word.Visible == false) Globals.word.Visible = true;
+                Globals.doc = Globals.word.Documents.Open(input.docPath);
+                shear = input.shear;
+                shear.Load();
+                scale = input.scale;
             }
         }
 
@@ -432,8 +501,14 @@ namespace workspace_test
             {
                 if (!(LA == 0 || LD == 0)) {
                     cm.Close();
+                    SaveFileDialog saveDialog = new SaveFileDialog();
+                    saveDialog.Filter = "Word Document (*.docx)|*.docx";
+                    if(saveDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        Globals.doc.SaveAs(saveDialog.FileName);
                         Algorithm();
                         selectedLines.Clear();
+                    }
                 }
             }
             else if(item.Text == "Set Scale")
@@ -490,7 +565,6 @@ namespace workspace_test
         private void contextMenu_Opening(object sender, EventArgs e)
         {
             Console.WriteLine("cm openieng event");
-            menu = true;
             if (hoverWeight != RectangleF.Empty)
             {
                 cm.Items[3].Enabled = true;
@@ -499,11 +573,6 @@ namespace workspace_test
             {
                 cm.Items[3].Enabled = false;
             }
-        }
-
-        private void contextMenu_Closing(object sender, EventArgs e)
-        {
-            menu = false;
         }
 
         // all the shear wall stuff in one bundle
@@ -1278,7 +1347,7 @@ namespace workspace_test
                 }
             }
 
-            if (pointerMode == "select" && shear != null)
+            if (pointerMode == "select" && shear != null && shear.GetShearData() != null)
             {
                 List<ShearData> lefts = shear.GetShearData().Item1;
                 List<ShearData> bottoms = shear.GetShearData().Item2;
