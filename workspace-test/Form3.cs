@@ -225,7 +225,8 @@ namespace workspace_test
         {
             float w1 = LD * WW1 * (0.5F * (HA1 + HB1) + HP1 + HS1);
             float w2 = LD * WW2 * (0.5F * (HA2 + HB2) + HP2 + HS2);
-            op += LD + " * " + WW1 + " * (0.5 * (" + HA1 + " + " + HA2 + ") + " + HP1 + " + " + HS1 + ")";
+            op += "(" + LD + " * " + WW1 + " * (0.5 * (" + HA1 + " + " + HB1 + ") + " + HP1 + " + " + HS1 + "))";
+            op += " + (" + LD + " * " + WW2 + " * (0.5 * (" + HA2 + " + " + HB2 + ") + " + HP2 + " + " + HS2 + "))";
 
             wAdd = w1 + w2;
 

@@ -65,9 +65,18 @@ namespace workspace_test
             //Console.WriteLine("updating w visual to " + visual);
         }
 
-        public void AddWeight(float addW)
+        public void AddWeight(float addW, string str)
         {
-            
+            Word.Range tempRange = Globals.doc.Range(range.End, range.End);
+            tempRange.Delete(Word.WdUnits.wdWord, -4);
+            if (wx == 0)
+            {
+                wy += addW;
+            }
+            else wx += addW;
+
+            range.InsertAfter("+ " + str + " = " + ((wx == 0) ? wy : wx) + " PLF\n");
+            UpdateVisual(addW);
         }
 
         public RectangleF rect { get; }

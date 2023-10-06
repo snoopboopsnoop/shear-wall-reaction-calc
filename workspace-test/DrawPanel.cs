@@ -453,9 +453,11 @@ namespace workspace_test
             {
                 float addW = 0;
                 Form3 addWeight = new Form3(LD);
-                if(addWeight.ShowDialog() == DialogResult.OK)
+                string str = "";
+                if (addWeight.ShowDialog() == DialogResult.OK)
                 {
                     addW = addWeight.GetWAdd();
+                    str = addWeight.GetOp();
                     Console.WriteLine("adding weight " + addW);
                 }
                 foreach (var shear in shears)
@@ -468,7 +470,7 @@ namespace workspace_test
                     {
                         if (lefts[i].visual == hoverWeight)
                         {
-                            lefts[i].UpdateVisual(addW);
+                            lefts[i].AddWeight(addW, str);
                             Console.WriteLine("added " + addW + " to wx");
                             Invalidate();
                         }
@@ -478,7 +480,7 @@ namespace workspace_test
                     {
                         if (bottoms[i].visual == hoverWeight)
                         {
-                            bottoms[i].UpdateVisual(addW);
+                            bottoms[i].AddWeight(addW, str);
                             Console.WriteLine("added " + addW + " to wy");
                             Invalidate();
                         }

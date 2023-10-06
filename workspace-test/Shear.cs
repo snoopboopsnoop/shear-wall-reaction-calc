@@ -26,7 +26,6 @@ namespace workspace_test
         private float LA;
         private float LD;
         private float LS;
-        private Word.Range range;
 
         public Shear()
         {
@@ -75,7 +74,7 @@ namespace workspace_test
             }
 
 
-            range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+            Word.Range range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
             range.InsertParagraphAfter();
 
             foreach(var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
