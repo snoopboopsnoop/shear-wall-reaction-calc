@@ -505,6 +505,14 @@ namespace workspace_test
                     saveDialog.Filter = "Word Document (*.docx)|*.docx";
                     if(saveDialog.ShowDialog() == DialogResult.OK)
                     {
+                        if(!File.Exists(saveDialog.FileName))
+                        {
+                            Globals.doc = Globals.word.Documents.Add(ref docPath, ref Globals.missing, ref Globals.missing, ref Globals.missing);
+                        }
+                        else
+                        {
+                            Globals.doc = Globals.word.Documents.Open(saveDialog.FileName);
+                        }
                         Globals.doc.SaveAs(saveDialog.FileName);
                         Algorithm();
                         selectedLines.Clear();
