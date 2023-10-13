@@ -37,6 +37,7 @@ namespace workspace_test
         private Boolean dragging = false;
         private Boolean selecting = false;
         private Boolean selected = false;
+        private Boolean clickedLine = false;
 
         private double scale = 1;
         private string unit;
@@ -637,7 +638,7 @@ namespace workspace_test
                 Tuple<PointF, PointF> temp = lines[pos - shift];
                 lines.Remove(temp);
                 selectLines.Add(temp);
-                string direction = getDirection(temp.Item1, temp.Item2);
+                string direction = GetDirection(temp.Item1, temp.Item2);
                 if (direction == "vertical") vertical.Add(selectLines.Count() - 1);
                 else horizontal.Add(selectLines.Count() - 1);
 
@@ -1116,7 +1117,7 @@ namespace workspace_test
             rects[currentlySelected] = new Tuple<RectangleF, ShearData>(newRect, rects[currentlySelected].Item2);
         }
 
-        private string getDirection(PointF start, PointF location)
+        private string GetDirection(PointF start, PointF location)
         {
             float x = location.X - start.X;
             float y = location.Y - start.Y;
@@ -1131,6 +1132,7 @@ namespace workspace_test
         // begin new rectangle if mouse down while rectangle selection
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            clickedLine = false;
             suggestLine = PointF.Empty;
             base.OnMouseDown(e);
 
@@ -1170,6 +1172,69 @@ namespace workspace_test
                 drawing = false;
                 PointF currPoint = e.Location;
 
+                foreach(var(points, i) in lines.Select((value, i) => (value, i)))
+                {
+                    string direction = GetDirection(points.Item1, points.Item2);
+                    if(direction == "vertical")
+                    {
+                        if(Math.Abs(e.Location.X - points.Item1.X) < 3)
+                        {
+                            if(points.Item1.Y < points.Item2.Y)
+                            {
+                                if (e.Location.Y >= points.Item1.Y && e.Location.Y <= points.Item2.Y)
+                                {
+                                    if(Control.ModifierKeys != Keys.Shift)
+                                    {
+                                        selectedLines.Clear();
+                                    }
+                                    selectedLines.Add(i);
+                                    clickedLine = true;
+                                }
+                            }
+                            else
+                            {
+                                if (e.Location.Y <= points.Item1.Y && e.Location.Y >= points.Item2.Y) {
+                                    if (Control.ModifierKeys != Keys.Shift)
+                                    {
+                                        selectedLines.Clear();
+                                    }
+                                    selectedLines.Add(i);
+                                    clickedLine = true;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (Math.Abs(e.Location.Y - points.Item1.Y) < 3)
+                        {
+                            if (points.Item1.X < points.Item2.X)
+                            {
+                                if (e.Location.X >= points.Item1.X && e.Location.X <= points.Item2.X)
+                                {
+                                    if (Control.ModifierKeys != Keys.Shift)
+                                    {
+                                        selectedLines.Clear();
+                                    }
+                                    selectedLines.Add(i);
+                                    clickedLine = true;
+                                }
+                            }
+                            else
+                            {
+                                if (e.Location.X <= points.Item1.X && e.Location.X >= points.Item2.X)
+                                {
+                                    if (Control.ModifierKeys != Keys.Shift)
+                                    {
+                                        selectedLines.Clear();
+                                    }
+                                    selectedLines.Add(i);
+                                    clickedLine = true;
+                                }
+                            }
+                        }
+                    }
+                }
                 // check if clicked a rectangle -- if so, make it currently selected
                 foreach (var (rectangle, i) in rects.Select((value, i) => (value, i)))
                 {
@@ -1222,7 +1287,7 @@ namespace workspace_test
         {
             base.OnMouseUp(e);
 
-            if (clickOff == e.Location || selecting)
+            if ((clickOff == e.Location || selecting) && clickedLine == false)
             {
                 selectedLines.Clear();
                 clickOff = Point.Empty;
@@ -1253,6 +1318,7 @@ namespace workspace_test
                 selection = Rectangle.Empty;
             }
 
+            clickedLine = false;
             Invalidate();
         }
 
@@ -1284,7 +1350,7 @@ namespace workspace_test
             }
             else if(drawing)
             {
-                string direction = getDirection(start, e.Location);
+                string direction = GetDirection(start, e.Location);
                 if(direction == "vertical")
                 {
                     end = new PointF(start.X, e.Location.Y);
@@ -1318,7 +1384,7 @@ namespace workspace_test
                 {
                     if (!line.Item1.Equals(end) && !line.Item2.Equals(end))
                     {
-                        string direction = getDirection(start, e.Location);
+                        string direction = GetDirection(start, e.Location);
 
                         if (direction == "vertical")
                         {
