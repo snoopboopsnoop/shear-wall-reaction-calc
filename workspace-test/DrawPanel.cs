@@ -16,9 +16,6 @@ using System.Data.SqlClient;
 using Microsoft.Win32;
 using System.IO;
 using System.Drawing.Imaging;
-using System.Xml;
-//using System.Xml.Serialization;
-//using System.Text.Json;
 using Newtonsoft.Json;
 
 using Word = Microsoft.Office.Interop.Word;
@@ -64,9 +61,6 @@ namespace workspace_test
 
         // the funny blue rectangle when you drag to select
         private Rectangle selection = Rectangle.Empty;
-
-        // List containing drawn rectangles
-        private List<Tuple<RectangleF, ShearData>> rects = new List<Tuple<RectangleF, ShearData>>();
 
         // List containing drawn lines
         private List<Tuple<PointF, PointF>> lines = new List<Tuple<PointF, PointF>>();
@@ -171,7 +165,6 @@ namespace workspace_test
             this.Controls.Add(scaleLabel);
             Console.WriteLine(docPath);
 
-            //Globals.doc = Globals.word.Documents.Add(ref docPath, ref Globals.missing, ref Globals.missing, ref Globals.missing);
             Globals.word.Visible = false;
         }
 
@@ -182,7 +175,7 @@ namespace workspace_test
                 Globals.doc.Close();
                 Globals.word.Quit();
             }
-            catch(COMException)
+            catch(Exception)
             {
                 return;
             }
@@ -190,19 +183,6 @@ namespace workspace_test
 
         public void Save(string path)
         {
-            //if(shear != null)
-            //{
-            //    XmlSerializer serializer = new XmlSerializer(typeof(Shear));
-            //    TextWriter writer = new StreamWriter(path);
-            //    serializer.Serialize(writer, shear);
-            //    writer.Close();
-            //}
-            //if(shear != null)
-            //{
-            //    Stream stream = File.Create(path);
-            //    var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-            //    binaryFormatter.Serialize(stream, shear);
-            //}
             Output output = new Output(shear, Globals.doc.FullName, Globals.refMeasure, scale);
 
             JsonSerializer serializer = new JsonSerializer();
@@ -215,25 +195,10 @@ namespace workspace_test
                 serializer.Serialize(writer, output);
             }
             Console.WriteLine(Globals.doc.FullName);
-
-            //JsonSerializerOptions options = new JsonSerializerOptions();
-
-            //using (FileStream createStream = File.Create(path))
-            //{
-            //    await JsonSerializer.SerializeAsync(createStream, shear);
-            //}
         }
 
         public void LoadData(string path)
         {
-            //using (FileStream openStream = File.OpenRead(path))
-            //{
-            //    Shear shear = await JsonSerializer.DeserializeAsync<Shear>(openStream);
-            //}
-            //XmlSerializer serializer = new XmlSerializer(typeof(Shear));
-            //FileStream fs = new FileStream(path, FileMode.Open);
-
-            //shear = (Shear)serializer.Deserialize(fs);
             Output input;
 
             using (StreamReader file = File.OpenText(path))
@@ -274,18 +239,6 @@ namespace workspace_test
             return currentlySelected;
         }
 
-        public RectangleF GetRectangleFromIndex(int i)
-        {
-            return rects[i].Item1;
-        }
-
-        public void SetRectangle(RectangleF paramRect, int i)
-        {
-            Tuple<RectangleF, ShearData> temp = new Tuple<RectangleF, ShearData>(paramRect, new ShearData(paramRect));
-            rects[i] = temp;
-            Invalidate();
-        }
-
         public void deleteSelected()
         {
             foreach (var (pos, i) in selectedLines.Select((value, i) => (value, i)))
@@ -296,17 +249,6 @@ namespace workspace_test
             selectedLines.Clear();
 
             Invalidate();
-        }
-
-        // do the math for shear wall reaction
-        public ShearData Calculate(int i, float LA, float LD)
-        {
-            RectangleF rect = rects[i].Item1;
-            ShearData data = new ShearData(rect, LA * LD);
-            Tuple<RectangleF, ShearData> temp = new Tuple<RectangleF, ShearData>(rect, data);
-            rects[i] = temp;
-            Invalidate();
-            return data;
         }
 
         public void Export()
@@ -414,54 +356,6 @@ namespace workspace_test
             return Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
         }
 
-        // makes a rectangle out of 4 selected lines if possible, kind of a useless feature now but it's still cool
-        private RectangleF CreateRectangle()
-        {
-            if(selectedLines.Count != 4)
-            {
-                return RectangleF.Empty;
-            }
-
-            selectedLines.Sort();
-
-            // get the unique points from the lines, should be 4 if it's a rectangle
-            List<PointF> points = new List<PointF>();
-            foreach (var pos in selectedLines)
-            {
-                Tuple<PointF, PointF> currLine = lines[pos];
-                if(!points.Contains(currLine.Item1))
-                {
-                    points.Add(currLine.Item1);
-
-                }
-                if (!points.Contains(currLine.Item2))
-                {
-                    points.Add(currLine.Item2);
-                }
-            }
-
-            // wait this might be superfluous but i'll come back to it because this feature sucks
-            // don't need this code right why don't you just check if points.count == 4 if not then it can't be a rectangle if so then it must be a rectangle
-            if (isRectangle(points))
-            {
-                points = points.OrderBy(p => p.X).ThenBy(p => p.Y).ToList();
-                foreach (var point in points)
-                {
-                    System.Console.WriteLine(point.X + ", " + point.Y);
-                }
-
-                foreach (var (pos, i) in selectedLines.Select((value, i) => (value, i)))
-                {
-                    lines.RemoveAt(pos - i);
-                }
-
-                return (new RectangleF(points[0], new Size((int)(points[3].X - points[0].X), (int)(points[3].Y - points[0].Y))));
-            }
-            else Console.WriteLine("not a rectangle");
-
-            return RectangleF.Empty;
-        }
-
         // returns if 4 coordinates from a rectangle
         private bool isRectangle(List<PointF> points)
         {
@@ -488,17 +382,7 @@ namespace workspace_test
         {
             ToolStripItem item = e.ClickedItem;
             System.Console.WriteLine(item.Text);
-            if (item.Text == "Create Rectangle")
-            {
-                RectangleF rect = CreateRectangle();
-
-                if (!rect.IsEmpty)
-                {
-                    rects.Add(new Tuple<RectangleF, ShearData>(rect, new ShearData()));
-                    Invalidate();
-                }
-            }
-            else if (item.Text == "Run Shear Reaction")
+            if (item.Text == "Run Shear Reaction")
             {
                 if (!(LA == 0 || LD == 0)) {
                     cm.Close();
@@ -1112,9 +996,13 @@ namespace workspace_test
         // move currently selected rectangle by values given by translation Point
         public void moveSelected(PointF translation)
         {
-            RectangleF current = rects[currentlySelected].Item1;
-            RectangleF newRect = new RectangleF(current.X + translation.X, current.Y + translation.Y, current.Width, current.Height);
-            rects[currentlySelected] = new Tuple<RectangleF, ShearData>(newRect, rects[currentlySelected].Item2);
+            for (int i = 0; i < selectedLines.Count; i++)
+            {
+                Tuple<PointF, PointF> line = lines[selectedLines[i]];
+                PointF new1 = new PointF(line.Item1.X + translation.X, line.Item1.Y + translation.Y);
+                PointF new2 = new PointF(line.Item2.X + translation.X, line.Item2.Y + translation.Y);
+                lines[selectedLines[i]] = new Tuple<PointF, PointF>(new1, new2);
+            }
         }
 
         private string GetDirection(PointF start, PointF location)
@@ -1169,37 +1057,44 @@ namespace workspace_test
             }
             else if(e.Button == MouseButtons.Left && pointerMode == "select")
             {
+                Console.WriteLine("selecting");
+                start = e.Location;
+                selecting = true;
                 drawing = false;
-                PointF currPoint = e.Location;
 
-                foreach(var(points, i) in lines.Select((value, i) => (value, i)))
+                foreach (var (points, i) in lines.Select((value, i) => (value, i)))
                 {
                     string direction = GetDirection(points.Item1, points.Item2);
-                    if(direction == "vertical")
+                    if (direction == "vertical")
                     {
-                        if(Math.Abs(e.Location.X - points.Item1.X) < 3)
+                        if (Math.Abs(e.Location.X - points.Item1.X) < 3)
                         {
-                            if(points.Item1.Y < points.Item2.Y)
+                            if (points.Item1.Y < points.Item2.Y)
                             {
                                 if (e.Location.Y >= points.Item1.Y && e.Location.Y <= points.Item2.Y)
                                 {
-                                    if(Control.ModifierKeys != Keys.Shift)
+                                    if(selectedLines.Count == 0)
                                     {
-                                        selectedLines.Clear();
+                                        selectedLines.Add(i);
                                     }
-                                    selectedLines.Add(i);
-                                    clickedLine = true;
+                                    else clickedLine = true;
+                                    dragging = true;
+                                    selecting = false;
+                                    lastPos = e.Location;
                                 }
                             }
                             else
                             {
-                                if (e.Location.Y <= points.Item1.Y && e.Location.Y >= points.Item2.Y) {
-                                    if (Control.ModifierKeys != Keys.Shift)
+                                if (e.Location.Y <= points.Item1.Y && e.Location.Y >= points.Item2.Y)
+                                {
+                                    if (selectedLines.Count == 0)
                                     {
-                                        selectedLines.Clear();
+                                        selectedLines.Add(i);
                                     }
-                                    selectedLines.Add(i);
-                                    clickedLine = true;
+                                    else clickedLine = true;
+                                    dragging = true;
+                                    selecting = false;
+                                    lastPos = e.Location;
                                 }
                             }
                         }
@@ -1212,63 +1107,35 @@ namespace workspace_test
                             {
                                 if (e.Location.X >= points.Item1.X && e.Location.X <= points.Item2.X)
                                 {
-                                    if (Control.ModifierKeys != Keys.Shift)
+                                    if (selectedLines.Count == 0)
                                     {
-                                        selectedLines.Clear();
+                                        selectedLines.Add(i);
                                     }
-                                    selectedLines.Add(i);
-                                    clickedLine = true;
+                                    else clickedLine = true;
+                                    dragging = true;
+                                    selecting = false;
+                                    lastPos = e.Location;
                                 }
                             }
                             else
                             {
                                 if (e.Location.X <= points.Item1.X && e.Location.X >= points.Item2.X)
                                 {
-                                    if (Control.ModifierKeys != Keys.Shift)
+                                    if (selectedLines.Count == 0)
                                     {
-                                        selectedLines.Clear();
+                                        selectedLines.Add(i);
                                     }
-                                    selectedLines.Add(i);
-                                    clickedLine = true;
+                                    else clickedLine = true;
+                                    dragging = true;
+                                    selecting = false;
+                                    lastPos = e.Location;
                                 }
                             }
                         }
                     }
                 }
-                // check if clicked a rectangle -- if so, make it currently selected
-                foreach (var (rectangle, i) in rects.Select((value, i) => (value, i)))
-                {
-                    Tuple<PointF, PointF> currRect = RectToPP(rectangle.Item1);
-                    if (currPoint.X >= currRect.Item1.X && currPoint.X <= currRect.Item2.X
-                        && currPoint.Y >= currRect.Item1.Y && currPoint.Y <= currRect.Item2.Y)
-                    {
-                        currentlySelected = i;
 
-                        // enable dragging on clicked rectangle
-                        dragging = true;
-                        lastPos = e.Location;
-                        break;
-                    }
-                    else
-                    {
-                        selecting = true;
-                        start = e.Location;
-                        currentlySelected = -1;
-                        System.Console.WriteLine("selecting");
-                    }
-                }
-                if(rects.Count == 0)
-                {
-                    selecting = true;
-                    start = e.Location;
-                    currentlySelected = -1;
-                    System.Console.WriteLine("selecting");
-                }
-
-                if(selected)
-                {
-                    clickOff = e.Location;
-                }
+                clickOff = e.Location;
             }
             else
             {
@@ -1287,21 +1154,90 @@ namespace workspace_test
         {
             base.OnMouseUp(e);
 
-            if ((clickOff == e.Location || selecting) && clickedLine == false)
+            if ((clickOff == e.Location || selecting))
             {
-                selectedLines.Clear();
-                clickOff = Point.Empty;
+                if(clickedLine == true)
+                {
+                    Console.WriteLine("clicked oline");
+                    foreach (var (points, i) in lines.Select((value, i) => (value, i)))
+                    {
+                        string direction = GetDirection(points.Item1, points.Item2);
+                        if (direction == "vertical")
+                        {
+                            if (Math.Abs(e.Location.X - points.Item1.X) < 3)
+                            {
+                                if (points.Item1.Y < points.Item2.Y)
+                                {
+                                    if (e.Location.Y >= points.Item1.Y && e.Location.Y <= points.Item2.Y)
+                                    {
+                                        if (Control.ModifierKeys != Keys.Shift)
+                                        {
+                                            selectedLines.Clear();
+                                        }
+                                        selectedLines.Add(i);
+                                        clickedLine = false;
+                                        dragging = false;
+                                    }
+                                }
+                                else
+                                {
+                                    if (e.Location.Y <= points.Item1.Y && e.Location.Y >= points.Item2.Y)
+                                    {
+                                        if (Control.ModifierKeys != Keys.Shift)
+                                        {
+                                            selectedLines.Clear();
+                                        }
+                                        selectedLines.Add(i);
+                                        clickedLine = false;
+                                        dragging = false;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (Math.Abs(e.Location.Y - points.Item1.Y) < 3)
+                            {
+                                if (points.Item1.X < points.Item2.X)
+                                {
+                                    if (e.Location.X >= points.Item1.X && e.Location.X <= points.Item2.X)
+                                    {
+                                        if (Control.ModifierKeys != Keys.Shift)
+                                        {
+                                            selectedLines.Clear();
+                                        }
+                                        selectedLines.Add(i);
+                                        clickedLine = false;
+                                        dragging = false;
+                                    }
+                                }
+                                else
+                                {
+                                    if (e.Location.X <= points.Item1.X && e.Location.X >= points.Item2.X)
+                                    {
+                                        if (Control.ModifierKeys != Keys.Shift)
+                                        {
+                                            selectedLines.Clear();
+                                        }
+                                        selectedLines.Add(i);
+                                        clickedLine = false;
+                                        dragging = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    selectedLines.Clear();
+                    clickOff = Point.Empty;
+                }
+                
             }
 
             if (drawing && !start.IsEmpty && !end.IsEmpty)
             {
-                if (pointerMode == "rectangle")
-                {
-                    RectangleF rect = GetRectangle(start, end);
-                    rects.Add(new Tuple<RectangleF, ShearData>(rect, new ShearData(rect)));
-                }
-                
-
                 // resets
                 drawing = false;
                 start = PointF.Empty;
@@ -1339,6 +1275,21 @@ namespace workspace_test
                 if (drawing) end = e.Location;
                 else if (dragging)
                 {
+                    //foreach (var pos in selectedLines)
+                    //{
+                    //    foreach (var (line2, i) in lines.Select((value, i) => (value, i)))
+                    //    {
+                    //        if (pos == i) continue;
+                    //        else
+                    //        {
+                    //            var line = lines[pos];
+                    //            if()
+                    //            {
+
+                    //            }
+                    //        }
+                    //    }
+                    //}
                     // draw moved rectangle, update positions
                     moveSelected(new PointF(e.Location.X - lastPos.X, e.Location.Y - lastPos.Y));
                     lastPos = e.Location;
@@ -1459,20 +1410,11 @@ namespace workspace_test
 
             foreach (var (line, i) in lines.Select((value, i) => (value, i)))
             {
-                if(selectedLines.Contains(i))
+                if (selectedLines.Contains(i))
                 {
                     DrawLine(e, line, Color.Blue);
                 }
                 else DrawLine(e, line, Color.Black);
-            }
-
-            foreach (var (rectangle, i) in rects.Select((value, i) => (value, i)))
-            {
-                if (i == currentlySelected)
-                {
-                    DrawRect(e, rectangle, Color.Blue);
-                }
-                else DrawRect(e, rectangle, Color.Red);
             }
 
             if(shear != null) DrawShear(e, shear);
