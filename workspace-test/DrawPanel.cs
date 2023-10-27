@@ -253,6 +253,12 @@ namespace workspace_test
             LD = paramLD;
         }
 
+        public void clearShear()
+        {
+            shear = null;
+            Invalidate();
+        }
+
         public int GetCurrentlySelected()
         {
             return currentlySelected;

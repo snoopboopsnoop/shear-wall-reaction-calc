@@ -208,5 +208,10 @@ namespace workspace_test
                 workspace.LoadData(openDialog.FileName);
             }
         }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            workspace.clearShear();
+        }
     }
 }
