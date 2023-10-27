@@ -67,6 +67,7 @@ namespace workspace_test
 
         // list containing positions of drawn lines that are currently selected
         private List<int> selectedLines = new List<int>();
+        private List<PointF> selectedPoints = new List<PointF>();
 
         // how big to make the vertex dots
         private int dotSize = 6;
@@ -175,7 +176,11 @@ namespace workspace_test
                 Globals.doc.Close();
                 Globals.word.Quit();
             }
-            catch(Exception)
+            catch(COMException)
+            {
+                return;
+            }
+            catch(NullReferenceException)
             {
                 return;
             }
@@ -247,6 +252,7 @@ namespace workspace_test
             }
 
             selectedLines.Clear();
+            selectedPoints.Clear();
 
             Invalidate();
         }
@@ -351,6 +357,10 @@ namespace workspace_test
             scaleLabel.Text = $"Scale: 1 pixel = {scale.ToString("N2")}{unit}";
         }
 
+        private double Magnitude(PointF point)
+        {
+            return Math.Sqrt(Math.Pow(point.X, 2) + Math.Pow(point.Y, 2));
+        }
         private double Magnitude(Tuple<PointF, PointF> line)
         {
             return Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
@@ -401,6 +411,7 @@ namespace workspace_test
                         Globals.doc.SaveAs(saveDialog.FileName);
                         Algorithm();
                         selectedLines.Clear();
+                        selectedPoints.Clear();
                     }
                 }
             }
@@ -747,6 +758,7 @@ namespace workspace_test
                         }
                     }
                 }
+                setSelectedPoints();
             }
 
             if (selectedLines.Count == 0)
@@ -1005,6 +1017,23 @@ namespace workspace_test
             }
         }
 
+        private void setSelectedPoints()
+        {
+            selectedPoints.Clear();
+
+            foreach (var pos in selectedLines)
+            {
+                if (!selectedPoints.Contains(lines[pos].Item1))
+                {
+                    selectedPoints.Add(lines[pos].Item1);
+                }
+                if (!selectedPoints.Contains(lines[pos].Item2))
+                {
+                    selectedPoints.Add(lines[pos].Item2);
+                }
+            }
+        }
+
         private string GetDirection(PointF start, PointF location)
         {
             float x = location.X - start.X;
@@ -1173,6 +1202,7 @@ namespace workspace_test
                                         if (Control.ModifierKeys != Keys.Shift)
                                         {
                                             selectedLines.Clear();
+                                            selectedPoints.Clear();
                                         }
                                         selectedLines.Add(i);
                                         clickedLine = false;
@@ -1186,6 +1216,7 @@ namespace workspace_test
                                         if (Control.ModifierKeys != Keys.Shift)
                                         {
                                             selectedLines.Clear();
+                                            selectedPoints.Clear();
                                         }
                                         selectedLines.Add(i);
                                         clickedLine = false;
@@ -1205,6 +1236,7 @@ namespace workspace_test
                                         if (Control.ModifierKeys != Keys.Shift)
                                         {
                                             selectedLines.Clear();
+                                            selectedPoints.Clear();
                                         }
                                         selectedLines.Add(i);
                                         clickedLine = false;
@@ -1218,6 +1250,7 @@ namespace workspace_test
                                         if (Control.ModifierKeys != Keys.Shift)
                                         {
                                             selectedLines.Clear();
+                                            selectedPoints.Clear();
                                         }
                                         selectedLines.Add(i);
                                         clickedLine = false;
@@ -1231,6 +1264,7 @@ namespace workspace_test
                 else
                 {
                     selectedLines.Clear();
+                    selectedPoints.Clear();
                     clickOff = Point.Empty;
                 }
                 
@@ -1291,7 +1325,41 @@ namespace workspace_test
                     //    }
                     //}
                     // draw moved rectangle, update positions
-                    moveSelected(new PointF(e.Location.X - lastPos.X, e.Location.Y - lastPos.Y));
+                    PointF closest = PointF.Empty;
+                    PointF temp;
+                    foreach(var line in lines)
+                    {
+                        foreach(var point in selectedPoints)
+                        {
+                            
+                            temp = PointF.Subtract(line.Item1, new SizeF(point));
+                            Console.WriteLine("distnace from " + point + " to " + line.Item1 + ": " + Magnitude(temp));
+
+                            if (closest == PointF.Empty || Magnitude(temp) < Magnitude(closest))
+                            {
+                                closest = temp;
+                                Console.WriteLine("new closest: " + Magnitude(closest) + " away < " + Magnitude(temp));
+                            }
+                            temp = PointF.Subtract(line.Item2, new SizeF(point));
+                            if (closest == PointF.Empty || Magnitude(temp) < Magnitude(closest))
+                            {
+                                closest = temp;
+                                Console.WriteLine("new closest: " + Magnitude(closest) + " away < " + Magnitude(temp));
+                            }
+                        }
+                    }
+                    Console.WriteLine("closest Point is " + closest + " away");
+
+                    if(Magnitude(closest) < 6)
+                    {
+                        moveSelected(closest);
+                    }
+                    else
+                    {
+                        moveSelected(new PointF(e.Location.X - lastPos.X, e.Location.Y - lastPos.Y));
+                    }
+                    
+                    setSelectedPoints();
                     lastPos = e.Location;
                 }
                 else if (selecting)
