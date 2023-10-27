@@ -361,6 +361,12 @@ namespace workspace_test
         {
             return Math.Sqrt(Math.Pow(point.X, 2) + Math.Pow(point.Y, 2));
         }
+
+        private double Magnitude(PointF a, PointF b)
+        {
+            return Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
+        }
+
         private double Magnitude(Tuple<PointF, PointF> line)
         {
             return Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
@@ -408,6 +414,7 @@ namespace workspace_test
                         {
                             Globals.doc = Globals.word.Documents.Open(saveDialog.FileName);
                         }
+                        Globals.doc.Content.Delete();
                         Globals.doc.SaveAs(saveDialog.FileName);
                         Algorithm();
                         selectedLines.Clear();
@@ -531,13 +538,13 @@ namespace workspace_test
             foreach (var pos in selectedLines)
             {
                 Tuple<PointF, PointF> temp = lines[pos - shift];
-                lines.Remove(temp);
+                //lines.Remove(temp);
                 selectLines.Add(temp);
                 string direction = GetDirection(temp.Item1, temp.Item2);
                 if (direction == "vertical") vertical.Add(selectLines.Count() - 1);
                 else horizontal.Add(selectLines.Count() - 1);
 
-                ++shift;
+                //++shift;
             }
 
             vertical = vertical.OrderBy(p => selectLines[p].Item1.X).ToList();
@@ -977,10 +984,10 @@ namespace workspace_test
 
         private void DrawShear(PaintEventArgs e, Shear shear)
         {
-            foreach (var (line, i) in shear.GetLines().Select((value, i) => (value, i)))
-            {
-                DrawLine(e, line, Color.Black);
-            }
+            //foreach (var (line, i) in shear.GetLines().Select((value, i) => (value, i)))
+            //{
+            //    DrawLine(e, line, Color.Black);
+            //}
 
             Tuple<List<RectangleF>, List<RectangleF>> data = shear.GetData();
             Tuple<List<ShearData>, List<ShearData>> shearData = shear.GetShearData();
@@ -1327,30 +1334,38 @@ namespace workspace_test
                     // draw moved rectangle, update positions
                     PointF closest = PointF.Empty;
                     PointF temp;
+                    PointF attached = PointF.Empty;
                     foreach(var line in lines)
                     {
                         foreach(var point in selectedPoints)
                         {
                             
-                            temp = PointF.Subtract(line.Item1, new SizeF(point));
-                            Console.WriteLine("distnace from " + point + " to " + line.Item1 + ": " + Magnitude(temp));
-
-                            if (closest == PointF.Empty || Magnitude(temp) < Magnitude(closest))
+                            if(line.Item1 != point)
                             {
-                                closest = temp;
-                                Console.WriteLine("new closest: " + Magnitude(closest) + " away < " + Magnitude(temp));
+                                temp = PointF.Subtract(line.Item1, new SizeF(point));
+                                Console.WriteLine("distnace from " + point + " to " + line.Item1 + ": " + Magnitude(temp));
+                                if (closest == PointF.Empty || Magnitude(temp) < Magnitude(closest))
+                                {
+                                    Console.WriteLine("new closest: " + Magnitude(temp) + " away < " + Magnitude(closest));
+                                    closest = temp;
+                                    attached = point;
+                                }
                             }
-                            temp = PointF.Subtract(line.Item2, new SizeF(point));
-                            if (closest == PointF.Empty || Magnitude(temp) < Magnitude(closest))
+                            if(line.Item2 != point)
                             {
-                                closest = temp;
-                                Console.WriteLine("new closest: " + Magnitude(closest) + " away < " + Magnitude(temp));
+                                temp = PointF.Subtract(line.Item2, new SizeF(point));
+                                if (closest == PointF.Empty || Magnitude(temp) < Magnitude(closest))
+                                {
+                                    Console.WriteLine("new closest: " + Magnitude(temp) + " away < " + Magnitude(closest));
+                                    closest = temp;
+                                    attached = point;
+                                }
                             }
                         }
                     }
-                    Console.WriteLine("closest Point is " + closest + " away");
+                    Console.WriteLine("closest Point is " + closest + " away\n");
 
-                    if(Magnitude(closest) < 6)
+                    if(Magnitude(closest) < 5)
                     {
                         moveSelected(closest);
                     }
