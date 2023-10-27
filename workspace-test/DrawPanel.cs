@@ -33,7 +33,6 @@ namespace workspace_test
         private Boolean drawing = false;
         private Boolean dragging = false;
         private Boolean selecting = false;
-        private Boolean selected = false;
         private Boolean clickedLine = false;
 
         private double scale = 1;
@@ -188,7 +187,15 @@ namespace workspace_test
 
         public void Save(string path)
         {
-            Output output = new Output(shear, Globals.doc.FullName, Globals.refMeasure, scale);
+            Output output;
+            if (Globals.doc == null)
+            {
+                output = new Output(lines, shear, Globals.refMeasure, scale);
+            }
+            else
+            {
+                output = new Output(lines, shear, Globals.refMeasure, scale, Globals.doc.FullName);
+            }
 
             JsonSerializer serializer = new JsonSerializer();
             serializer.TypeNameHandling = TypeNameHandling.Auto;
@@ -199,7 +206,7 @@ namespace workspace_test
             {
                 serializer.Serialize(writer, output);
             }
-            Console.WriteLine(Globals.doc.FullName);
+            //Console.WriteLine(Globals.doc.FullName);
         }
 
         public void LoadData(string path)
@@ -215,10 +222,17 @@ namespace workspace_test
                 input = (Output)serializer.Deserialize(file, typeof(Output));
 
                 Globals.refMeasure = input.refMeasure;
-                if(Globals.word.Visible == false) Globals.word.Visible = true;
-                Globals.doc = Globals.word.Documents.Open(input.docPath);
-                shear = input.shear;
-                shear.Load();
+                if(input.docPath != "")
+                {
+                    if (Globals.word.Visible == false) Globals.word.Visible = true;
+                    Globals.doc = Globals.word.Documents.Open(input.docPath);
+                }
+                lines = input.lines;
+                if(input.shear != null)
+                {
+                    shear = input.shear;
+                    shear.Load();
+                }
                 scale = input.scale;
             }
         }
@@ -767,12 +781,6 @@ namespace workspace_test
                 }
                 setSelectedPoints();
             }
-
-            if (selectedLines.Count == 0)
-            {
-                selected = false;
-            }
-            else selected = true;
         }
 
         // returns rectangle data from 2 points in form (starting point, (width, length))
