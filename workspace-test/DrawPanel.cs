@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 
 using Word = Microsoft.Office.Interop.Word;
 using Newtonsoft.Json.Converters;
+using System.Xml.Linq;
 
 namespace workspace_test
 {
@@ -111,6 +112,53 @@ namespace workspace_test
             Dock = DockStyle.Fill;
             DoubleBuffered = true;
             BorderStyle = BorderStyle.FixedSingle;
+            Margin = new Padding(0, 0, 0, 0);
+
+            // settings to allow importing images behind
+            BackColor = Color.Transparent;
+            BackgroundImageLayout = ImageLayout.Center;
+
+            // string formatting settings
+            formatWidth.Alignment = StringAlignment.Center;
+            formatWidth.LineAlignment = StringAlignment.Far;
+
+            formatHeight.Alignment = StringAlignment.Near;
+            formatHeight.LineAlignment = StringAlignment.Center;
+
+            formatwx.Alignment = StringAlignment.Far;
+            formatwx.LineAlignment = StringAlignment.Center;
+
+            formatwy.Alignment = StringAlignment.Center;
+            formatwy.LineAlignment = StringAlignment.Near;
+
+            formatrx.Alignment = StringAlignment.Center;
+            formatrx.LineAlignment = StringAlignment.Far;
+
+            formatry.Alignment = StringAlignment.Near;
+            formatry.LineAlignment = StringAlignment.Center;
+
+            // basic right click menu code that i stole from stack overflow and modified
+            cm = new ContextMenuStrip();
+            this.ContextMenuStrip = cm;
+
+            cm.Items.Add("Create Rectangle");
+            cm.Items.Add("Run Shear Reaction");
+            cm.Items.Add("Set Scale");
+            ToolStripItem weightButton = cm.Items.Add("Add Weight...");
+            weightButton.Enabled = false;
+
+            cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
+            cm.Opening += contextMenu_Opening;
+
+            scaleLabel = new Label();
+            scaleLabel.Location = new Point(0, 0);
+            scaleLabel.AutoSize = true;
+            scaleLabel.Padding = new Padding(5);
+            scaleLabel.Text = $"Scale: 1 pixel = {scale}{unit}";
+            this.Controls.Add(scaleLabel);
+            Console.WriteLine(docPath);
+
+            Globals.word.Visible = false;
         }
 
         // named panel constructor

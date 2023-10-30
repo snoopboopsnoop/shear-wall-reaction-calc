@@ -26,7 +26,14 @@ namespace workspace_test
 
         private static void OnApplicationExit(object sender, EventArgs e)
         {
-            form.GetWorkspace().CloseWord();
+            try
+            {
+                form.GetWorkspace().CloseWord();
+            }
+            catch(NullReferenceException)
+            {
+            
+            }
         }
         
 

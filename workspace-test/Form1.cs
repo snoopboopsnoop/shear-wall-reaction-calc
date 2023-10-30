@@ -14,15 +14,30 @@ namespace workspace_test
 {
     public partial class Form1 : Form
     {
-        private DrawPanel workspace;
+        private List<DrawPanel> workspaces = new List<DrawPanel> ();
+        private DrawPanel currentWorkspace;
+        private TabControl tabPages;
+        private List<TabPage> tabs = new List<TabPage>();
         private RadioButton selectedRb;
         private float opacity = 0.0F;
 
         public Form1()
         {
             InitializeComponent();
-            tableLayoutPanel1.Controls.Add(new DrawPanel("workspace"), 0, 1);
-            workspace = tableLayoutPanel1.Controls["workspace"] as DrawPanel;
+            tabPages = new TabControl();
+            tabPages.Dock = DockStyle.Fill;
+            tabPages.Padding = new Point(0, 0);
+            tabPages.Margin = new Padding(0, 0, 0, 0);
+            tabs.Add(new TabPage("Untitled"));
+            tabs[0].Dock = DockStyle.Fill;
+            tabs[0].BorderStyle = BorderStyle.FixedSingle;
+            tabs[0].Margin = new Padding(0, 0, 0, 0);
+            tableLayoutPanel2.Controls.Add(tabPages, 1, 0);
+            tabPages.Controls.AddRange(new Control[] { tabs[0] });
+            workspaces.Add(new DrawPanel());
+            tabs[0].Controls.Add(workspaces[0]);
+            currentWorkspace = workspaces[0];
+
             radioButton1.CheckedChanged += radioButton_CheckedChanged;
             radioButton2.CheckedChanged += radioButton_CheckedChanged;
             radioButton3.CheckedChanged += radioButton_CheckedChanged; 
@@ -38,7 +53,7 @@ namespace workspace_test
 
         public DrawPanel GetWorkspace()
         {
-            return this.workspace;
+            return currentWorkspace;
         }
         
         void radioButton_CheckedChanged(object sender, EventArgs e)
@@ -55,16 +70,16 @@ namespace workspace_test
                 switch (selectedRb.Text)
                 {
                     case "Pointer":
-                        workspace.SetPointerMode("select");
+                        currentWorkspace.SetPointerMode("select");
                         return;
                     case "Rectangle Tool":
-                        workspace.SetPointerMode("rectangle");
+                        currentWorkspace.SetPointerMode("rectangle");
                         break;
                     case "Pen Tool":
-                        workspace.SetPointerMode("pen");
+                        currentWorkspace.SetPointerMode("pen");
                         break;
                     default:
-                        workspace.SetPointerMode("select");
+                        currentWorkspace.SetPointerMode("select");
                         break;
                 }
             }
@@ -74,48 +89,48 @@ namespace workspace_test
         private void workspace_KeyDown(object sender, KeyEventArgs e)
         {
             System.Console.WriteLine(e.KeyCode);
-            if (workspace.GetCurrentlySelected() != -1)
+            if (currentWorkspace.GetCurrentlySelected() != -1)
             {
                 if (e.KeyCode == Keys.W)
                 {
                     //System.Console.WriteLine("w pressed");
-                    workspace.moveSelected(new Point(0, -1));
+                    currentWorkspace.moveSelected(new Point(0, -1));
                 }
                 else if (e.KeyCode == Keys.A)
                 {
                     //System.Console.WriteLine("a pressed");
-                    workspace.moveSelected(new Point(-1, 0));
+                    currentWorkspace.moveSelected(new Point(-1, 0));
                 }
                 else if (e.KeyCode == Keys.S)
                 {
                     //System.Console.WriteLine("a pressed");
-                    workspace.moveSelected(new Point(0, 1));
+                    currentWorkspace.moveSelected(new Point(0, 1));
                 }
                 else if (e.KeyCode == Keys.D)
                 {
                     //System.Console.WriteLine("a pressed");
-                    workspace.moveSelected(new Point(1, 0));
+                    currentWorkspace.moveSelected(new Point(1, 0));
                 }
             }
             if (e.KeyCode == Keys.Delete)
             {
                 Console.WriteLine("delete");
-                workspace.deleteSelected();
+                currentWorkspace.deleteSelected();
             }
             else if(e.KeyCode == Keys.V)
             {
                 radioButton1.Checked = true;
-                workspace.SetPointerMode("select");
+                currentWorkspace.SetPointerMode("select");
             }
             else if (e.KeyCode == Keys.R)
             {
                 radioButton2.Checked = true;
-                workspace.SetPointerMode("rectangle");
+                currentWorkspace.SetPointerMode("rectangle");
             }
             else if (e.KeyCode == Keys.P)
             {
                 radioButton3.Checked = true;
-                workspace.SetPointerMode("pen");
+                currentWorkspace.SetPointerMode("pen");
             }
         }
 
@@ -123,7 +138,7 @@ namespace workspace_test
         {
             if(openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                workspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
+                currentWorkspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
             }
         }
 
@@ -146,14 +161,14 @@ namespace workspace_test
 
         private void button3_Click(object sender, EventArgs e)
         {
-            workspace.BackgroundImage = null;
+            currentWorkspace.BackgroundImage = null;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             try
             {
-                workspace.SetLA(float.Parse(textBox1.Text));
+                currentWorkspace.SetLA(float.Parse(textBox1.Text));
             }
             catch(FormatException)
             {
@@ -165,7 +180,7 @@ namespace workspace_test
         {
             try
             {
-                workspace.SetLD(float.Parse(textBox2.Text));
+                currentWorkspace.SetLD(float.Parse(textBox2.Text));
             }
             catch (FormatException)
             {
@@ -175,7 +190,7 @@ namespace workspace_test
 
         private void button4_Click(object sender, EventArgs e)
         {
-            workspace.Export();
+            currentWorkspace.Export();
         }
 
         private void trackBar1_Scroll(object sender, EventArgs e)
@@ -185,7 +200,7 @@ namespace workspace_test
             //Console.WriteLine( "\"" + openFileDialog1.FileName + "\"");
             if (openFileDialog1.FileName != "openFileDialog1")
             {
-                workspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
+                currentWorkspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
             }
         }
 
@@ -195,7 +210,7 @@ namespace workspace_test
             saveDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
             if (saveDialog.ShowDialog() == DialogResult.OK)
             {
-                workspace.Save(saveDialog.FileName);
+                currentWorkspace.Save(saveDialog.FileName);
             }
         }
 
@@ -205,13 +220,13 @@ namespace workspace_test
             openDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
             if (openDialog.ShowDialog() == DialogResult.OK)
             {
-                workspace.LoadData(openDialog.FileName);
+                currentWorkspace.LoadData(openDialog.FileName);
             }
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            workspace.clearShear();
+            currentWorkspace.clearShear();
         }
     }
 }

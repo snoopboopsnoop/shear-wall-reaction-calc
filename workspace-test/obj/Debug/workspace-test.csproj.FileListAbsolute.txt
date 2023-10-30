@@ -33,3 +33,7 @@ C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\System.Va
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.csproj.CopyComplete
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\Newtonsoft.Json.dll
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\Newtonsoft.Json.xml
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace-test.exe.manifest
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace-test.application
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.exe.manifest
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.application
