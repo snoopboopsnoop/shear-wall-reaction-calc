@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Security.Permissions;
 using System.Text;
@@ -20,6 +21,8 @@ namespace workspace_test
         private List<TabPage> tabs = new List<TabPage>();
         private RadioButton selectedRb;
         private float opacity = 0.0F;
+        private string logoPath = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/gorillahat.jpg");
+        private PictureBox logoBox = new PictureBox();
 
         public Form1()
         {
@@ -38,11 +41,36 @@ namespace workspace_test
             tabs[0].Controls.Add(workspaces[0]);
             currentWorkspace = workspaces[0];
 
+            logoBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            logoBox.Image = Image.FromFile(logoPath);
+            logoBox.Anchor = AnchorStyles.None;
+            logoBox.Dock = DockStyle.None;
+
+            flowLayoutPanel1.Controls.Add(logoBox);
+
+            radioButton1.Left = (flowLayoutPanel3.Width - radioButton1.Width) / 2;
+            radioButton3.Left = (flowLayoutPanel3.Width - radioButton3.Width) / 2;
+
+            pictureBox1.Top = (flowLayoutPanel1.Height - pictureBox1.Height) / 2;
+            pictureBox1.Margin = new Padding(pictureBox1.Top, 0, 0, 0);
+
             radioButton1.CheckedChanged += radioButton_CheckedChanged;
-            radioButton2.CheckedChanged += radioButton_CheckedChanged;
             radioButton3.CheckedChanged += radioButton_CheckedChanged; 
             this.KeyDown += workspace_KeyDown;
             this.FormClosing += Form1_Closing;
+            this.Resize += Form1_Resize;
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            logoBox.Height = flowLayoutPanel1.Height - 20;
+            Console.WriteLine("panel height: " + flowLayoutPanel1.Height);
+            Console.WriteLine("image height: " + logoBox.Height);
+            logoBox.Width = logoBox.Height;
+            logoBox.Top = (flowLayoutPanel1.Height - logoBox.Height) / 2;
+            Console.WriteLine("math: " + ((flowLayoutPanel1.Height - logoBox.Height) / 2));
+            Console.WriteLine("top: " + logoBox.Top);
+            logoBox.Left = logoBox.Top;
         }
 
         private void Form1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -121,11 +149,6 @@ namespace workspace_test
             {
                 radioButton1.Checked = true;
                 currentWorkspace.SetPointerMode("select");
-            }
-            else if (e.KeyCode == Keys.R)
-            {
-                radioButton2.Checked = true;
-                currentWorkspace.SetPointerMode("rectangle");
             }
             else if (e.KeyCode == Keys.P)
             {
