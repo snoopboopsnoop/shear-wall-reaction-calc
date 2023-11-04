@@ -22,7 +22,8 @@ namespace workspace_test
         private RadioButton selectedRb;
         private float opacity = 0.0F;
         private string logoPath = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/gorillahat.jpg");
-        private PictureBox logoBox = new PictureBox();
+        private PictureBox logoBox;
+        private MenuStrip menu = new MenuStrip ();
 
         public Form1()
         {
@@ -41,36 +42,58 @@ namespace workspace_test
             tabs[0].Controls.Add(workspaces[0]);
             currentWorkspace = workspaces[0];
 
-            logoBox.SizeMode = PictureBoxSizeMode.StretchImage;
-            logoBox.Image = Image.FromFile(logoPath);
-            logoBox.Anchor = AnchorStyles.None;
-            logoBox.Dock = DockStyle.None;
+            Controls.Add(menu);
+            ToolStripMenuItem fileMenu = new ToolStripMenuItem("File");
+            ToolStripMenuItem openMenu = new ToolStripMenuItem("Open...", null, new EventHandler(open_Click));
+            ToolStripMenuItem saveAsMenu = new ToolStripMenuItem("Save As...", null, new EventHandler(saveAs_Click));
 
-            flowLayoutPanel1.Controls.Add(logoBox);
+            fileMenu.ForeColor = Globals.fontColor;
 
-            radioButton1.Left = (flowLayoutPanel3.Width - radioButton1.Width) / 2;
-            radioButton3.Left = (flowLayoutPanel3.Width - radioButton3.Width) / 2;
+            fileMenu.DropDownItems.Add(openMenu);
+            fileMenu.DropDownItems.Add(saveAsMenu);
 
-            pictureBox1.Top = (flowLayoutPanel1.Height - pictureBox1.Height) / 2;
-            pictureBox1.Margin = new Padding(pictureBox1.Top, 0, 0, 0);
+            menu.Items.Add(fileMenu);
+            menu.BackColor = Color.FromArgb(1, 120, 120, 120);
 
-            radioButton1.CheckedChanged += radioButton_CheckedChanged;
-            radioButton3.CheckedChanged += radioButton_CheckedChanged; 
+            pointerButton.CheckedChanged += radioButton_CheckedChanged;
+            penButton.CheckedChanged += radioButton_CheckedChanged;
             this.KeyDown += workspace_KeyDown;
             this.FormClosing += Form1_Closing;
             this.Resize += Form1_Resize;
         }
 
+        private void saveAs_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveDialog = new SaveFileDialog();
+            saveDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
+            if (saveDialog.ShowDialog() == DialogResult.OK)
+            {
+                currentWorkspace.Save(saveDialog.FileName);
+            }
+        }
+
+        private void open_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openDialog = new OpenFileDialog();
+            openDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
+            if (openDialog.ShowDialog() == DialogResult.OK)
+            {
+                currentWorkspace.LoadData(openDialog.FileName);
+            }
+        }
+
         private void Form1_Resize(object sender, EventArgs e)
         {
-            logoBox.Height = flowLayoutPanel1.Height - 20;
-            Console.WriteLine("panel height: " + flowLayoutPanel1.Height);
-            Console.WriteLine("image height: " + logoBox.Height);
-            logoBox.Width = logoBox.Height;
-            logoBox.Top = (flowLayoutPanel1.Height - logoBox.Height) / 2;
-            Console.WriteLine("math: " + ((flowLayoutPanel1.Height - logoBox.Height) / 2));
-            Console.WriteLine("top: " + logoBox.Top);
-            logoBox.Left = logoBox.Top;
+            //logoBox.Height = flowLayoutPanel1.Height - 20;
+            //Console.WriteLine("panel height: " + flowLayoutPanel1.Height);
+            //Console.WriteLine("image height: " + logoBox.Height);
+            //logoBox.Width = logoBox.Height;
+            //logoBox.Top = (flowLayoutPanel1.Height - logoBox.Height) / 2;
+            //Console.WriteLine("math: " + ((flowLayoutPanel1.Height - logoBox.Height) / 2));
+            //Console.WriteLine("top: " + logoBox.Top);
+            //logoBox.Left = logoBox.Top;
+            pointerButton.Left = (flowLayoutPanel3.Width - pointerButton.Width) / 2;
+            penButton.Left = (flowLayoutPanel3.Width - penButton.Width) / 2;
         }
 
         private void Form1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -95,15 +118,12 @@ namespace workspace_test
             if(rb.Checked)
             {
                 selectedRb = rb;
-                switch (selectedRb.Text)
+                switch (selectedRb.Name)
                 {
-                    case "Pointer":
+                    case "pointerButton":
                         currentWorkspace.SetPointerMode("select");
                         return;
-                    case "Rectangle Tool":
-                        currentWorkspace.SetPointerMode("rectangle");
-                        break;
-                    case "Pen Tool":
+                    case "penButton":
                         currentWorkspace.SetPointerMode("pen");
                         break;
                     default:
@@ -147,12 +167,12 @@ namespace workspace_test
             }
             else if(e.KeyCode == Keys.V)
             {
-                radioButton1.Checked = true;
+                pointerButton.Checked = true;
                 currentWorkspace.SetPointerMode("select");
             }
             else if (e.KeyCode == Keys.P)
             {
-                radioButton3.Checked = true;
+                penButton.Checked = true;
                 currentWorkspace.SetPointerMode("pen");
             }
         }
@@ -225,31 +245,6 @@ namespace workspace_test
             {
                 currentWorkspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
             }
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog saveDialog = new SaveFileDialog();
-            saveDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
-            if (saveDialog.ShowDialog() == DialogResult.OK)
-            {
-                currentWorkspace.Save(saveDialog.FileName);
-            }
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openDialog = new OpenFileDialog();
-            openDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
-            if (openDialog.ShowDialog() == DialogResult.OK)
-            {
-                currentWorkspace.LoadData(openDialog.FileName);
-            }
-        }
-
-        private void button6_Click(object sender, EventArgs e)
-        {
-            currentWorkspace.clearShear();
         }
     }
 }

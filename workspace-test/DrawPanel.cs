@@ -141,11 +141,21 @@ namespace workspace_test
             cm = new ContextMenuStrip();
             this.ContextMenuStrip = cm;
 
-            cm.Items.Add("Create Rectangle");
+            // NOTE: IF YOU CHANGE THE CM CHANGE INDEXES IN CONTEXTMENU_OPENING FUNC
+
+            // 0
             cm.Items.Add("Run Shear Reaction");
+            // 1
+            ToolStripItem clearButton = cm.Items.Add("Clear Shear");
+            clearButton.Enabled = false;
+            // 2
             cm.Items.Add("Set Scale");
+            // 3
             ToolStripItem weightButton = cm.Items.Add("Add Weight...");
             weightButton.Enabled = false;
+            // 4
+            ToolStripItem printButton = cm.Items.Add("Print Workspace to Active Word Doc");
+            printButton.Enabled = false;
 
             cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
             cm.Opening += contextMenu_Opening;
@@ -162,58 +172,9 @@ namespace workspace_test
         }
 
         // named panel constructor
-        public DrawPanel(string name)
+        public DrawPanel(string name) : this()
         {
-            Dock = DockStyle.Fill;
-            DoubleBuffered = true;
-            BorderStyle = BorderStyle.FixedSingle;
             Name = name;
-            
-            // settings to allow importing images behind
-            BackColor = Color.Transparent;
-            BackgroundImageLayout = ImageLayout.Center;
-
-            // string formatting settings
-            formatWidth.Alignment = StringAlignment.Center;
-            formatWidth.LineAlignment = StringAlignment.Far;
-
-            formatHeight.Alignment = StringAlignment.Near;
-            formatHeight.LineAlignment = StringAlignment.Center;
-
-            formatwx.Alignment = StringAlignment.Far;
-            formatwx.LineAlignment = StringAlignment.Center;
-
-            formatwy.Alignment = StringAlignment.Center;
-            formatwy.LineAlignment = StringAlignment.Near;
-
-            formatrx.Alignment = StringAlignment.Center;
-            formatrx.LineAlignment = StringAlignment.Far;
-
-            formatry.Alignment = StringAlignment.Near;
-            formatry.LineAlignment = StringAlignment.Center;
-
-            // basic right click menu code that i stole from stack overflow and modified
-            cm = new ContextMenuStrip();
-            this.ContextMenuStrip = cm;
-
-            cm.Items.Add("Create Rectangle");
-            cm.Items.Add("Run Shear Reaction");
-            cm.Items.Add("Set Scale");
-            ToolStripItem weightButton = cm.Items.Add("Add Weight...");
-            weightButton.Enabled = false;
-
-            cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
-            cm.Opening += contextMenu_Opening;
-
-            scaleLabel = new Label();
-            scaleLabel.Location = new Point(0, 0);
-            scaleLabel.AutoSize = true;
-            scaleLabel.Padding = new Padding(5);
-            scaleLabel.Text = $"Scale: 1 pixel = {scale}{unit}";
-            this.Controls.Add(scaleLabel);
-            Console.WriteLine(docPath);
-
-            Globals.word.Visible = false;
         }
 
         public void CloseWord()
@@ -503,6 +464,10 @@ namespace workspace_test
                     scaleForm.ShowDialog();
                 }
             }
+            else if(item.Text == "Clear Shear")
+            {
+                clearShear();
+            }
             else if(item.Text == "Add Weight...")
             {
                 float addW = 0;
@@ -539,6 +504,10 @@ namespace workspace_test
                     }
                 }
             }
+            else if(item.Text == "Print Workspace to Active Word Doc")
+            {
+                Export();
+            }
         }
 
         private void contextMenu_Opening(object sender, EventArgs e)
@@ -552,12 +521,29 @@ namespace workspace_test
             {
                 cm.Items[3].Enabled = false;
             }
+            if(shear != null)
+            {
+                cm.Items[1].Enabled = true;
+            }
+            else
+            {
+                cm.Items[1].Enabled = false;
+            }
+            if(Globals.doc != null)
+            {
+                cm.Items[4].Enabled = true;
+            }
+            else
+            {
+                cm.Items[4].Enabled = false;
+            }
         }
 
         // all the shear wall stuff in one bundle
         private void Algorithm()
         {
             Globals.word.Visible = true;
+            
 
             Word.Paragraph header;
             header = Globals.doc.Content.Paragraphs.Add();
