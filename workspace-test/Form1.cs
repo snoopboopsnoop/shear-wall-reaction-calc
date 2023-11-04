@@ -231,11 +231,6 @@ namespace workspace_test
             }
         }
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-            currentWorkspace.Export();
-        }
-
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
             label3.Text = "Opacity: " + trackBar1.Value / 10.0;

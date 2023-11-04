@@ -44,7 +44,6 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.label3 = new System.Windows.Forms.Label();
-            this.button4 = new System.Windows.Forms.Button();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.pointerButton = new System.Windows.Forms.RadioButton();
             this.penButton = new System.Windows.Forms.RadioButton();
@@ -99,7 +98,6 @@
             this.flowLayoutPanel2.Controls.Add(this.panel2);
             this.flowLayoutPanel2.Controls.Add(this.panel4);
             this.flowLayoutPanel2.Controls.Add(this.panel3);
-            this.flowLayoutPanel2.Controls.Add(this.button4);
             this.flowLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel2.Location = new System.Drawing.Point(1104, 3);
@@ -236,18 +234,6 @@
             this.label3.TabIndex = 15;
             this.label3.Text = "Opacity: 0.0";
             // 
-            // button4
-            // 
-            this.button4.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.button4.Location = new System.Drawing.Point(55, 297);
-            this.button4.Margin = new System.Windows.Forms.Padding(0);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 13;
-            this.button4.Text = "Export...";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
             // flowLayoutPanel3
             // 
             this.flowLayoutPanel3.Controls.Add(this.pointerButton);
@@ -342,7 +328,6 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TrackBar trackBar1;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
