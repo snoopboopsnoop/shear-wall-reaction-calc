@@ -297,13 +297,21 @@ namespace workspace_test
 
                 Rectangle bounds = new Rectangle(((int)dims.Left) - 100, ((int)dims.Top) - 100, ((int)dims.Width) + 200, ((int)dims.Height) + 200);
 
-                bm = new Bitmap(bounds.Width, bounds.Height);
-                Graphics g = Graphics.FromImage(bm);
+                //Rectangle photo = new Rectangle(bounds.Width + this.Left)
+
+                //bm = new Bitmap(bounds.Width, bounds.Height);
+                //Graphics g = Graphics.FromImage(bm);
 
                 Console.WriteLine("control: " + this.Left + ", " + this.Top);
 
-                g.CopyFromScreen(bounds.Left + this.Left, bounds.Top + this.Top, 0, 0, bm.Size, CopyPixelOperation.SourceCopy);
+                //g.CopyFromScreen(bounds.Left + this.Left, bounds.Top + this.Top, 0, 0, bm.Size, CopyPixelOperation.SourceCopy);
+                //DrawToBitmap(bm, bounds);
 
+                bm = new Bitmap(this.Width, this.Height);
+                DrawToBitmap(bm, new Rectangle(this.Left, this.Top, this.Width, this.Height));
+
+                bm = bm.Clone(bounds, bm.PixelFormat);
+;
                 Console.WriteLine("rectangel: " + dims.Width + " x " + dims.Height);
                 Console.WriteLine("location: " + dims.Left + ", " + dims.Top);
                 
@@ -543,7 +551,6 @@ namespace workspace_test
         private void Algorithm()
         {
             Globals.word.Visible = true;
-            
 
             Word.Paragraph header;
             header = Globals.doc.Content.Paragraphs.Add();
@@ -636,6 +643,8 @@ namespace workspace_test
                 if (line.Item2.Y < min.Y) min.Y = (int)line.Item2.Y;
                 else if (line.Item2.Y > max.Y) max.Y = (int)line.Item2.Y;
             }
+
+            Console.WriteLine("minmax: " + min + ", " + max);
 
             // get all the rectangles to shear by forming a rectangle out of the fake lines and the real lines
             // its a lot and tbh i forgot most of the logic
@@ -1104,6 +1113,7 @@ namespace workspace_test
         // begin new rectangle if mouse down while rectangle selection
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            Console.WriteLine("clicked: " + e.Location);        
             clickedLine = false;
             suggestLine = PointF.Empty;
             base.OnMouseDown(e);

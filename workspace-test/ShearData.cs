@@ -43,16 +43,16 @@ namespace workspace_test
             direction = paramDirection;
 
             wx = (direction == "bottom") ? 0 : LS * rect.Width;
-            Console.WriteLine("wx: " + wx);
+            Console.WriteLine("wx: " + wx.ToString("#,#0.###"));
             wy = (direction == "left") ? 0 : LS * rect.Height;
-            Console.WriteLine("wy: " + wy);
+            Console.WriteLine("wy: " + wy.ToString("#,#0.###"));
 
             visual = Rectangle.Empty;
 
             range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
             range.InsertAfter(name + " = ");
-            if (direction == "bottom") range.InsertAfter(LS + "PSF x " + rect.Height + "\' = " + wy + " PLF\n");
-            else if (direction == "left") range.InsertAfter(LS + "PSF x " + rect.Width + "\' = " + wx + " PLF\n");
+            if (direction == "bottom") range.InsertAfter(LS + "PSF x " + rect.Height.ToString("#,#0.###") + "\' = " + wy.ToString("#,#0.###") + " PLF\n");
+            else if (direction == "left") range.InsertAfter(LS + "PSF x " + rect.Width.ToString("#,#0.###") + "\' = " + wx.ToString("#,#0.###") + " PLF\n");
 
             rangeIndex = range.End;
         }
@@ -79,7 +79,7 @@ namespace workspace_test
             }
             else wx += addW;
 
-            range.InsertAfter("+ " + str + " = " + ((wx == 0) ? wy : wx) + " PLF\n");
+            range.InsertAfter("+ " + str + " = " + ((wx == 0) ? wy.ToString("#,#0.###") : wx.ToString("#,#0.###")) + " PLF\n");
             UpdateVisual(addW);
         }
 
