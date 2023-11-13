@@ -19,8 +19,8 @@ namespace workspace_test
         {
             InitializeComponent();
             workspace = sender as DrawPanel;
-            comboBox1.Items.Add("m");
             comboBox1.Items.Add("ft");
+            comboBox1.Items.Add("m");
             comboBox1.Items.Add("football fields");
             comboBox1.SelectedIndex = 0;
             if(unit != "" && unit != null)
@@ -50,7 +50,11 @@ namespace workspace_test
             label2.Text = "";
             try
             {
-                workspace.SetScale(double.Parse(textBox1.Text)/magnitude, " " + comboBox1.SelectedItem.ToString());
+                if(comboBox1.SelectedItem.ToString() == "ft")
+                {
+                    workspace.SetScale(double.Parse(textBox1.Text) / magnitude, "\'");
+                }
+                else workspace.SetScale(double.Parse(textBox1.Text)/magnitude, " " + comboBox1.SelectedItem.ToString());
                 this.Close();
             }
             catch (FormatException)

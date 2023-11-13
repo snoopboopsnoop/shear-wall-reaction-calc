@@ -36,9 +36,6 @@ namespace workspace_test
         private Boolean selecting = false;
         private Boolean clickedLine = false;
 
-        private double scale = 1;
-        private string unit;
-
         // used to check if mouse clicked in one spot
         private PointF clickOff = Point.Empty;
 
@@ -164,7 +161,7 @@ namespace workspace_test
             scaleLabel.Location = new Point(0, 0);
             scaleLabel.AutoSize = true;
             scaleLabel.Padding = new Padding(5);
-            scaleLabel.Text = $"Scale: 1 pixel = {scale}{unit}";
+            scaleLabel.Text = $"Scale: 1 pixel = {Globals.scale}{Globals.unit}";
             this.Controls.Add(scaleLabel);
             Console.WriteLine(docPath);
 
@@ -199,11 +196,11 @@ namespace workspace_test
             Output output;
             if (Globals.doc == null)
             {
-                output = new Output(lines, shear, Globals.refMeasure, scale);
+                output = new Output(lines, shear, Globals.refMeasure, Globals.scale);
             }
             else
             {
-                output = new Output(lines, shear, Globals.refMeasure, scale, Globals.doc.FullName);
+                output = new Output(lines, shear, Globals.refMeasure, Globals.scale, Globals.doc.FullName);
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -242,7 +239,7 @@ namespace workspace_test
                     shear = input.shear;
                     shear.Load();
                 }
-                scale = input.scale;
+                Globals.scale = input.scale;
             }
         }
 
@@ -389,9 +386,9 @@ namespace workspace_test
 
         public void SetScale(double value, string paramUnit)
         {
-            scale = value;
-            unit = paramUnit;
-            scaleLabel.Text = $"Scale: 1 pixel = {scale.ToString("N2")}{unit}";
+            Globals.scale = value;
+            Globals.unit = paramUnit;
+            scaleLabel.Text = $"Scale: 1 pixel = {Globals.scale.ToString("N2")}{Globals.unit}";
         }
 
         private double Magnitude(PointF point)
@@ -468,7 +465,7 @@ namespace workspace_test
                 }
                 else
                 {
-                    Form4 scaleForm = new Form4(this, (int)Magnitude(lines[selectedLines[0]]), unit);
+                    Form4 scaleForm = new Form4(this, (int)Magnitude(lines[selectedLines[0]]), Globals.unit);
                     scaleForm.ShowDialog();
                 }
             }
@@ -1031,11 +1028,11 @@ namespace workspace_test
             // text display depends on if the line is horizontal or vertical
             if (line.Item1.X == line.Item2.X)
             {
-                e.Graphics.DrawString((Math.Round((magnitude * scale)/0.5) * 0.5).ToString("0.###") + unit, font, brush, line.Item1.X + 5, line.Item1.Y + (line.Item2.Y - line.Item1.Y) / 2, formatHeight);
+                e.Graphics.DrawString((Math.Round((magnitude * Globals.scale)/0.5) * 0.5).ToString("#,#0.###") + Globals.unit, font, brush, line.Item1.X + 5, line.Item1.Y + (line.Item2.Y - line.Item1.Y) / 2, formatHeight);
             }
             else
             {
-                e.Graphics.DrawString((Math.Round((magnitude * scale)/0.5)*0.5).ToString("0.###") + unit, font, brush, line.Item1.X + (line.Item2.X - line.Item1.X) / 2, line.Item1.Y - 5, formatWidth);
+                e.Graphics.DrawString((Math.Round((magnitude * Globals.scale)/0.5)*0.5).ToString("#,#0.###") + Globals.unit, font, brush, line.Item1.X + (line.Item2.X - line.Item1.X) / 2, line.Item1.Y - 5, formatWidth);
             }
         }
 

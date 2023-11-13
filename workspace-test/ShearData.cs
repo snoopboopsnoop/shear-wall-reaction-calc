@@ -42,17 +42,17 @@ namespace workspace_test
             LS = paramLS;
             direction = paramDirection;
 
-            wx = (direction == "bottom") ? 0 : LS * rect.Width;
+            wx = (direction == "bottom") ? 0 : LS * rect.Width * (float)Globals.scale;
             Console.WriteLine("wx: " + wx.ToString("#,#0.###"));
-            wy = (direction == "left") ? 0 : LS * rect.Height;
+            wy = (direction == "left") ? 0 : LS * rect.Height * (float)Globals.scale;
             Console.WriteLine("wy: " + wy.ToString("#,#0.###"));
 
             visual = Rectangle.Empty;
 
             range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
             range.InsertAfter(name + " = ");
-            if (direction == "bottom") range.InsertAfter(LS + "PSF x " + rect.Height.ToString("#,#0.###") + "\' = " + wy.ToString("#,#0.###") + " PLF\n");
-            else if (direction == "left") range.InsertAfter(LS + "PSF x " + rect.Width.ToString("#,#0.###") + "\' = " + wx.ToString("#,#0.###") + " PLF\n");
+            if (direction == "bottom") range.InsertAfter(LS + "PSF x " + (rect.Height * Globals.scale).ToString("#,#0.###") + "\' = " + wy.ToString("#,#0.###") + " PLF\n");
+            else if (direction == "left") range.InsertAfter(LS + "PSF x " + (rect.Width * Globals.scale).ToString("#,#0.###") + "\' = " + wx.ToString("#,#0.###") + " PLF\n");
 
             rangeIndex = range.End;
         }
