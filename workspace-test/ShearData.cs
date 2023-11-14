@@ -51,8 +51,8 @@ namespace workspace_test
 
             range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
             range.InsertAfter(name + " = ");
-            if (direction == "bottom") range.InsertAfter(LS + "PSF x " + (rect.Height * Globals.scale).ToString("#,#0.###") + "\' = " + wy.ToString("#,#0.###") + " PLF\n");
-            else if (direction == "left") range.InsertAfter(LS + "PSF x " + (rect.Width * Globals.scale).ToString("#,#0.###") + "\' = " + wx.ToString("#,#0.###") + " PLF\n");
+            if (direction == "bottom") range.InsertAfter(LS + "PSF x " + (rect.Height * Globals.scale).ToString("#,#0.###") + Globals.scale + " = " + wy.ToString("#,#0.###") + " PLF\n");
+            else if (direction == "left") range.InsertAfter(LS + "PSF x " + (rect.Width * Globals.scale).ToString("#,#0.###") + Globals.scale + " = " + wx.ToString("#,#0.###") + " PLF\n");
 
             rangeIndex = range.End;
         }
