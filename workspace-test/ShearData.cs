@@ -42,9 +42,9 @@ namespace workspace_test
             LS = paramLS;
             direction = paramDirection;
 
-            wx = (direction == "bottom") ? 0 : LS * rect.Width * (float)Globals.scale;
+            wx = (direction == "bottom") ? 0 : (float)Math.Round(LS * rect.Width * (float)Globals.scale / 0.5F) * 0.5F;
             Console.WriteLine("wx: " + wx.ToString("#,#0.###"));
-            wy = (direction == "left") ? 0 : LS * rect.Height * (float)Globals.scale;
+            wy = (direction == "left") ? 0 : (float)Math.Round(LS * rect.Height * (float)Globals.scale / 0.5F) * 0.5F;
             Console.WriteLine("wy: " + wy.ToString("#,#0.###"));
 
             visual = Rectangle.Empty;
