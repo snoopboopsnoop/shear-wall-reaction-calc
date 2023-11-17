@@ -70,6 +70,9 @@ namespace workspace_test
 
             pointerButton.CheckedChanged += radioButton_CheckedChanged;
             penButton.CheckedChanged += radioButton_CheckedChanged;
+
+            this.ActiveControl = workspaces[0];
+
             this.KeyDown += workspace_KeyDown;
             this.FormClosing += Form1_Closing;
             this.Resize += Form1_Resize;
@@ -92,6 +95,7 @@ namespace workspace_test
             if (openDialog.ShowDialog() == DialogResult.OK)
             {
                 currentWorkspace.LoadData(openDialog.FileName);
+                tabPages.SelectedTab.Text = Path.GetFileName(openDialog.FileName.TrimEnd(Path.DirectorySeparatorChar));
             }
         }
 
@@ -180,11 +184,13 @@ namespace workspace_test
             else if(e.KeyCode == Keys.V)
             {
                 pointerButton.Checked = true;
+                //penButton.Checked = false;
                 currentWorkspace.SetPointerMode("select");
             }
             else if (e.KeyCode == Keys.P)
             {
-                //penButton.Checked = true;
+                penButton.Checked = true;
+                //pointerButton.Checked = false;
                 currentWorkspace.SetPointerMode("pen");
             }
         }
