@@ -59,9 +59,9 @@ namespace workspace_test
 
             Controls.Add(menu);
             ToolStripMenuItem fileMenu = new ToolStripMenuItem("File");
-            ToolStripMenuItem openMenu = new ToolStripMenuItem("Open...", null, new EventHandler(open_Click));
-            ToolStripMenuItem saveMenu = new ToolStripMenuItem("Save", null, new EventHandler(saveAs_Click));
-            ToolStripMenuItem saveAsMenu = new ToolStripMenuItem("Save As...", null, new EventHandler(saveAs_Click));
+            ToolStripMenuItem openMenu = new ToolStripMenuItem("Open...", Image.FromFile(imgPath + "openIcon.png"), new EventHandler(open_Click));
+            ToolStripMenuItem saveMenu = new ToolStripMenuItem("Save", Image.FromFile(imgPath + "saveIcon.png"), new EventHandler(saveAs_Click));
+            ToolStripMenuItem saveAsMenu = new ToolStripMenuItem("Save As...", Image.FromFile(imgPath + "saveAsIcon.png"), new EventHandler(saveAs_Click));
 
             ToolStripMenuItem imgMenu = new ToolStripMenuItem("Image");
             ToolStripMenuItem openImgMenu = new ToolStripMenuItem("Load Image...", null, new EventHandler(imgLoad_Click));
