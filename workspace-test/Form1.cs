@@ -22,17 +22,21 @@ namespace workspace_test
         private RadioButton selectedRb;
         private float opacity = 0.0F;
         private string imgPath = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/");
+
         private RadioButton pointerButton;
         private RadioButton penButton;
+        private Button helpButton;
+
         private MenuStrip menu = new MenuStrip ();
 
         public Form1()
         {
+            this.Font = SystemFonts.MessageBoxFont;
             InitializeComponent();
             tabPages = new TabControl();
             tabPages.Dock = DockStyle.Fill;
             tabPages.Padding = new Point(0, 0);
-            tabPages.Margin = new Padding(0, 0, 0, 0);
+            tabPages.Margin = new Padding(0, 10, 0, 0);
             tabs.Add(new TabPage("Untitled"));
             tabs[0].Dock = DockStyle.Fill;
             tabs[0].BorderStyle = BorderStyle.FixedSingle;
@@ -43,33 +47,59 @@ namespace workspace_test
             tabs[0].Controls.Add(workspaces[0]);
             currentWorkspace = workspaces[0];
 
+            ToolTip toolTip1 = new ToolTip();
+
+            // Set up the delays for the ToolTip.
+            toolTip1.InitialDelay = 500;
+            toolTip1.ReshowDelay = 250;
+            // Force the ToolTip text to be displayed whether or not the form is active.
+            toolTip1.ShowAlways = true;
+
             Controls.Add(menu);
             ToolStripMenuItem fileMenu = new ToolStripMenuItem("File");
             ToolStripMenuItem openMenu = new ToolStripMenuItem("Open...", null, new EventHandler(open_Click));
             ToolStripMenuItem saveAsMenu = new ToolStripMenuItem("Save As...", null, new EventHandler(saveAs_Click));
 
+            ToolStripMenuItem imgMenu = new ToolStripMenuItem("Image");
+            ToolStripMenuItem openImgMenu = new ToolStripMenuItem("Load Image...", null, new EventHandler(imgLoad_Click));
+            ToolStripMenuItem clearImgMenu = new ToolStripMenuItem("Clear Image", null, new EventHandler(imgClear_Click));
+
             fileMenu.ForeColor = Globals.fontColor;
+            imgMenu.ForeColor = Globals.fontColor;
 
             fileMenu.DropDownItems.Add(openMenu);
             fileMenu.DropDownItems.Add(saveAsMenu);
 
+            imgMenu.DropDownItems.Add(openImgMenu);
+            imgMenu.DropDownItems.Add(clearImgMenu);
+
             menu.Items.Add(fileMenu);
-            menu.BackColor = Color.FromArgb(1, 120, 120, 120);
+            menu.Items.Add(imgMenu);
+            menu.BackColor = Color.FromArgb(255, 120, 120, 120);
 
             pointerButton = new RadioButton();
+            pointerButton.Name = "pointerButton";
             pointerButton.Appearance = Appearance.Button;
             panel5.Controls.Add(pointerButton);
             pointerButton.BackgroundImage = Image.FromFile(imgPath + "pointerIcon.png");
             pointerButton.BackgroundImageLayout = ImageLayout.Stretch;
+            toolTip1.SetToolTip(pointerButton, "Select Tool");
 
             penButton = new RadioButton();
+            penButton.Name = "penButton";
             penButton.Appearance = Appearance.Button;
             panel5.Controls.Add(penButton);
             penButton.BackgroundImage = Image.FromFile(imgPath + "penIcon.png");
             penButton.BackgroundImageLayout = ImageLayout.Stretch;
+            toolTip1.SetToolTip(penButton, "Pen Tool");
 
             pointerButton.CheckedChanged += radioButton_CheckedChanged;
             penButton.CheckedChanged += radioButton_CheckedChanged;
+
+            helpButton = new Button();
+            panel5.Controls.Add(helpButton);
+            helpButton.BackgroundImage = Image.FromFile(imgPath + "helpIcon.png");
+            helpButton.BackgroundImageLayout = ImageLayout.Stretch;
 
             this.ActiveControl = workspaces[0];
 
@@ -110,6 +140,11 @@ namespace workspace_test
             penButton.Height = penButton.Width;
             penButton.Left = pointerButton.Left;
             penButton.Top = penButton.Left + pointerButton.Bottom;
+
+            helpButton.Width = pointerButton.Width;
+            helpButton.Height = helpButton.Width;
+            helpButton.Left = penButton.Left;
+            helpButton.Top = panel5.Height - 10 - helpButton.Height;
         }
 
         private void Form1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -195,7 +230,7 @@ namespace workspace_test
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void imgLoad_Click(object sender, EventArgs e)
         {
             if(openFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -220,7 +255,7 @@ namespace workspace_test
             return bmp;
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void imgClear_Click(object sender, EventArgs e)
         {
             currentWorkspace.BackgroundImage = null;
         }

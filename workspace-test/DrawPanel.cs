@@ -246,7 +246,18 @@ namespace workspace_test
         public void SetPointerMode(string mode)
         {
             System.Console.WriteLine("switching pointer to mode " + mode);
+            start = PointF.Empty;
+            end = PointF.Empty;
+            suggestLine = PointF.Empty;
+
+            drawing = false;
+            dragging = false;
+            selecting = false;
+            clickedLine = false;
+
             pointerMode = mode;
+
+            Invalidate();
         }
 
         public void SetLA(float paramLA)
@@ -1503,7 +1514,7 @@ namespace workspace_test
                             {
                                 end = new PointF(line.Item2.X, start.Y);
 
-                                if (!start.Equals(end)) suggestLine = line.Item1;
+                                if (!start.Equals(end)) suggestLine = line.Item2;
                             }
                         }
                     }
