@@ -21,6 +21,7 @@ using Newtonsoft.Json;
 using Word = Microsoft.Office.Interop.Word;
 using Newtonsoft.Json.Converters;
 using System.Xml.Linq;
+using System.Security.Policy;
 
 namespace workspace_test
 {
@@ -102,6 +103,8 @@ namespace workspace_test
         private object docPath = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/template.docx");
 
         private string tempFile = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/temp.jpg");
+
+        private string loadedFile = "";
 
         // default constructor
         public DrawPanel()
@@ -193,6 +196,8 @@ namespace workspace_test
 
         public void Save(string path)
         {
+            if (path == "") path = loadedFile;
+
             Output output;
             if (Globals.doc == null)
             {
@@ -241,6 +246,8 @@ namespace workspace_test
                 }
                 Globals.scale = input.scale;
             }
+
+            loadedFile = path;
         }
 
         public void SetPointerMode(string mode)
@@ -279,6 +286,11 @@ namespace workspace_test
         public int GetCurrentlySelected()
         {
             return currentlySelected;
+        }
+
+        public string GetLoadedFile()
+        {
+            return loadedFile;
         }
 
         public void deleteSelected()

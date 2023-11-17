@@ -10,6 +10,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Input;
 
 namespace workspace_test
 {
@@ -110,12 +111,31 @@ namespace workspace_test
 
         private void saveAs_Click(object sender, EventArgs e)
         {
-            SaveFileDialog saveDialog = new SaveFileDialog();
-            saveDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
-            if (saveDialog.ShowDialog() == DialogResult.OK)
+            save();
+        }
+
+        private void save()
+        {
+            Console.WriteLine("loaded file: " + currentWorkspace.GetLoadedFile());
+            if (currentWorkspace.GetLoadedFile() != "")
             {
-                currentWorkspace.Save(saveDialog.FileName);
+                this.Cursor = Cursors.WaitCursor;
+                System.Threading.Thread.Sleep(50);
+                currentWorkspace.Save("");
+                this.Cursor = Cursors.Default;
             }
+            else
+            {
+                SaveFileDialog saveDialog = new SaveFileDialog();
+                saveDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                {
+                    this.Cursor = Cursors.WaitCursor;
+                    currentWorkspace.Save(saveDialog.FileName);
+                    this.Cursor = Cursors.Default;
+                }
+            }
+            
         }
 
         private void open_Click(object sender, EventArgs e)
@@ -227,6 +247,10 @@ namespace workspace_test
                 penButton.Checked = true;
                 //pointerButton.Checked = false;
                 currentWorkspace.SetPointerMode("pen");
+            }
+            else if(e.KeyCode == Keys.S && (ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                save();
             }
         }
 
