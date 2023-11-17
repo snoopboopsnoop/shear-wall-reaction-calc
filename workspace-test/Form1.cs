@@ -33,6 +33,7 @@ namespace workspace_test
         public Form1()
         {
             this.Font = SystemFonts.MessageBoxFont;
+            this.ForeColor = Globals.fontColor;
             InitializeComponent();
             tabPages = new TabControl();
             tabPages.Dock = DockStyle.Fill;
@@ -59,6 +60,7 @@ namespace workspace_test
             Controls.Add(menu);
             ToolStripMenuItem fileMenu = new ToolStripMenuItem("File");
             ToolStripMenuItem openMenu = new ToolStripMenuItem("Open...", null, new EventHandler(open_Click));
+            ToolStripMenuItem saveMenu = new ToolStripMenuItem("Save", null, new EventHandler(saveAs_Click));
             ToolStripMenuItem saveAsMenu = new ToolStripMenuItem("Save As...", null, new EventHandler(saveAs_Click));
 
             ToolStripMenuItem imgMenu = new ToolStripMenuItem("Image");
@@ -69,6 +71,7 @@ namespace workspace_test
             imgMenu.ForeColor = Globals.fontColor;
 
             fileMenu.DropDownItems.Add(openMenu);
+            fileMenu.DropDownItems.Add(saveMenu);
             fileMenu.DropDownItems.Add(saveAsMenu);
 
             imgMenu.DropDownItems.Add(openImgMenu);
@@ -103,7 +106,10 @@ namespace workspace_test
             helpButton.BackgroundImageLayout = ImageLayout.Stretch;
 
             this.ActiveControl = workspaces[0];
-
+            fileMenu.DropDownOpening += menu_Opening;
+            fileMenu.DropDownClosed += menu_Closing;
+            imgMenu.DropDownOpening += menu_Opening;
+            imgMenu.DropDownClosed += menu_Closing;
             this.KeyDown += workspace_KeyDown;
             this.FormClosing += Form1_Closing;
             this.Resize += Form1_Resize;
@@ -112,6 +118,25 @@ namespace workspace_test
         private void saveAs_Click(object sender, EventArgs e)
         {
             save();
+        }
+
+        private void menu_Opening(object sender, EventArgs e)
+        {
+            ToolStripMenuItem temp = sender as ToolStripMenuItem;
+            if (temp.Text == "File")
+            {
+                if (currentWorkspace.GetLoadedFile() != "")
+                {
+                    temp.DropDownItems[1].Enabled = true;
+                }
+                else temp.DropDownItems[1].Enabled = false;
+            }
+            temp.ForeColor = Color.FromArgb(255, 48, 48, 48);
+        }
+
+        private void menu_Closing(object sender, EventArgs e)
+        {
+            (sender as ToolStripMenuItem).ForeColor = Globals.fontColor;
         }
 
         private void save()
