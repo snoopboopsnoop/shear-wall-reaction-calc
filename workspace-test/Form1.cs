@@ -21,8 +21,9 @@ namespace workspace_test
         private List<TabPage> tabs = new List<TabPage>();
         private RadioButton selectedRb;
         private float opacity = 0.0F;
-        private string logoPath = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/gorillahat.jpg");
-        private PictureBox logoBox;
+        private string imgPath = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/");
+        private RadioButton pointerButton;
+        private RadioButton penButton;
         private MenuStrip menu = new MenuStrip ();
 
         public Form1()
@@ -55,6 +56,18 @@ namespace workspace_test
             menu.Items.Add(fileMenu);
             menu.BackColor = Color.FromArgb(1, 120, 120, 120);
 
+            pointerButton = new RadioButton();
+            pointerButton.Appearance = Appearance.Button;
+            panel5.Controls.Add(pointerButton);
+            pointerButton.BackgroundImage = Image.FromFile(imgPath + "pointerIcon.png");
+            pointerButton.BackgroundImageLayout = ImageLayout.Stretch;
+
+            penButton = new RadioButton();
+            penButton.Appearance = Appearance.Button;
+            panel5.Controls.Add(penButton);
+            penButton.BackgroundImage = Image.FromFile(imgPath + "penIcon.png");
+            penButton.BackgroundImageLayout = ImageLayout.Stretch;
+
             pointerButton.CheckedChanged += radioButton_CheckedChanged;
             penButton.CheckedChanged += radioButton_CheckedChanged;
             this.KeyDown += workspace_KeyDown;
@@ -84,16 +97,15 @@ namespace workspace_test
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            //logoBox.Height = flowLayoutPanel1.Height - 20;
-            //Console.WriteLine("panel height: " + flowLayoutPanel1.Height);
-            //Console.WriteLine("image height: " + logoBox.Height);
-            //logoBox.Width = logoBox.Height;
-            //logoBox.Top = (flowLayoutPanel1.Height - logoBox.Height) / 2;
-            //Console.WriteLine("math: " + ((flowLayoutPanel1.Height - logoBox.Height) / 2));
-            //Console.WriteLine("top: " + logoBox.Top);
-            //logoBox.Left = logoBox.Top;
-            pointerButton.Left = (flowLayoutPanel3.Width - pointerButton.Width) / 2;
-            penButton.Left = (flowLayoutPanel3.Width - penButton.Width) / 2;
+            pointerButton.Width = (int)Math.Round(panel5.Width * 0.8);
+            pointerButton.Height = pointerButton.Width;
+            pointerButton.Left = (panel5.Width - pointerButton.Width) / 2;
+            pointerButton.Top = pointerButton.Left;
+
+            penButton.Width = pointerButton.Width;
+            penButton.Height = penButton.Width;
+            penButton.Left = pointerButton.Left;
+            penButton.Top = penButton.Left + pointerButton.Bottom;
         }
 
         private void Form1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -172,7 +184,7 @@ namespace workspace_test
             }
             else if (e.KeyCode == Keys.P)
             {
-                penButton.Checked = true;
+                //penButton.Checked = true;
                 currentWorkspace.SetPointerMode("pen");
             }
         }

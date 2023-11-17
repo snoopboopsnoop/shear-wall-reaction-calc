@@ -44,10 +44,8 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.label3 = new System.Windows.Forms.Label();
-            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
-            this.pointerButton = new System.Windows.Forms.RadioButton();
-            this.penButton = new System.Windows.Forms.RadioButton();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.panel5 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
@@ -56,7 +54,6 @@
             this.panel4.SuspendLayout();
             this.panel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
-            this.flowLayoutPanel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -78,11 +75,11 @@
             // 
             this.tableLayoutPanel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(171)))), ((int)(((byte)(171)))), ((int)(((byte)(171)))));
             this.tableLayoutPanel2.ColumnCount = 3;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 5F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 80F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 2.5F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 82.5F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 15F));
             this.tableLayoutPanel2.Controls.Add(this.flowLayoutPanel2, 2, 0);
-            this.tableLayoutPanel2.Controls.Add(this.flowLayoutPanel3, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.panel5, 0, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
@@ -100,9 +97,9 @@
             this.flowLayoutPanel2.Controls.Add(this.panel3);
             this.flowLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(1104, 3);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(1105, 3);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(190, 814);
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(189, 814);
             this.flowLayoutPanel2.TabIndex = 0;
             // 
             // panel1
@@ -234,57 +231,21 @@
             this.label3.TabIndex = 15;
             this.label3.Text = "Opacity: 0.0";
             // 
-            // flowLayoutPanel3
-            // 
-            this.flowLayoutPanel3.Controls.Add(this.pointerButton);
-            this.flowLayoutPanel3.Controls.Add(this.penButton);
-            this.flowLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel3.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(0, 0);
-            this.flowLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(64, 820);
-            this.flowLayoutPanel3.TabIndex = 1;
-            this.flowLayoutPanel3.WrapContents = false;
-            // 
-            // pointerButton
-            // 
-            this.pointerButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pointerButton.Appearance = System.Windows.Forms.Appearance.Button;
-            this.pointerButton.BackgroundImage = global::workspace_test.Properties.Resources.pointerIcon;
-            this.pointerButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pointerButton.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.pointerButton.Location = new System.Drawing.Point(0, 0);
-            this.pointerButton.Margin = new System.Windows.Forms.Padding(0);
-            this.pointerButton.Name = "pointerButton";
-            this.pointerButton.Size = new System.Drawing.Size(37, 36);
-            this.pointerButton.TabIndex = 3;
-            this.pointerButton.TabStop = true;
-            this.pointerButton.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.pointerButton.UseVisualStyleBackColor = true;
-            // 
-            // penButton
-            // 
-            this.penButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.penButton.Appearance = System.Windows.Forms.Appearance.Button;
-            this.penButton.BackgroundImage = global::workspace_test.Properties.Resources.penIcon;
-            this.penButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.penButton.CheckAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.penButton.Location = new System.Drawing.Point(0, 38);
-            this.penButton.Margin = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            this.penButton.Name = "penButton";
-            this.penButton.Size = new System.Drawing.Size(37, 39);
-            this.penButton.TabIndex = 6;
-            this.penButton.TabStop = true;
-            this.penButton.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.penButton.UseVisualStyleBackColor = true;
-            // 
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             this.openFileDialog1.Filter = "All files (*.*)|*.*|JPEG Files (*.jpg)|*.jpg|PNG Files (*.png)|*.png|BMP Files (*" +
     ".bmp)|*.bmp";
             this.openFileDialog1.Title = "Select a file";
+            // 
+            // panel5
+            // 
+            this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel5.Location = new System.Drawing.Point(0, 0);
+            this.panel5.Margin = new System.Windows.Forms.Padding(0);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(32, 820);
+            this.panel5.TabIndex = 1;
             // 
             // Form1
             // 
@@ -311,7 +272,6 @@
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
-            this.flowLayoutPanel3.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -319,8 +279,6 @@
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.RadioButton pointerButton;
-        private System.Windows.Forms.RadioButton penButton;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Button button3;
@@ -332,11 +290,11 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Panel panel5;
     }
 }
 
