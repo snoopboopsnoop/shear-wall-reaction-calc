@@ -115,8 +115,9 @@ namespace workspace_test
             Margin = new Padding(0, 0, 0, 0);
 
             // settings to allow importing images behind
-            BackColor = Color.Transparent;
+            BackColor = Color.White;
             BackgroundImageLayout = ImageLayout.Center;
+            DoubleBuffered = true;
 
             // string formatting settings
             formatWidth.Alignment = StringAlignment.Center;

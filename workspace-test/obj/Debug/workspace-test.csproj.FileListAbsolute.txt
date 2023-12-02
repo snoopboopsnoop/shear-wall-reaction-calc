@@ -37,3 +37,4 @@ C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace-test.application
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.exe.manifest
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.application
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form5.resources

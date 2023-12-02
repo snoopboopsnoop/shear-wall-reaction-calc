@@ -21,7 +21,7 @@ namespace workspace_test
         private TabControl tabPages;
         private List<TabPage> tabs = new List<TabPage>();
         private RadioButton selectedRb;
-        private float opacity = 0.0F;
+        private float opacity = 1.0F;
         private string imgPath = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/");
 
         private RadioButton pointerButton;
@@ -47,7 +47,11 @@ namespace workspace_test
             tabPages.Controls.AddRange(new Control[] { tabs[0] });
             workspaces.Add(new DrawPanel());
             tabs[0].Controls.Add(workspaces[0]);
+            tabs[0].BackgroundImageLayout = ImageLayout.Stretch;
             currentWorkspace = workspaces[0];
+            currentWorkspace.BackgroundImageLayout = ImageLayout.Center;
+
+            trackBar1.Value = trackBar1.Maximum;
 
             ToolTip toolTip1 = new ToolTip();
 
@@ -104,6 +108,7 @@ namespace workspace_test
             panel5.Controls.Add(helpButton);
             helpButton.BackgroundImage = Image.FromFile(imgPath + "helpIcon.png");
             helpButton.BackgroundImageLayout = ImageLayout.Stretch;
+            helpButton.Click += help_Click;
 
             this.ActiveControl = workspaces[0];
             fileMenu.DropDownOpening += menu_Opening;
@@ -113,6 +118,12 @@ namespace workspace_test
             this.KeyDown += workspace_KeyDown;
             this.FormClosing += Form1_Closing;
             this.Resize += Form1_Resize;
+        }
+
+        private void help_Click(object sender, EventArgs e)
+        {
+            Form5 form5 = new Form5();
+            form5.ShowDialog();
         }
 
         private void saveAs_Click(object sender, EventArgs e)
@@ -283,7 +294,7 @@ namespace workspace_test
         {
             if(openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                currentWorkspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
+                currentWorkspace.BackgroundImage = SetImageOpacity(ResizeImage(openFileDialog1.FileName, new Size(1920, 1080)), 1);
             }
         }
 
@@ -340,8 +351,44 @@ namespace workspace_test
             //Console.WriteLine( "\"" + openFileDialog1.FileName + "\"");
             if (openFileDialog1.FileName != "openFileDialog1")
             {
-                currentWorkspace.BackgroundImage = SetImageOpacity(Image.FromFile(openFileDialog1.FileName), opacity);
+                currentWorkspace.BackgroundImage = SetImageOpacity(ResizeImage(openFileDialog1.FileName, new Size(1920, 1080)), opacity);
             }
+        }
+
+        private Image ResizeImage(string path, Size size)
+        {
+
+            Console.WriteLine($"width: {size.Width}, height: {size.Height}");
+
+            Image img = Image.FromFile(path);
+            Bitmap src = new Bitmap(img);
+
+            int sourceWidth = src.Width;
+            int sourceHeight = src.Height;
+
+            float nPercentW = (float)size.Width / (float)sourceWidth;
+            float nPercentH = (float)size.Height / (float)sourceHeight;
+
+            Console.WriteLine($"sourcew: {sourceWidth}, sourceheight: {sourceHeight}");
+
+            Console.WriteLine($"percentw: {nPercentW}, percentH: {nPercentH}");
+
+            float nPercent = Math.Min(nPercentW, nPercentH);
+
+            int destWidth = (int)(sourceWidth * nPercent);
+            int destHeight = (int)(sourceHeight * nPercent);
+
+            Console.WriteLine($"destwidth: {destWidth}, destHeight: {destHeight}");
+
+            Bitmap b = new Bitmap(destWidth, destHeight);
+            Graphics g = Graphics.FromImage(b);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.DrawImage(src, 0, 0, destWidth, destHeight);
+            g.Dispose();
+
+            b.Save(imgPath + "/tempImg/temp.jpg");
+
+            return b;
         }
     }
 }
