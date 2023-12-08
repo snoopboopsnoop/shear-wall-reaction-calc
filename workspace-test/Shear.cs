@@ -133,8 +133,7 @@ namespace workspace_test
                                             " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS";
 
                     buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
-                              " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
-                              " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("#,#0.###"));
+                              " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
                 }
                 else
                 {
@@ -144,12 +143,14 @@ namespace workspace_test
                     reaction.Range.Text += buffer;
 
                     buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" + 
-                              " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + 
-                              " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("#,#0.###"));
+                              " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
+
+                    if (i == tempLefts.Count() - 1)
+                    {
+                        buffer += " = " + 0.5 * temp.wx * (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5) +  " LBS\n";
+                    }
                 }
             }
-
-            buffer += (" LBS\n");
             reaction.Range.Text += buffer;
 
             reaction.Range.Text += ("Ry = 0.5 * wy * dimX lbs\n");
@@ -161,26 +162,27 @@ namespace workspace_test
                 if (i == 0)
                 {
                     reaction.Range.Text += ("RA = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
-                                            " * " + (Math.Round(temp.rect.Width / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
-                                            " = " + (Math.Round(temp.wy * temp.rect.Width) * 0.5).ToString("#,#0.###") + " LBS");
+                                            " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
+                                            " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
 
                     buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
-                              " * " + (Math.Round(temp.rect.Width / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + 
-                              " = " + (Math.Round(temp.wy * temp.rect.Width) * 0.5).ToString("#,#0.###"));
+                              " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
                 }
                 else
                 {
                     buffer += (" + 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
-                               " * " + (Math.Round(temp.rect.Width / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + 
-                               " = " + (Math.Round(temp.wy * temp.rect.Width) * 0.5).ToString("#,#0.###"));
+                               " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + 
+                               " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###"));
                     reaction.Range.Text += buffer;
 
                     buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
-                              " * " + (Math.Round(temp.rect.Width / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + 
-                              " = " + (Math.Round(temp.wy * temp.rect.Width) * 0.5).ToString("#,#0.###"));
+                              " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
+                    if(i == tempBottoms.Count() - 1)
+                    {
+                        buffer += " = " + 0.5 * temp.wy * (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5) + " LBS\n";
+                    }
                 }
             }
-            buffer += (" LBS");
             reaction.Range.Text += buffer;
             reaction.Range.InsertParagraphAfter();
 
