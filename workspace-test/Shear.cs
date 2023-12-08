@@ -16,6 +16,9 @@ using Word = Microsoft.Office.Interop.Word;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
+using Microsoft.Office.Interop.Word;
+using Newtonsoft.Json.Bson;
+using static System.Collections.Specialized.BitVector32;
 
 namespace workspace_test
 {
@@ -39,6 +42,13 @@ namespace workspace_test
         private float LD { get; set; }
         [JsonProperty]
         private float LS { get; set; }
+        [JsonProperty]
+        int rangeStart { get; set; }
+        [JsonProperty]
+        int rangeEnd { get; set; }
+        [JsonIgnore]
+        Range reactRange { get; set; }
+
 
         public Shear()
         {
@@ -83,7 +93,6 @@ namespace workspace_test
             {
                 Console.WriteLine("adding new data");
                 tempLefts.Add(new ShearData(left, LS, "left", "Wx" + (i + 1)));
-
             }
 
 
@@ -99,92 +108,7 @@ namespace workspace_test
             range.InsertBreak(Word.WdBreakType.wdPageBreak);
             //range.InsertParagraphAfter();
 
-            Word.Paragraph reactionHeader;
-            reactionHeader = Globals.doc.Content.Paragraphs.Add();
-            reactionHeader.Range.Underline = Word.WdUnderline.wdUnderlineSingle;
-            reactionHeader.Range.Font.Size = 18;
-            reactionHeader.Range.Font.Bold = 1;
-                
-
-            reactionHeader.Range.Text = "REACTIONS @ SHEAR LINES";
-            reactionHeader.Format.SpaceAfter = 16;
-
-            reactionHeader.Range.InsertParagraphAfter();
-
-            Word.Paragraph reaction;
-            reaction = Globals.doc.Content.Paragraphs.Add();
-            reaction.Range.Text = ("Rx = 0.5 * wx * dimY lbs");
-            reaction.Format.SpaceAfter = 0;
-            reaction.Format.SpaceBefore = 0;
-            reaction.Range.Font.Bold = 0;
-            reaction.Range.Font.Size = 12;
-            reaction.Range.Text += "";
-
-            string buffer = "";
-            foreach (var (left, i) in paramData.Item1.Select((left, i) => (left, i)))
-            {
-                ShearData temp = tempLefts[i];
-
-                if (i == 0)
-                {
-                    reaction.Range.Text += "R1 = 0.5 * " +
-                                            temp.wx.ToString("0,0.###") + " PLF" + 
-                                            " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("0,0.###") + Globals.unit +
-                                            " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS";
-
-                    buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
-                              " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
-                }
-                else
-                {
-                    buffer += (" + 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
-                               " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
-                               " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
-                    reaction.Range.Text += buffer;
-
-                    buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" + 
-                              " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
-
-                    if (i == tempLefts.Count() - 1)
-                    {
-                        buffer += " = " + 0.5 * temp.wx * (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5) +  " LBS\n";
-                    }
-                }
-            }
-            reaction.Range.Text += buffer;
-
-            reaction.Range.Text += ("Ry = 0.5 * wy * dimX lbs\n");
-
-            foreach (var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
-            {
-                ShearData temp = tempBottoms[i];
-
-                if (i == 0)
-                {
-                    reaction.Range.Text += ("RA = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
-                                            " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
-                                            " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
-
-                    buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
-                              " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
-                }
-                else
-                {
-                    buffer += (" + 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
-                               " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + 
-                               " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###"));
-                    reaction.Range.Text += buffer;
-
-                    buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
-                              " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
-                    if(i == tempBottoms.Count() - 1)
-                    {
-                        buffer += " = " + 0.5 * temp.wy * (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5) + " LBS\n";
-                    }
-                }
-            }
-            reaction.Range.Text += buffer;
-            reaction.Range.InsertParagraphAfter();
+            LoadReactions(tempLefts, tempBottoms);
 
             int wxMeasure = tempLefts.Min(p => (int)p.wx);
             int wyMeasure = tempBottoms.Min(p => (int)p.wy);
@@ -207,6 +131,140 @@ namespace workspace_test
             //Console.WriteLine("test0: " + tempLefts[0].visual);
 
             shearData = new Tuple<List<ShearData>, List<ShearData>>(tempLefts, tempBottoms);
+        }
+
+        public void updateReactions()
+        {
+            reactRange.Text = "";
+            reactRange.Text = "bobr\n";
+            reactRange.Text += "bobr2\n";
+            WriteReactions(reactRange, shearData.Item1, shearData.Item2);
+        }
+
+        private void LoadReactions(List<ShearData> tempLefts, List<ShearData> tempBottoms)
+        {
+            Word.Paragraph reactionHeader;
+            reactionHeader = Globals.doc.Content.Paragraphs.Add();
+            reactionHeader.Range.Underline = Word.WdUnderline.wdUnderlineSingle;
+            reactionHeader.Range.Font.Size = 18;
+            reactionHeader.Range.Font.Bold = 1;
+
+
+            reactionHeader.Range.Text = "REACTIONS @ SHEAR LINES";
+            reactionHeader.Format.SpaceAfter = 16;
+
+            reactionHeader.Range.InsertParagraphAfter();
+
+            reactRange = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+            rangeStart = reactRange.End;
+
+            Word.Paragraph reaction;
+            reaction = Globals.doc.Content.Paragraphs.Add();
+            reaction.Range.Text = ("Rx = 0.5 * wx * dimY lbs");
+            reaction.Format.SpaceAfter = 0;
+            reaction.Format.SpaceBefore = 0;
+            reaction.Range.Font.Bold = 0;
+            reaction.Range.Font.Size = 12;
+            reaction.Range.Text += "";
+
+            WriteReactions(reaction.Range, tempLefts, tempBottoms);
+
+            reactRange = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+            rangeEnd = reactRange.End;
+
+            reactRange = Globals.doc.Range(rangeStart, rangeEnd);
+        }
+
+        private void WriteReactions(Range range, List<ShearData> tempLefts, List<ShearData> tempBottoms)
+        {
+            string buffer = "";
+            foreach (var (left, i) in data.Item1.Select((left, i) => (left, i)))
+            {
+                ShearData temp = tempLefts[i];
+                if (tempLefts.Count() == 1)
+                {
+
+                    range.Text += "R1 = 0.5 * " +
+                                            temp.wx.ToString("0,0.###") + " PLF" +
+                                            " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("0,0.###") + Globals.unit +
+                                            " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS\n";
+                    range.Text += "R2 = 0.5 * " +
+                                            temp.wx.ToString("0,0.###") + " PLF" +
+                                            " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("0,0.###") + Globals.unit +
+                                            " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS\n";
+                    break;
+                }
+                else if (i == 0)
+                {
+                    range.Text += "R1 = 0.5 * " +
+                                            temp.wx.ToString("0,0.###") + " PLF" +
+                                            " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("0,0.###") + Globals.unit +
+                                            " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS";
+
+                    buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
+                              " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
+                }
+                else
+                {
+                    buffer += (" + 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
+                               " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
+                               " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
+                    range.Text += buffer;
+
+                    buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
+                              " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
+
+                    if (i == tempLefts.Count() - 1)
+                    {
+                        buffer += " = " + 0.5 * temp.wx * (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5) + " LBS\n";
+                    }
+                }
+            }
+            range.Text += buffer;
+
+            range.Text += ("Ry = 0.5 * wy * dimX lbs\n");
+
+            foreach (var (bottom, i) in data.Item2.Select((left, i) => (left, i)))
+            {
+                ShearData temp = tempBottoms[i];
+
+                if (tempBottoms.Count() == 1)
+                {
+
+                    range.Text += ("RA = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                                            " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
+                                            " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
+                    range.Text += ("RB = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                                            " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
+                                            " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS\n");
+                    break;
+                }
+                else if (i == 0)
+                {
+                    range.Text += ("RA = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                                            " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
+                                            " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
+
+                    buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                              " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
+                }
+                else
+                {
+                    buffer += (" + 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                               " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
+                               " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###"));
+                    range.Text += buffer;
+
+                    buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                              " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
+                    if (i == tempBottoms.Count() - 1)
+                    {
+                        buffer += " = " + 0.5 * temp.wy * (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5) + " LBS\n";
+                    }
+                }
+            }
+            range.Text += buffer;
+            range.InsertParagraphAfter();
         }
 
         public void Load()

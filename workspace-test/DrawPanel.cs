@@ -22,6 +22,7 @@ using Word = Microsoft.Office.Interop.Word;
 using Newtonsoft.Json.Converters;
 using System.Xml.Linq;
 using System.Security.Policy;
+using System.Linq.Expressions;
 
 namespace workspace_test
 {
@@ -200,13 +201,12 @@ namespace workspace_test
             if (path == "") path = loadedFile;
 
             Output output;
-            if (Globals.doc == null)
-            {
-                output = new Output(lines, shear, Globals.refMeasure, Globals.scale);
-            }
-            else
+            try
             {
                 output = new Output(lines, shear, Globals.refMeasure, Globals.scale, Globals.doc.FullName);
+            }
+            catch(System.Runtime.InteropServices.COMException) {
+                output = new Output(lines, shear, Globals.refMeasure, Globals.scale);
             }
 
             JsonSerializer serializer = new JsonSerializer();
@@ -507,6 +507,7 @@ namespace workspace_test
                     addW = addWeight.GetWAdd();
                     str = addWeight.GetOp();
                     Console.WriteLine("adding weight " + addW);
+                    shear.updateReactions();
                 }
 
                 List<ShearData> lefts = shear.GetShearData().Item1;
