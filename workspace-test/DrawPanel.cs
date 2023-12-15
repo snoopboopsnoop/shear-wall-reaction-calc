@@ -326,15 +326,15 @@ namespace workspace_test
                     //rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(((int)dims.Left) - 50, ((int)dims.Top) - 50, ((int)dims.Width) + 100, ((int)dims.Height) + 100), new ShearData()));
 
                     Rectangle bounds = new Rectangle(((int)dims.Left) - 100, ((int)dims.Top) - 100, ((int)dims.Width) + 200, ((int)dims.Height) + 200);
-                    if ((bounds.Height > this.Height || bounds.Top < this.Top) && (bounds.Width > this.Width || bounds.Left < this.Left))
+                    if (bounds.Height - bounds.Top > this.Height && bounds.Width - bounds.Left > this.Width)
                     {
                         bounds = new Rectangle((int)this.Left, (int)this.Top, (int)this.Width, (int)this.Height);
                     }
-                    else if(bounds.Height > this.Height || bounds.Top < this.Top)
+                    else if(bounds.Height + bounds.Top > this.Height)
                     {
                         bounds = new Rectangle((int)dims.Left - 100, (int)this.Top, (int)dims.Width + 200, (int)this.Height);
                     }
-                    else if(bounds.Width > this.Width || bounds.Left < this.Left)
+                    else if(bounds.Width + bounds.Left > this.Width)
                     {
                         bounds = new Rectangle((int)this.Left, (int)dims.Top - 100, (int)this.Width, (int)dims.Height + 200);
                     }
