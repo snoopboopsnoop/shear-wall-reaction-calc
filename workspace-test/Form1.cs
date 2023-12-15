@@ -110,7 +110,7 @@ namespace workspace_test
             helpButton.BackgroundImageLayout = ImageLayout.Stretch;
             helpButton.Click += help_Click;
 
-            this.ActiveControl = workspaces[0];
+
             fileMenu.DropDownOpening += menu_Opening;
             fileMenu.DropDownClosed += menu_Closing;
             imgMenu.DropDownOpening += menu_Opening;
@@ -118,7 +118,16 @@ namespace workspace_test
             this.KeyDown += workspace_KeyDown;
             this.FormClosing += Form1_Closing;
             this.Resize += Form1_Resize;
+
+            this.ActiveControl = workspaces[0];
+            this.Click += on_Click;
         }
+
+        private void on_Click(object sender, EventArgs e)
+        {
+            this.ActiveControl = workspaces[0];
+        }
+
 
         private void help_Click(object sender, EventArgs e)
         {

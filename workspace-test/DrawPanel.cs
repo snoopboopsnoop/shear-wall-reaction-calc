@@ -317,48 +317,64 @@ namespace workspace_test
 
         public void Export()
         {
-            Bitmap bm;
-
-            if (shear != null)
+            Bitmap screenshot;
+            using (Bitmap bm = new Bitmap(this.Width, this.Height))
             {
-                RectangleF dims = shear.GetDimensions();
-                //rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(((int)dims.Left) - 50, ((int)dims.Top) - 50, ((int)dims.Width) + 100, ((int)dims.Height) + 100), new ShearData()));
+                if (shear != null)
+                {
+                    RectangleF dims = shear.GetDimensions();
+                    //rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(((int)dims.Left) - 50, ((int)dims.Top) - 50, ((int)dims.Width) + 100, ((int)dims.Height) + 100), new ShearData()));
 
-                Rectangle bounds = new Rectangle(((int)dims.Left) - 100, ((int)dims.Top) - 100, ((int)dims.Width) + 200, ((int)dims.Height) + 200);
+                    Rectangle bounds = new Rectangle(((int)dims.Left) - 100, ((int)dims.Top) - 100, ((int)dims.Width) + 200, ((int)dims.Height) + 200);
+                    if ((bounds.Height > this.Height || bounds.Top < this.Top) && (bounds.Width > this.Width || bounds.Left < this.Left))
+                    {
+                        bounds = new Rectangle((int)this.Left, (int)this.Top, (int)this.Width, (int)this.Height);
+                    }
+                    else if(bounds.Height > this.Height || bounds.Top < this.Top)
+                    {
+                        bounds = new Rectangle((int)dims.Left - 100, (int)this.Top, (int)dims.Width + 200, (int)this.Height);
+                    }
+                    else if(bounds.Width > this.Width || bounds.Left < this.Left)
+                    {
+                        bounds = new Rectangle((int)this.Left, (int)dims.Top - 100, (int)this.Width, (int)dims.Height + 200);
+                    }
 
-                //Rectangle photo = new Rectangle(bounds.Width + this.Left)
+                    Console.WriteLine("max bounds: " + this.Left + ", " + this.Top + ", " + this.Width + ", " + this.Height);
+                    Console.WriteLine("bounds: " + bounds.Left + ", " + bounds.Top + ", " + this.Width + ", " + this.Height);
 
-                //bm = new Bitmap(bounds.Width, bounds.Height);
-                //Graphics g = Graphics.FromImage(bm);
+                    //Rectangle photo = new Rectangle(bounds.Width + this.Left)
 
-                Console.WriteLine("control: " + this.Left + ", " + this.Top);
+                    //bm = new Bitmap(bounds.Width, bounds.Height);
+                    //Graphics g = Graphics.FromImage(bm);
 
-                //g.CopyFromScreen(bounds.Left + this.Left, bounds.Top + this.Top, 0, 0, bm.Size, CopyPixelOperation.SourceCopy);
-                //DrawToBitmap(bm, bounds);
+                    Console.WriteLine("control: " + this.Left + ", " + this.Top);
 
-                bm = new Bitmap(this.Width, this.Height);
-                DrawToBitmap(bm, new Rectangle(this.Left, this.Top, this.Width, this.Height));
+                    //g.CopyFromScreen(bounds.Left + this.Left, bounds.Top + this.Top, 0, 0, bm.Size, CopyPixelOperation.SourceCopy);
+                    //DrawToBitmap(bm, bounds);
 
-                bm = bm.Clone(bounds, bm.PixelFormat);
-;
-                Console.WriteLine("rectangel: " + dims.Width + " x " + dims.Height);
-                Console.WriteLine("location: " + dims.Left + ", " + dims.Top);
-                
-                Console.WriteLine("bitmap: " + bm.PhysicalDimension);
+                    DrawToBitmap(bm, new Rectangle(this.Left, this.Top, this.Width, this.Height));
+
+                    screenshot = bm.Clone(bounds, bm.PixelFormat);
+                    ;
+                    Console.WriteLine("rectangel: " + dims.Width + " x " + dims.Height);
+                    Console.WriteLine("location: " + dims.Left + ", " + dims.Top);
+
+                    Console.WriteLine("bitmap: " + bm.PhysicalDimension);
+                }
+                else
+                {
+                    screenshot = new Bitmap(this.Width, this.Height);
+                    this.DrawToBitmap(bm, new Rectangle(0, 0, this.Width, this.Height));
+                }
+                Invalidate();
             }
-            else
+
+            if (screenshot.Width > screenshot.Height)
             {
-                bm = new Bitmap(this.Width, this.Height);
-                this.DrawToBitmap(bm, new Rectangle(0, 0, this.Width, this.Height));
-            }
-            Invalidate();
-
-            if(bm.Width > bm.Height)
-            {
-                bm.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                screenshot.RotateFlip(RotateFlipType.Rotate90FlipNone);
             }
 
-            bm.Save(tempFile, ImageFormat.Jpeg);
+            screenshot.Save(tempFile, ImageFormat.Jpeg);
 
             Word.Paragraph image;
             object range = Globals.doc.Content.Start;
@@ -382,7 +398,7 @@ namespace workspace_test
 
             float scale = (Globals.word.InchesToPoints(8.5F) / shape.Height);
 
-            if(shape.Width * ((shape.ScaleWidth * scale) / 100) >= Globals.word.InchesToPoints(6.0F))
+            if (shape.Width * ((shape.ScaleWidth * scale) / 100) >= Globals.word.InchesToPoints(6.0F))
             {
                 scale = Globals.word.InchesToPoints(6.0F) / shape.Width;
             }
@@ -412,7 +428,7 @@ namespace workspace_test
 
             //top.Text = "bob";
 
-            bm.Dispose();
+            screenshot.Dispose();
             File.Delete(tempFile);
         }
 
