@@ -46,6 +46,7 @@ namespace workspace_test
         int rangeEnd { get; set; }
         [JsonIgnore]
         Range reactRange { get; set; }
+        [JsonIgnore]
         Paragraph reaction { get; set; }
 
 
@@ -153,14 +154,14 @@ namespace workspace_test
 
             reactionHeader.Range.InsertParagraphAfter();
 
-            reaction = Globals.doc.Content.Paragraphs.Add();
-
             WriteReactions(tempLefts, tempBottoms);
 
         }
 
         private void WriteReactions(List<ShearData> tempLefts, List<ShearData> tempBottoms)
         {
+            reaction = Globals.doc.Content.Paragraphs.Add();
+
             reactRange = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
             rangeStart = reactRange.End;
 
@@ -268,7 +269,9 @@ namespace workspace_test
 
         public void Load()
         {
-            foreach(ShearData data in shearData.Item1)
+            reactRange = Globals.doc.Range(rangeStart, rangeEnd);
+
+            foreach (ShearData data in shearData.Item1)
             {
                 data.Load();
             }

@@ -236,7 +236,15 @@ namespace workspace_test
                 Globals.refMeasure = input.refMeasure;
                 if(input.docPath != "")
                 {
-                    if (Globals.word.Visible == false) Globals.word.Visible = true;
+                    try
+                    {
+                        if (Globals.word.Visible == false) Globals.word.Visible = true;
+                    }
+                    catch (Exception)
+                    {
+                        Globals.word = new Word.Application();
+                        Globals.word.Visible = true;
+                    }   
                     Globals.doc = Globals.word.Documents.Open(input.docPath);
                 }
                 lines = input.lines;
