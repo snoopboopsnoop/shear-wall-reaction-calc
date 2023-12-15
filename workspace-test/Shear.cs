@@ -155,8 +155,6 @@ namespace workspace_test
 
             reaction = Globals.doc.Content.Paragraphs.Add();
 
-            
-
             WriteReactions(tempLefts, tempBottoms);
 
         }
@@ -212,7 +210,7 @@ namespace workspace_test
 
                     if (i == tempLefts.Count() - 1)
                     {
-                        buffer += " = " + 0.5 * temp.wx * (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5) + " LBS\n";
+                        buffer += " = " + (0.5 * temp.wx * (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5)).ToString("#,#0.###") + " LBS\n";
                     }
                 }
             }
@@ -248,14 +246,14 @@ namespace workspace_test
                 {
                     buffer += (" + 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
                                " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
-                               " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###"));
+                               " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
                     reaction.Range.Text += buffer;
 
                     buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
                               " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
                     if (i == tempBottoms.Count() - 1)
                     {
-                        buffer += " = " + 0.5 * temp.wy * (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5) + " LBS\n";
+                        buffer += " = " + (0.5 * temp.wy * (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5)).ToString("#,#0.###") + " LBS\n";
                     }
                 }
             }

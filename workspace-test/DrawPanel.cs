@@ -506,32 +506,37 @@ namespace workspace_test
                 {
                     addW = addWeight.GetWAdd();
                     str = addWeight.GetOp();
+                    Console.WriteLine("before: " + shear.GetShearData().Item1[0].wx);
                     Console.WriteLine("adding weight " + addW);
+                    
+
+                    List<ShearData> lefts = shear.GetShearData().Item1;
+                    List<ShearData> bottoms = shear.GetShearData().Item2;
+
+                    for (int i = 0; i < lefts.Count; ++i)
+                    //foreach (var data in lefts)
+                    {
+                        if (lefts[i].visual == hoverWeight)
+                        {
+                            lefts[i].AddWeight(addW, str);
+                            Console.WriteLine("added " + addW + " to wx");
+                            Invalidate();
+                        }
+                    }
+                    for (int i = 0; i < bottoms.Count; ++i)
+                    //foreach (var data in bottoms)
+                    {
+                        if (bottoms[i].visual == hoverWeight)
+                        {
+                            bottoms[i].AddWeight(addW, str);
+                            Console.WriteLine("added " + addW + " to wy");
+                            Invalidate();
+                        }
+                    }
+
                     shear.updateReactions();
-                }
 
-                List<ShearData> lefts = shear.GetShearData().Item1;
-                List<ShearData> bottoms = shear.GetShearData().Item2;
-
-                for(int i = 0; i < lefts.Count; ++i)
-                //foreach (var data in lefts)
-                {
-                    if (lefts[i].visual == hoverWeight)
-                    {
-                        lefts[i].AddWeight(addW, str);
-                        Console.WriteLine("added " + addW + " to wx");
-                        Invalidate();
-                    }
-                }
-                for (int i = 0; i < bottoms.Count; ++i)
-                //foreach (var data in bottoms)
-                {
-                    if (bottoms[i].visual == hoverWeight)
-                    {
-                        bottoms[i].AddWeight(addW, str);
-                        Console.WriteLine("added " + addW + " to wy");
-                        Invalidate();
-                    }
+                    Console.WriteLine("after: " + shear.GetShearData().Item1[0].wx);
                 }
             }
             else if(item.Text == "Print Workspace to Active Word Doc")
