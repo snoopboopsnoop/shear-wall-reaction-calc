@@ -15,9 +15,7 @@ using System.Threading.Tasks;
 using Word = Microsoft.Office.Interop.Word;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
-using System.Security.Cryptography;
 using Microsoft.Office.Interop.Word;
-using Newtonsoft.Json.Bson;
 using static System.Collections.Specialized.BitVector32;
 
 namespace workspace_test
@@ -135,10 +133,11 @@ namespace workspace_test
 
         public void updateReactions()
         {
+            Console.WriteLine("updating reaction");
             reactRange.Text = "";
             reactRange.Text = "bobr\n";
             reactRange.Text += "bobr2\n";
-            WriteReactions(reactRange, shearData.Item1, shearData.Item2);
+            WriteReactions(reactRange, shearData.Item1, shearData.Item2, true);
         }
 
         private void LoadReactions(List<ShearData> tempLefts, List<ShearData> tempBottoms)
@@ -160,12 +159,10 @@ namespace workspace_test
 
             Word.Paragraph reaction;
             reaction = Globals.doc.Content.Paragraphs.Add();
-            reaction.Range.Text = ("Rx = 0.5 * wx * dimY lbs");
             reaction.Format.SpaceAfter = 0;
             reaction.Format.SpaceBefore = 0;
             reaction.Range.Font.Bold = 0;
             reaction.Range.Font.Size = 12;
-            reaction.Range.Text += "";
 
             WriteReactions(reaction.Range, tempLefts, tempBottoms);
 
@@ -175,8 +172,11 @@ namespace workspace_test
             reactRange = Globals.doc.Range(rangeStart, rangeEnd);
         }
 
-        private void WriteReactions(Range range, List<ShearData> tempLefts, List<ShearData> tempBottoms)
+        private void WriteReactions(Range range, List<ShearData> tempLefts, List<ShearData> tempBottoms, bool update = false)
         {
+            range.Text = ("Rx = 0.5 * wx * dimY lbs\n");
+            range.Text += "bobr";
+
             string buffer = "";
             foreach (var (left, i) in data.Item1.Select((left, i) => (left, i)))
             {
@@ -188,10 +188,12 @@ namespace workspace_test
                                             temp.wx.ToString("0,0.###") + " PLF" +
                                             " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("0,0.###") + Globals.unit +
                                             " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS\n";
+                    if (update) range.Text += "\n";
                     range.Text += "R2 = 0.5 * " +
                                             temp.wx.ToString("0,0.###") + " PLF" +
                                             " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("0,0.###") + Globals.unit +
                                             " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS\n";
+                    if (update) range.Text += "\n";
                     break;
                 }
                 else if (i == 0)
@@ -200,6 +202,7 @@ namespace workspace_test
                                             temp.wx.ToString("0,0.###") + " PLF" +
                                             " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("0,0.###") + Globals.unit +
                                             " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS";
+                    if (update) range.Text += "\n";
 
                     buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
                               " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
@@ -210,6 +213,7 @@ namespace workspace_test
                                " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
                                " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
                     range.Text += buffer;
+                    if (update) range.Text += "\n";
 
                     buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
                               " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
@@ -217,10 +221,12 @@ namespace workspace_test
                     if (i == tempLefts.Count() - 1)
                     {
                         buffer += " = " + 0.5 * temp.wx * (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5) + " LBS\n";
+                        if (update) range.Text += "\n";
                     }
                 }
             }
             range.Text += buffer;
+            if (update) range.Text += "\n";
 
             range.Text += ("Ry = 0.5 * wy * dimX lbs\n");
 
