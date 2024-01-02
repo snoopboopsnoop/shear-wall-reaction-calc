@@ -117,6 +117,7 @@ namespace workspace_test
 
             // settings to allow importing images behind
             BackColor = Color.White;
+            BackgroundImage = null;
             BackgroundImageLayout = ImageLayout.Center;
             DoubleBuffered = true;
 

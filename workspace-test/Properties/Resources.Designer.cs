@@ -63,6 +63,26 @@ namespace workspace_test.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap helpIcon {
+            get {
+                object obj = ResourceManager.GetObject("helpIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap openIcon {
+            get {
+                object obj = ResourceManager.GetObject("openIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap penIcon {
             get {
                 object obj = ResourceManager.GetObject("penIcon", resourceCulture);
@@ -76,6 +96,26 @@ namespace workspace_test.Properties {
         internal static System.Drawing.Bitmap pointerIcon {
             get {
                 object obj = ResourceManager.GetObject("pointerIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap saveAsIcon {
+            get {
+                object obj = ResourceManager.GetObject("saveAsIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap saveIcon {
+            get {
+                object obj = ResourceManager.GetObject("saveIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
