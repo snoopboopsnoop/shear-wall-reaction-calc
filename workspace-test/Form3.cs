@@ -19,7 +19,7 @@ namespace workspace_test
         private float HB1 = 0;
         private float HS1 = 0;
         private float WW1 = 0;
-        private float LD = 0;
+        private float LA = 0;
 
         private float HP2 = 0;
         private float HA2 = 0;
@@ -36,10 +36,11 @@ namespace workspace_test
             InitializeComponent();
         }
 
-        public Form3(float paramLD)
+        public Form3(float paramLA)
         {
             InitializeComponent();
-            LD = paramLD;
+            LA = paramLA;
+
             textBox1.Text = HP1.ToString();
             textBox2.Text = HA1.ToString();
             textBox3.Text = HB1.ToString();
@@ -223,10 +224,10 @@ namespace workspace_test
 
         private void button1_Click(object sender, EventArgs e)
         {
-            float w1 = LD * WW1 * (0.5F * (HA1 + HB1) + HP1 + HS1);
-            float w2 = LD * WW2 * (0.5F * (HA2 + HB2) + HP2 + HS2);
-            op += "(" + LD + " * " + WW1 + " * (0.5 * (" + HA1 + " + " + HB1 + ") + " + HP1 + " + " + HS1 + "))";
-            op += " + (" + LD + " * " + WW2 + " * (0.5 * (" + HA2 + " + " + HB2 + ") + " + HP2 + " + " + HS2 + "))";
+            float w1 = LA * WW1 * (0.5F * (HA1 + HB1) + HP1 + HS1);
+            float w2 = LA * WW2 * (0.5F * (HA2 + HB2) + HP2 + HS2);
+            op += "(" + LA + " g * " + WW1 + " LBS * (0.5 * (" + HA1 + "\' + " + HB1 + "\') + " + HP1 + "\' + " + HS1 + "\'))";
+            op += " + (" + LA + " g * " + WW2 + " LBS * (0.5 * (" + HA2 + "\' + " + HB2 + "\') + " + HP2 + "\' + " + HS2 + "\'))";
 
             wAdd = w1 + w2;
 

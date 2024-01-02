@@ -524,7 +524,7 @@ namespace workspace_test
             else if(item.Text == "Add Weight...")
             {
                 float addW = 0;
-                Form3 addWeight = new Form3(LD);
+                Form3 addWeight = new Form3(LA);
                 string str = "";
                 if (addWeight.ShowDialog() == DialogResult.OK)
                 {
