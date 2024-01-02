@@ -302,6 +302,7 @@ namespace workspace_test
             return loadedFile;
         }
 
+        // deletes currently selected lines
         public void deleteSelected()
         {
             foreach (var (pos, i) in selectedLines.Select((value, i) => (value, i)))
@@ -315,6 +316,7 @@ namespace workspace_test
             Invalidate();
         }
 
+        // exports formatted screenshot of workspace to current word document
         public void Export()
         {
             Bitmap screenshot;
@@ -333,7 +335,6 @@ namespace workspace_test
                     float top = (dims.Top - 100 < 0) ? 0 : dims.Top - 100;
                     temp = dims.Height + 2 * (dims.Top - top);
                     float height = (temp > this.Height) ? this.Height : temp;
-
 
                     Rectangle bounds = new Rectangle((int)left, (int)top, (int)width, (int)height);
 
@@ -485,12 +486,12 @@ namespace workspace_test
             {
                 if (selectedLines.Count() != 1)
                 {
-                    Form2 error = new Form2("Error: Need to select 1 line to set scale");
+                    Error error = new Error("Error: Need to select 1 line to set scale");
                     error.ShowDialog();
                 }
                 else
                 {
-                    Form4 scaleForm = new Form4(this, (int)Magnitude(lines[selectedLines[0]]), Globals.unit);
+                    ScaleScreen scaleForm = new ScaleScreen(this, (int)Magnitude(lines[selectedLines[0]]), Globals.unit);
                     scaleForm.ShowDialog();
                 }
             }
@@ -501,7 +502,7 @@ namespace workspace_test
             else if(item.Text == "Add Weight...")
             {
                 float addW = 0;
-                Form3 addWeight = new Form3(LA);
+                AddWeightScreen addWeight = new AddWeightScreen(LA);
                 string str = "";
                 if (addWeight.ShowDialog() == DialogResult.OK)
                 {

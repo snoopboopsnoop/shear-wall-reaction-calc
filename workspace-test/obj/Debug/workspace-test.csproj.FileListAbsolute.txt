@@ -1,5 +1,4 @@
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.csproj.AssemblyReference.cache
-C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form1.resources
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Properties.Resources.resources
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.csproj.GenerateResource.cache
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.csproj.CoreCompileInputs.cache
@@ -8,9 +7,6 @@ C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace-test.pdb
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.exe
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.pdb
-C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form2.resources
-C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form3.resources
-C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form4.resources
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.csproj.ResolveComReference.cache
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\System.Buffers.dll
@@ -37,4 +33,9 @@ C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\bin\Debug\workspace-test.application
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.exe.manifest
 C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace-test.application
-C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Form5.resources
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Main.resources
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.Error.resources
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.TutorialScreen.resources
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.AddWeightScreen.resources
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.ScaleScreen.resources
+C:\Users\croom-oc\source\repos\workspace-test\workspace-test\obj\Debug\workspace_test.WeightScreen.resources

@@ -10,7 +10,7 @@ namespace workspace_test
     internal static class Program
     {
 
-        private static Form1 form;
+        private static Main form;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -19,7 +19,7 @@ namespace workspace_test
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            form = new Form1();
+            form = new Main();
             Application.ApplicationExit += OnApplicationExit;
             Application.Run(form);
         }
