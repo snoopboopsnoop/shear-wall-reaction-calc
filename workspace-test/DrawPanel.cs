@@ -320,11 +320,12 @@ namespace workspace_test
             Bitmap screenshot;
             using (Bitmap bm = new Bitmap(this.Width, this.Height))
             {
+                // screenshot around building if analysis run
                 if (shear != null)
                 {
                     RectangleF dims = shear.GetDimensions();
-                    //rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(((int)dims.Left) - 50, ((int)dims.Top) - 50, ((int)dims.Width) + 100, ((int)dims.Height) + 100), new ShearData()));
 
+                    // draw 100 pixel margin around shear and resize if out of bounds
                     float left = (dims.Left - 100 < 0) ? 0 : dims.Left - 100;
                     float temp = dims.Width + 2 * (dims.Left - left);
                     float width = (temp > this.Width) ? this.Width : temp;
@@ -335,43 +336,19 @@ namespace workspace_test
 
 
                     Rectangle bounds = new Rectangle((int)left, (int)top, (int)width, (int)height);
-                    Console.WriteLine("prev bounds: " + bounds.Left + ", " + bounds.Top + ", " + this.Width + ", " + this.Height);
 
-                    //if ((bounds.Height - bounds.Top > this.Height && bounds.Width - bounds.Left > this.Width) || (bounds.Left < 0 && bounds.Top < 0))
-                    //{
-                    //    bounds = new Rectangle((int)this.Left, (int)this.Top, (int)this.Width, (int)this.Height);
-                    //}
-                    //else if(bounds.Height + bounds.Top > this.Height || bounds.Top < 0)
-                    //{
-                    //    bounds = new Rectangle((int)dims.Left - 100, (int)this.Top, (int)dims.Width + 200, (int)this.Height);
-                    //}
-                    //else if(bounds.Width + bounds.Left > this.Width || bounds.Left < 0)
-                    //{
-                    //    bounds = new Rectangle((int)this.Left, (int)dims.Top - 100, (int)this.Width, (int)dims.Height + 200);
-                    //}
-
-                    Console.WriteLine("max bounds: " + this.Left + ", " + this.Top + ", " + this.Width + ", " + this.Height);
-                    Console.WriteLine("bounds: " + bounds.Left + ", " + bounds.Top + ", " + this.Width + ", " + this.Height);
-
-                    //Rectangle photo = new Rectangle(bounds.Width + this.Left)
-
-                    //bm = new Bitmap(bounds.Width, bounds.Height);
-                    //Graphics g = Graphics.FromImage(bm);
-
-                    Console.WriteLine("control: " + this.Left + ", " + this.Top);
-
-                    //g.CopyFromScreen(bounds.Left + this.Left, bounds.Top + this.Top, 0, 0, bm.Size, CopyPixelOperation.SourceCopy);
-                    //DrawToBitmap(bm, bounds);
+                    // debug
+                    //Console.WriteLine("max bounds: " + this.Left + ", " + this.Top + ", " + this.Width + ", " + this.Height);
+                    //Console.WriteLine("bounds: " + bounds.Left + ", " + bounds.Top + ", " + this.Width + ", " + this.Height);
 
                     DrawToBitmap(bm, new Rectangle(this.Left, this.Top, this.Width, this.Height));
 
                     screenshot = bm.Clone(bounds, bm.PixelFormat);
                     
-                    Console.WriteLine("rectangel: " + dims.Width + " x " + dims.Height);
-                    Console.WriteLine("location: " + dims.Left + ", " + dims.Top);
-
-                    Console.WriteLine("bitmap: " + bm.PhysicalDimension);
+                    // debug
+                    //Console.WriteLine("bitmap: " + bm.PhysicalDimension);
                 }
+                // if no shear then screenshot whole workspace
                 else
                 {
                     screenshot = new Bitmap(this.Width, this.Height);
@@ -380,11 +357,13 @@ namespace workspace_test
                 Invalidate();
             }
 
+            // assign portrait or landscape based on screenshot dimensions
             if (screenshot.Width > screenshot.Height)
             {
                 screenshot.RotateFlip(RotateFlipType.Rotate270FlipNone);
             }
 
+            // Docs doesn't take bmps I don't think, save temporary jpg to be inserted
             screenshot.Save(tempFile, ImageFormat.Jpeg);
 
             Word.Paragraph image;
@@ -392,21 +371,19 @@ namespace workspace_test
             Word.Range rangeStart = Globals.doc.Range(range, range);
 
             image = Globals.doc.Content.Paragraphs.Add(rangeStart);
-
             image.Format.SpaceBefore = 16;
-
             image.Range.Underline = Word.WdUnderline.wdUnderlineNone;
 
             Globals.word.Visible = true;
 
+            // insert workspace export
             Word.InlineShape shape = image.Range.InlineShapes.AddPicture(tempFile, Globals.missing, Globals.missing, rangeStart);
 
             shape.Range.Underline = Word.WdUnderline.wdUnderlineNone;
             shape.Range.Font.Bold = 0;
             image.Format.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
 
-            //Console.WriteLine("Height: " + shape.Height + ", measure: " + Globals.word.InchesToPoints(8.5F) + ", scale: " + shape.ScaleHeight);
-
+            // scale image to fit page using 8.5" x 11" size
             float scale = (Globals.word.InchesToPoints(8.5F) / shape.Height);
 
             if (shape.Width * ((shape.ScaleWidth * scale) / 100) >= Globals.word.InchesToPoints(6.0F))
@@ -417,27 +394,16 @@ namespace workspace_test
             shape.ScaleHeight = shape.ScaleHeight * scale;
             shape.ScaleWidth = shape.ScaleHeight;
 
-            Console.WriteLine(shape.ScaleWidth);
-
-            Console.WriteLine("top1: " + rangeStart.Text);
-
             rangeStart.Underline = Word.WdUnderline.wdUnderlineNone;
 
             rangeStart.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
 
             // this needs to be here or else it breaks and i don't know why
-            rangeStart.Text = "bbobr";
-
-            Console.WriteLine("top2: " + rangeStart.Text);
+            rangeStart.Text = "bobr";
 
             rangeStart.Underline = Word.WdUnderline.wdUnderlineNone;
 
-            //top.Text = "bobr";
-            Console.WriteLine("top3: " + rangeStart.Text);
-
             rangeStart.InsertBreak(Word.WdBreakType.wdPageBreak);
-
-            //top.Text = "bob";
 
             screenshot.Dispose();
             File.Delete(tempFile);
