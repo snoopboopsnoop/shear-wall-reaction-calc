@@ -325,19 +325,30 @@ namespace workspace_test
                     RectangleF dims = shear.GetDimensions();
                     //rects.Add(new Tuple<RectangleF, ShearData>(new RectangleF(((int)dims.Left) - 50, ((int)dims.Top) - 50, ((int)dims.Width) + 100, ((int)dims.Height) + 100), new ShearData()));
 
-                    Rectangle bounds = new Rectangle(((int)dims.Left) - 100, ((int)dims.Top) - 100, ((int)dims.Width) + 200, ((int)dims.Height) + 200);
-                    if (bounds.Height - bounds.Top > this.Height && bounds.Width - bounds.Left > this.Width)
-                    {
-                        bounds = new Rectangle((int)this.Left, (int)this.Top, (int)this.Width, (int)this.Height);
-                    }
-                    else if(bounds.Height + bounds.Top > this.Height)
-                    {
-                        bounds = new Rectangle((int)dims.Left - 100, (int)this.Top, (int)dims.Width + 200, (int)this.Height);
-                    }
-                    else if(bounds.Width + bounds.Left > this.Width)
-                    {
-                        bounds = new Rectangle((int)this.Left, (int)dims.Top - 100, (int)this.Width, (int)dims.Height + 200);
-                    }
+                    float left = (dims.Left - 100 < 0) ? 0 : dims.Left - 100;
+                    float temp = dims.Width + 2 * (dims.Left - left);
+                    float width = (temp > this.Width) ? this.Width : temp;
+
+                    float top = (dims.Top - 100 < 0) ? 0 : dims.Top - 100;
+                    temp = dims.Height + 2 * (dims.Top - top);
+                    float height = (temp > this.Height) ? this.Height : temp;
+
+
+                    Rectangle bounds = new Rectangle((int)left, (int)top, (int)width, (int)height);
+                    Console.WriteLine("prev bounds: " + bounds.Left + ", " + bounds.Top + ", " + this.Width + ", " + this.Height);
+
+                    //if ((bounds.Height - bounds.Top > this.Height && bounds.Width - bounds.Left > this.Width) || (bounds.Left < 0 && bounds.Top < 0))
+                    //{
+                    //    bounds = new Rectangle((int)this.Left, (int)this.Top, (int)this.Width, (int)this.Height);
+                    //}
+                    //else if(bounds.Height + bounds.Top > this.Height || bounds.Top < 0)
+                    //{
+                    //    bounds = new Rectangle((int)dims.Left - 100, (int)this.Top, (int)dims.Width + 200, (int)this.Height);
+                    //}
+                    //else if(bounds.Width + bounds.Left > this.Width || bounds.Left < 0)
+                    //{
+                    //    bounds = new Rectangle((int)this.Left, (int)dims.Top - 100, (int)this.Width, (int)dims.Height + 200);
+                    //}
 
                     Console.WriteLine("max bounds: " + this.Left + ", " + this.Top + ", " + this.Width + ", " + this.Height);
                     Console.WriteLine("bounds: " + bounds.Left + ", " + bounds.Top + ", " + this.Width + ", " + this.Height);
@@ -355,7 +366,7 @@ namespace workspace_test
                     DrawToBitmap(bm, new Rectangle(this.Left, this.Top, this.Width, this.Height));
 
                     screenshot = bm.Clone(bounds, bm.PixelFormat);
-                    ;
+                    
                     Console.WriteLine("rectangel: " + dims.Width + " x " + dims.Height);
                     Console.WriteLine("location: " + dims.Left + ", " + dims.Top);
 
@@ -371,16 +382,16 @@ namespace workspace_test
 
             if (screenshot.Width > screenshot.Height)
             {
-                screenshot.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                screenshot.RotateFlip(RotateFlipType.Rotate270FlipNone);
             }
 
             screenshot.Save(tempFile, ImageFormat.Jpeg);
 
             Word.Paragraph image;
             object range = Globals.doc.Content.Start;
-            Word.Range top = Globals.doc.Range(range, range);
+            Word.Range rangeStart = Globals.doc.Range(range, range);
 
-            image = Globals.doc.Content.Paragraphs.Add(top);
+            image = Globals.doc.Content.Paragraphs.Add(rangeStart);
 
             image.Format.SpaceBefore = 16;
 
@@ -388,7 +399,7 @@ namespace workspace_test
 
             Globals.word.Visible = true;
 
-            Word.InlineShape shape = image.Range.InlineShapes.AddPicture(tempFile, Globals.missing, Globals.missing, top);
+            Word.InlineShape shape = image.Range.InlineShapes.AddPicture(tempFile, Globals.missing, Globals.missing, rangeStart);
 
             shape.Range.Underline = Word.WdUnderline.wdUnderlineNone;
             shape.Range.Font.Bold = 0;
@@ -408,23 +419,23 @@ namespace workspace_test
 
             Console.WriteLine(shape.ScaleWidth);
 
-            Console.WriteLine("top1: " + top.Text);
+            Console.WriteLine("top1: " + rangeStart.Text);
 
-            top.Underline = Word.WdUnderline.wdUnderlineNone;
+            rangeStart.Underline = Word.WdUnderline.wdUnderlineNone;
 
-            top.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+            rangeStart.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
 
             // this needs to be here or else it breaks and i don't know why
-            top.Text = "bbobr";
+            rangeStart.Text = "bbobr";
 
-            Console.WriteLine("top2: " + top.Text);
+            Console.WriteLine("top2: " + rangeStart.Text);
 
-            top.Underline = Word.WdUnderline.wdUnderlineNone;
+            rangeStart.Underline = Word.WdUnderline.wdUnderlineNone;
 
             //top.Text = "bobr";
-            Console.WriteLine("top3: " + top.Text);
+            Console.WriteLine("top3: " + rangeStart.Text);
 
-            top.InsertBreak(Word.WdBreakType.wdPageBreak);
+            rangeStart.InsertBreak(Word.WdBreakType.wdPageBreak);
 
             //top.Text = "bob";
 
