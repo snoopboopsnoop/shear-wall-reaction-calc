@@ -131,7 +131,8 @@
             this.checkBox1.Location = new System.Drawing.Point(333, 37);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(101, 20);
-            this.checkBox1.TabIndex = 61;
+            this.checkBox1.TabIndex = 11;
+            this.checkBox1.TabStop = false;
             this.checkBox1.Text = "same weight";
             this.checkBox1.UseVisualStyleBackColor = true;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
@@ -140,7 +141,7 @@
             // 
             this.label32.AutoSize = true;
             this.label32.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label32.Location = new System.Drawing.Point(482, 31);
+            this.label32.Location = new System.Drawing.Point(520, 32);
             this.label32.Name = "label32";
             this.label32.Size = new System.Drawing.Size(106, 25);
             this.label32.TabIndex = 60;
@@ -150,7 +151,7 @@
             // 
             this.label31.AutoSize = true;
             this.label31.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label31.Location = new System.Drawing.Point(163, 31);
+            this.label31.Location = new System.Drawing.Point(158, 31);
             this.label31.Name = "label31";
             this.label31.Size = new System.Drawing.Size(120, 25);
             this.label31.TabIndex = 59;
@@ -185,7 +186,7 @@
             this.textBox6.Location = new System.Drawing.Point(549, 90);
             this.textBox6.Name = "textBox6";
             this.textBox6.Size = new System.Drawing.Size(77, 20);
-            this.textBox6.TabIndex = 56;
+            this.textBox6.TabIndex = 5;
             this.textBox6.TextChanged += new System.EventHandler(this.textBox6_TextChanged);
             // 
             // label23
@@ -265,7 +266,7 @@
             this.textBox7.Location = new System.Drawing.Point(549, 137);
             this.textBox7.Name = "textBox7";
             this.textBox7.Size = new System.Drawing.Size(77, 20);
-            this.textBox7.TabIndex = 49;
+            this.textBox7.TabIndex = 6;
             this.textBox7.TextChanged += new System.EventHandler(this.textBox7_TextChanged);
             // 
             // textBox8
@@ -273,7 +274,7 @@
             this.textBox8.Location = new System.Drawing.Point(549, 187);
             this.textBox8.Name = "textBox8";
             this.textBox8.Size = new System.Drawing.Size(77, 20);
-            this.textBox8.TabIndex = 48;
+            this.textBox8.TabIndex = 7;
             this.textBox8.TextChanged += new System.EventHandler(this.textBox8_TextChanged);
             // 
             // textBox9
@@ -281,7 +282,7 @@
             this.textBox9.Location = new System.Drawing.Point(549, 221);
             this.textBox9.Name = "textBox9";
             this.textBox9.Size = new System.Drawing.Size(77, 20);
-            this.textBox9.TabIndex = 47;
+            this.textBox9.TabIndex = 8;
             this.textBox9.Text = "0";
             this.textBox9.TextChanged += new System.EventHandler(this.textBox9_TextChanged);
             // 
@@ -290,7 +291,7 @@
             this.textBox10.Location = new System.Drawing.Point(549, 256);
             this.textBox10.Name = "textBox10";
             this.textBox10.Size = new System.Drawing.Size(77, 20);
-            this.textBox10.TabIndex = 46;
+            this.textBox10.TabIndex = 9;
             this.textBox10.Text = "0";
             this.textBox10.TextChanged += new System.EventHandler(this.textBox10_TextChanged);
             // 
@@ -347,7 +348,7 @@
             this.textBox5.Location = new System.Drawing.Point(225, 256);
             this.textBox5.Name = "textBox5";
             this.textBox5.Size = new System.Drawing.Size(77, 20);
-            this.textBox5.TabIndex = 41;
+            this.textBox5.TabIndex = 4;
             this.textBox5.TextChanged += new System.EventHandler(this.textBox5_TextChanged);
             // 
             // label4
@@ -427,7 +428,7 @@
             this.button1.Location = new System.Drawing.Point(348, 340);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 20;
+            this.button1.TabIndex = 10;
             this.button1.Text = "Add Weight";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
@@ -437,7 +438,7 @@
             this.textBox4.Location = new System.Drawing.Point(225, 220);
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(77, 20);
-            this.textBox4.TabIndex = 19;
+            this.textBox4.TabIndex = 3;
             this.textBox4.TextChanged += new System.EventHandler(this.textBox4_TextChanged);
             // 
             // textBox3
@@ -445,7 +446,7 @@
             this.textBox3.Location = new System.Drawing.Point(225, 186);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(77, 20);
-            this.textBox3.TabIndex = 18;
+            this.textBox3.TabIndex = 2;
             this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             // 
             // textBox2
@@ -453,7 +454,7 @@
             this.textBox2.Location = new System.Drawing.Point(225, 135);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(77, 20);
-            this.textBox2.TabIndex = 17;
+            this.textBox2.TabIndex = 1;
             this.textBox2.Text = "0";
             this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
@@ -462,7 +463,7 @@
             this.textBox1.Location = new System.Drawing.Point(225, 90);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(77, 20);
-            this.textBox1.TabIndex = 16;
+            this.textBox1.TabIndex = 0;
             this.textBox1.Text = "0";
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 

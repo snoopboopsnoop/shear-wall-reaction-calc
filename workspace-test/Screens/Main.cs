@@ -254,7 +254,7 @@ namespace workspace_test
         // this kind of works but it sucks
         private void workspace_KeyDown(object sender, KeyEventArgs e)
         {
-            System.Console.WriteLine(e.KeyCode);
+            //System.Console.WriteLine(e.KeyCode);
             if (currentWorkspace.GetCurrentlySelected() != -1)
             {
                 if (e.KeyCode == Keys.W)
@@ -280,7 +280,7 @@ namespace workspace_test
             }
             if (e.KeyCode == Keys.Delete)
             {
-                Console.WriteLine("delete");
+                //Console.WriteLine("delete");
                 currentWorkspace.deleteSelected();
             }
             else if(e.KeyCode == Keys.V)

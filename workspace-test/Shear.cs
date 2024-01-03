@@ -119,11 +119,11 @@ namespace workspace_test
 
             foreach (var shearData in tempLefts)
             {
-                shearData.UpdateVisual();
+                shearData.Update();
             }
             foreach (var shearData in tempBottoms)
             {
-                shearData.UpdateVisual();
+                shearData.Update();
             }
 
             //Console.WriteLine("sheardata left size: " + tempLefts.Count);

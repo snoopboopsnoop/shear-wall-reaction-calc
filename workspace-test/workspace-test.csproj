@@ -107,6 +107,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddiWeight.cs" />
     <Compile Include="Screens\ScaleScreen.cs">
       <SubType>Form</SubType>
     </Compile>

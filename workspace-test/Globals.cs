@@ -18,6 +18,7 @@ namespace workspace_test
         public static Color fontColor = Color.FromArgb(255, 247, 247, 247);
         public static double scale = 1;
         public static string unit = "px";
-
+        public static int weightWidth = 5;
+        public static int gap = 5;
     }
 }

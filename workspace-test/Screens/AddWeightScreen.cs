@@ -13,14 +13,15 @@ namespace workspace_test
 {
     public partial class AddWeightScreen : Form
     {
-        private float wAdd = 0;
+        private AddiWeight weight;
+        private float LA = 0;
+
         private float HP1 = 0;
         private float HA1 = 0;
         private float HB1 = 0;
         private float HS1 = 0;
         private float WW1 = 0;
-        private float LA = 0;
-
+        
         private float HP2 = 0;
         private float HA2 = 0;
         private float HB2 = 0;
@@ -29,29 +30,50 @@ namespace workspace_test
 
         private bool same = false;
 
-        private string op = "";
-
         public AddWeightScreen()
         {
             InitializeComponent();
         }
 
-        public AddWeightScreen(float paramLA)
+        public AddWeightScreen(AddiWeight weight, float LA)
         {
             InitializeComponent();
-            LA = paramLA;
+            this.weight = weight;
+            checkBox1.Checked = weight.same;
 
-            textBox1.Text = HP1.ToString();
-            textBox2.Text = HA1.ToString();
-            textBox3.Text = HB1.ToString();
-            textBox4.Text = HS1.ToString();
-            textBox5.Text = WW1.ToString();
+            this.LA = LA;
 
-            textBox6.Text = HP2.ToString();
-            textBox7.Text = HA2.ToString();
-            textBox8.Text = HB2.ToString();
-            textBox9.Text = HS2.ToString();
-            textBox10.Text = WW2.ToString();
+            textBox1.Click += textBox_Click;
+            textBox2.Click += textBox_Click;
+            textBox3.Click += textBox_Click;
+            textBox4.Click += textBox_Click;
+            textBox5.Click += textBox_Click;
+            textBox6.Click += textBox_Click;
+            textBox7.Click += textBox_Click;
+            textBox8.Click += textBox_Click;
+            textBox9.Click += textBox_Click;
+            textBox10.Click += textBox_Click;
+
+
+            textBox1.Text = weight.HP1.ToString();
+            textBox2.Text = weight.HA1.ToString();
+            textBox2.Text = weight.HA1.ToString();
+            textBox3.Text = weight.HB1.ToString();
+            textBox4.Text = weight.HS1.ToString();
+            textBox5.Text = weight.WW1.ToString();
+
+            textBox6.Text = weight.HP2.ToString();
+            textBox7.Text = weight.HA2.ToString();
+            textBox8.Text = weight.HB2.ToString();
+            textBox9.Text = weight.HS2.ToString();
+            textBox10.Text = weight.WW2.ToString();
+            
+        }
+
+        private void textBox_Click(object sender, EventArgs e)
+        {
+            TextBox box = sender as TextBox;
+            if (box.Text == "0") box.SelectAll();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -192,11 +214,11 @@ namespace workspace_test
         {
             try
             {
-                HA2 = float.Parse(textBox9.Text);
+                HS2 = float.Parse(textBox9.Text);
                 if (same)
                 {
-                    HA1 = HA2;
-                    textBox4.Text = HA1.ToString();
+                    HS1 = HS2;
+                    textBox4.Text = HS1.ToString();
                 }
             }
             catch (FormatException)
@@ -224,25 +246,24 @@ namespace workspace_test
 
         private void button1_Click(object sender, EventArgs e)
         {
-            float w1 = LA * WW1 * (0.5F * (HA1 + HB1) + HP1 + HS1);
-            float w2 = LA * WW2 * (0.5F * (HA2 + HB2) + HP2 + HS2);
-            op += "(" + LA + " g * " + WW1 + " LBS * (0.5 * (" + HA1 + "\' + " + HB1 + "\') + " + HP1 + "\' + " + HS1 + "\'))";
-            op += " + (" + LA + " g * " + WW2 + " LBS * (0.5 * (" + HA2 + "\' + " + HB2 + "\') + " + HP2 + "\' + " + HS2 + "\'))";
-
-            wAdd = w1 + w2;
+            weight.HP1 = HP1;
+            weight.HP1 = HP1;
+            weight.HA1 = HA1;
+            weight.HB1 = HB1;
+            weight.HS1 = HS1;
+            weight.WW1 = WW1;
+            weight.HP2 = HP2;
+            weight.HA2 = HA2;
+            weight.HB2 = HB2;
+            weight.HS2 = HS2;
+            weight.WW2 = WW2;
+            weight.active = true;
+            weight.LA = LA;
+            weight.same = same;
+            weight.updateWeight();
 
             this.DialogResult = DialogResult.OK;
             this.Close();
-        }
-
-        public float GetWAdd()
-        {
-            return wAdd;
-        }
-
-        public string GetOp()
-        {
-            return op;
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)

@@ -50,7 +50,7 @@ namespace workspace_test
 
         // which point is currently being hovered over, draws bigger one over it later
         private PointF hover = PointF.Empty;
-        private RectangleF hoverWeight = Rectangle.Empty;
+        private ShearData hoverWeight = null;
 
         // the funny red line that tells you if you're lined up
         private PointF suggestLine = PointF.Empty;
@@ -511,45 +511,51 @@ namespace workspace_test
             }
             else if(item.Text == "Add Weight...")
             {
-                float addW = 0;
-                AddWeightScreen addWeight = new AddWeightScreen(LA);
-                string str = "";
-                if (addWeight.ShowDialog() == DialogResult.OK)
+                //float addW = 0;
+                //AddWeightScreen addWeight = new AddWeightScreen(LA);
+                //string str = "";
+                //if (addWeight.ShowDialog() == DialogResult.OK)
+                //{
+                //    addW = addWeight.GetWAdd();
+                //    str = addWeight.GetOp();
+                //    Console.WriteLine("before: " + shear.GetShearData().Item1[0].wx);
+                //    Console.WriteLine("adding weight " + addW);
+
+
+                //    List<ShearData> lefts = shear.GetShearData().Item1;
+                //    List<ShearData> bottoms = shear.GetShearData().Item2;
+
+                //    for (int i = 0; i < lefts.Count; ++i)
+                //    //foreach (var data in lefts)
+                //    {
+                //        if (lefts[i].visual == hoverWeight)
+                //        {
+                //            lefts[i].AddWeight(addW, str);
+                //            Console.WriteLine("added " + addW + " to wx");
+                //            Invalidate();
+                //        }
+                //    }
+                //    for (int i = 0; i < bottoms.Count; ++i)
+                //    //foreach (var data in bottoms)
+                //    {
+                //        if (bottoms[i].visual == hoverWeight)
+                //        {
+                //            bottoms[i].AddWeight(addW, str);
+                //            Console.WriteLine("added " + addW + " to wy");
+                //            Invalidate();
+                //        }
+                //    }
+
+                //    shear.updateReactions();
+
+                //    Console.WriteLine("after: " + shear.GetShearData().Item1[0].wx);
+                //}
+                AddWeightScreen addWeight = new AddWeightScreen(hoverWeight.aWeight, LA);
+                if(addWeight.ShowDialog() == DialogResult.OK)
                 {
-                    addW = addWeight.GetWAdd();
-                    str = addWeight.GetOp();
-                    Console.WriteLine("before: " + shear.GetShearData().Item1[0].wx);
-                    Console.WriteLine("adding weight " + addW);
-                    
-
-                    List<ShearData> lefts = shear.GetShearData().Item1;
-                    List<ShearData> bottoms = shear.GetShearData().Item2;
-
-                    for (int i = 0; i < lefts.Count; ++i)
-                    //foreach (var data in lefts)
-                    {
-                        if (lefts[i].visual == hoverWeight)
-                        {
-                            lefts[i].AddWeight(addW, str);
-                            Console.WriteLine("added " + addW + " to wx");
-                            Invalidate();
-                        }
-                    }
-                    for (int i = 0; i < bottoms.Count; ++i)
-                    //foreach (var data in bottoms)
-                    {
-                        if (bottoms[i].visual == hoverWeight)
-                        {
-                            bottoms[i].AddWeight(addW, str);
-                            Console.WriteLine("added " + addW + " to wy");
-                            Invalidate();
-                        }
-                    }
-
-                    shear.updateReactions();
-
-                    Console.WriteLine("after: " + shear.GetShearData().Item1[0].wx);
+                    hoverWeight.Update();
                 }
+
             }
             else if(item.Text == "Print Workspace to Active Word Doc")
             {
@@ -560,7 +566,7 @@ namespace workspace_test
         private void contextMenu_Opening(object sender, EventArgs e)
         {
             Console.WriteLine("cm openieng event");
-            if (hoverWeight != RectangleF.Empty)
+            if (hoverWeight != null)
             {
                 cm.Items[3].Enabled = true;
             }
@@ -987,7 +993,7 @@ namespace workspace_test
                     paramRect.X + paramRect.Width + 5, paramRect.Y + paramRect.Height / 2, formatHeight);
             }
 
-            if(data.visual == hoverWeight)
+            if(hoverWeight != null && data.visual == hoverWeight.visual)
             {
                 selectBrush.Color = Color.FromArgb(25, Color.Red);
                 textBrush.Color = Color.Red;
@@ -1401,7 +1407,7 @@ namespace workspace_test
         {
             if(pointerMode != "menu")
             {
-                hoverWeight = RectangleF.Empty;
+                hoverWeight = null;
             }
 
             suggestLine = PointF.Empty;
@@ -1440,10 +1446,10 @@ namespace workspace_test
                             if(line.Item1 != point)
                             {
                                 temp = PointF.Subtract(line.Item1, new SizeF(point));
-                                Console.WriteLine("distnace from " + point + " to " + line.Item1 + ": " + Magnitude(temp));
+                                //Console.WriteLine("distnace from " + point + " to " + line.Item1 + ": " + Magnitude(temp));
                                 if (closest == PointF.Empty || Magnitude(temp) < Magnitude(closest))
                                 {
-                                    Console.WriteLine("new closest: " + Magnitude(temp) + " away < " + Magnitude(closest));
+                                    //Console.WriteLine("new closest: " + Magnitude(temp) + " away < " + Magnitude(closest));
                                     closest = temp;
                                     attached = point;
                                 }
@@ -1453,14 +1459,14 @@ namespace workspace_test
                                 temp = PointF.Subtract(line.Item2, new SizeF(point));
                                 if (closest == PointF.Empty || Magnitude(temp) < Magnitude(closest))
                                 {
-                                    Console.WriteLine("new closest: " + Magnitude(temp) + " away < " + Magnitude(closest));
+                                    //Console.WriteLine("new closest: " + Magnitude(temp) + " away < " + Magnitude(closest));
                                     closest = temp;
                                     attached = point;
                                 }
                             }
                         }
                     }
-                    Console.WriteLine("closest Point is " + closest + " away\n");
+                    //Console.WriteLine("closest Point is " + closest + " away\n");
 
                     if(Magnitude(closest) < 5)
                     {
@@ -1561,14 +1567,14 @@ namespace workspace_test
                 {
                     if (data.visual.Contains(e.Location))
                     {
-                        hoverWeight = data.visual;
+                        hoverWeight = data;
                     }
                 }
                 foreach (var data in bottoms)
                 {
                     if (data.visual.Contains(e.Location))
                     {
-                        hoverWeight = data.visual;
+                        hoverWeight = data;
                     }
                 }
             }

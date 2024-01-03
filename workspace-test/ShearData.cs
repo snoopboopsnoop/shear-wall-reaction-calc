@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
+using System.Xml.Linq;
 
 namespace workspace_test
 {
@@ -25,6 +26,7 @@ namespace workspace_test
             LS = 0;
             wx = 0;
             wy = 0;
+            aWeight = new AddiWeight();
         }
 
         public ShearData(RectangleF paramRect)
@@ -35,12 +37,15 @@ namespace workspace_test
             LS = 0;
             wx = 0;
             wy = 0;
+            aWeight = new AddiWeight();
         }
         public ShearData(RectangleF paramRect, float paramLS, string paramDirection = "both", string name = "")
         {
+            this.name = name;
             rect = paramRect;
             LS = paramLS;
             direction = paramDirection;
+            aWeight = new AddiWeight();
 
             wx = (direction == "bottom") ? 0 : (float)Math.Round(LS * rect.Width * (float)Globals.scale / 0.5F) * 0.5F;
             Console.WriteLine("wx: " + wx.ToString("#,#0.###"));
@@ -50,53 +55,47 @@ namespace workspace_test
             visual = Rectangle.Empty;
 
             range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
-            range.InsertAfter(name + " = ");
-            if (direction == "bottom") range.InsertAfter(LS +  " PSF x " + (Math.Round(rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + " = " + wy.ToString("#,#0.###") + " PLF\n");
-            else if (direction == "left") range.InsertAfter(LS + " PSF x " + (Math.Round(rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + " = " + wx.ToString("#,#0.###") + " PLF\n");
 
-            rangeIndex = range.End;
+            Update();
+
+            rangeEnd = range.End;
         }
 
-        public void UpdateVisual(float addW = 0)
+        public void Update()
         {
             //Console.WriteLine("wx ref " + wx / Globals.refMeasure);
             //Console.WriteLine("wy ref " + wy / Globals.refMeasure);
 
+            string text = name + " = ";
+            if (direction == "bottom") text += (LS + " PSF x " + (Math.Round(rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + aWeight.str + " = " + (wy + aWeight.wAdd).ToString("#,#0.###") + " PLF\n");
+            else if (direction == "left") text += (LS + " PSF x " + (Math.Round(rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + aWeight.str + " = " + (wx + aWeight.wAdd).ToString("#,#0.###") + " PLF\n");
+            range.Text = text;
+
+            Console.WriteLine("bobr: " + aWeight.wAdd);
+
             visual = (direction == "bottom") ?
-                new Rectangle((int)rect.X + 4, (int)(rect.Y + 5 + rect.Height), (int)rect.Width - 8, (int)(wy + addW) / Globals.refMeasure + 10) :
-                new Rectangle((int)(rect.X - ((int)(wx + addW) / Globals.refMeasure + 10)), (int)rect.Y + 4, (int)(wx + addW) / Globals.refMeasure + 5, (int)rect.Height - 8);
+                new Rectangle((int)rect.X + Globals.gap, (int)(rect.Y + Globals.gap + rect.Height), (int)rect.Width - 2 * Globals.gap, (int)((wy + aWeight.wAdd) / Globals.refMeasure * Globals.weightWidth)) :
+                new Rectangle((int)(rect.X - ((wx + aWeight.wAdd) / Globals.refMeasure * Globals.weightWidth) - Globals.gap), (int)rect.Y + Globals.gap, (int)((wx + aWeight.wAdd) / Globals.refMeasure * Globals.weightWidth), (int)rect.Height - 2 * Globals.gap);
 
             //Console.WriteLine("updating w visual to " + visual);
         }
 
-        public void AddWeight(float addW, string str)
-        {
-            Word.Range tempRange = Globals.doc.Range(range.End, range.End);
-            tempRange.Delete(Word.WdUnits.wdWord, -4);
-
-            if (wx == 0)
-            {
-                wy += addW;
-            }
-            else wx += addW;
-
-            range.InsertAfter("+ " + str + " = " + ((wx == 0) ? wy.ToString("#,#0.###") : wx.ToString("#,#0.###")) + " PLF\n");
-            UpdateVisual(addW);
-        }
-
         public void Load()
         {
-            range = Globals.doc.Range(rangeIndex, rangeIndex);
+            range = Globals.doc.Range(rangeStart, rangeEnd);
         }
 
         [JsonIgnore]
         private Word.Range range { get; set; }
         public RectangleF rect { get; set; }
         public Rectangle visual { get; set; }
-        public int rangeIndex { get; set; }
+        public int rangeStart { get; set; }
+        public int rangeEnd { get; set; }
         public float LS { get; set; }
         public float wx { get; set; }
         public float wy { get; set; }
         public string direction { get; set; }
+        public AddiWeight aWeight { get; set; }
+        public string name { get; set; }
     }
 }
