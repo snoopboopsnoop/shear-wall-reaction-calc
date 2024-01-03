@@ -112,6 +112,7 @@ namespace workspace_test
             helpButton.Click += help_Click;
 
 
+
             fileMenu.DropDownOpening += menu_Opening;
             fileMenu.DropDownClosed += menu_Closing;
             imgMenu.DropDownOpening += menu_Opening;

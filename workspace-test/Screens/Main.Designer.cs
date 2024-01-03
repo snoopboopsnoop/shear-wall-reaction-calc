@@ -39,8 +39,8 @@
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.label3 = new System.Windows.Forms.Label();
+            this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.panel5 = new System.Windows.Forms.Panel();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.tableLayoutPanel1.SuspendLayout();
@@ -175,16 +175,6 @@
             this.panel3.Size = new System.Drawing.Size(122, 45);
             this.panel3.TabIndex = 15;
             // 
-            // trackBar1
-            // 
-            this.trackBar1.Location = new System.Drawing.Point(0, 0);
-            this.trackBar1.Margin = new System.Windows.Forms.Padding(0);
-            this.trackBar1.Name = "trackBar1";
-            this.trackBar1.Size = new System.Drawing.Size(122, 45);
-            this.trackBar1.TabIndex = 14;
-            this.trackBar1.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
-            // 
             // label3
             // 
             this.label3.AutoSize = true;
@@ -195,6 +185,16 @@
             this.label3.Size = new System.Drawing.Size(64, 18);
             this.label3.TabIndex = 15;
             this.label3.Text = "Opacity: 0.0";
+            // 
+            // trackBar1
+            // 
+            this.trackBar1.Location = new System.Drawing.Point(0, 0);
+            this.trackBar1.Margin = new System.Windows.Forms.Padding(0);
+            this.trackBar1.Name = "trackBar1";
+            this.trackBar1.Size = new System.Drawing.Size(122, 45);
+            this.trackBar1.TabIndex = 14;
+            this.trackBar1.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
             // 
             // panel5
             // 
@@ -213,7 +213,7 @@
     ".bmp)|*.bmp";
             this.openFileDialog1.Title = "Select a file";
             // 
-            // Form1
+            // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -223,7 +223,7 @@
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
-            this.Name = "Form1";
+            this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Really Cool Shear Reaction Application";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;

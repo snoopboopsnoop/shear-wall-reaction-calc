@@ -164,11 +164,18 @@ namespace workspace_test
             cm.Opening += contextMenu_Opening;
 
             scaleLabel = new Label();
+            scaleLabel.ForeColor = Color.Black;
+            scaleLabel.Parent = this;
+            scaleLabel.BackColor = Color.Transparent;
             scaleLabel.Location = new Point(0, 0);
             scaleLabel.AutoSize = true;
             scaleLabel.Padding = new Padding(5);
+            
+
             scaleLabel.Text = $"Scale: 1 pixel = {Globals.scale}{Globals.unit}";
+
             this.Controls.Add(scaleLabel);
+
             Console.WriteLine(docPath);
 
             Globals.word.Visible = false;
@@ -358,6 +365,8 @@ namespace workspace_test
                 }
                 Invalidate();
             }
+
+
 
             // assign portrait or landscape based on screenshot dimensions
             if (screenshot.Width > screenshot.Height)
