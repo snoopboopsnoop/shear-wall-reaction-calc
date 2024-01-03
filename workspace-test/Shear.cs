@@ -82,9 +82,9 @@ namespace workspace_test
             intro.Range.Font.Size = 12;
             intro.Range.Text += ("LD = " + LD + " PSF");
             intro.Range.Text += ("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF\n");
-            intro.Range.Text += ("Wx = LS x dimX");
-            intro.Range.Text += ("Wy = LS x dimY");
-            intro.Range.Text += ("Additional weight: Wx + LA x Ww x 0.5(Ha + Hb + Hp + Hs)\n");
+            intro.Range.Text += ("Wx = LS x dimX + additional weight (near) + additional weight (far)");
+            intro.Range.Text += ("Wy = LS x dimY + additional weight (near) + additional weight (far)");
+            intro.Range.Text += ("Additional weight: LA x Ww x 0.5(Ha + Hb + Hp + Hs)\n");
             intro.Range.InsertParagraphAfter();
 
             List<ShearData> tempLefts = new List<ShearData>();
@@ -181,38 +181,38 @@ namespace workspace_test
                 {
 
                     reaction.Range.Text += "R1 = 0.5 * " +
-                                            temp.wx.ToString("0,0.###") + " PLF" +
+                                            (temp.wx + temp.aWeight.wAdd).ToString("0,0.###") + " PLF" +
                                             " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("0,0.###") + Globals.unit +
-                                            " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS\n";
+                                            " = " + (Math.Round((temp.wx + temp.aWeight.wAdd) * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS";
                     reaction.Range.Text += "R2 = 0.5 * " +
-                                            temp.wx.ToString("0,0.###") + " PLF" +
+                                            (temp.wx + temp.aWeight.wAdd).ToString("0,0.###") + " PLF" +
                                             " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("0,0.###") + Globals.unit +
-                                            " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS\n";
+                                            " = " + (Math.Round((temp.wx + temp.aWeight.wAdd) * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS";
                     break;
                 }
                 else if (i == 0)
                 {
                     reaction.Range.Text += "R1 = 0.5 * " +
-                                            temp.wx.ToString("0,0.###") + " PLF" +
+                                            (temp.wx + temp.aWeight.wAdd).ToString("0,0.###") + " PLF" +
                                             " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("0,0.###") + Globals.unit +
-                                            " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS";
+                                            " = " + (Math.Round((temp.wx + temp.aWeight.wAdd) * temp.rect.Height * Globals.scale) * 0.5).ToString("0,0.###") + " LBS";
 
-                    buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
+                    buffer = ("R" + (i + 2) + " = 0.5 * " + (temp.wx + temp.aWeight.wAdd).ToString("#,#0.###") + " PLF" +
                               " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
                 }
                 else
                 {
-                    buffer += (" + 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
+                    buffer += (" + 0.5 * " + (temp.wx + temp.aWeight.wAdd).ToString("#,#0.###") + " PLF" +
                                " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
-                               " = " + (Math.Round(temp.wx * temp.rect.Height * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
+                               " = " + (Math.Round((temp.wx + temp.aWeight.wAdd) * temp.rect.Height * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
                     reaction.Range.Text += buffer;
 
-                    buffer = ("R" + (i + 2) + " = 0.5 * " + temp.wx.ToString("#,#0.###") + " PLF" +
+                    buffer = ("R" + (i + 2) + " = 0.5 * " + (temp.wx + temp.aWeight.wAdd).ToString("#,#0.###") + " PLF" +
                               " * " + (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
 
                     if (i == tempLefts.Count() - 1)
                     {
-                        buffer += " = " + (0.5 * temp.wx * (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5)).ToString("#,#0.###") + " LBS\n";
+                        buffer += " = " + (0.5 * (temp.wx + temp.aWeight.wAdd) * (Math.Round(temp.rect.Height * Globals.scale / 0.5) * 0.5)).ToString("#,#0.###") + " LBS\n";
                     }
                 }
             }
@@ -227,35 +227,35 @@ namespace workspace_test
                 if (tempBottoms.Count() == 1)
                 {
 
-                    reaction.Range.Text += ("RA = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                    reaction.Range.Text += ("RA = 0.5 * " + (temp.wy + temp.aWeight.wAdd).ToString("#,#0.###") + " PLF" +
                                             " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
-                                            " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
-                    reaction.Range.Text += ("RB = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                                            " = " + (Math.Round((temp.wy + temp.aWeight.wAdd) * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
+                    reaction.Range.Text += ("RB = 0.5 * " + (temp.wy + temp.aWeight.wAdd).ToString("#,#0.###") + " PLF" +
                                             " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
-                                            " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS\n");
+                                            " = " + (Math.Round((temp.wy + temp.aWeight.wAdd) * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS\n");
                     break;
                 }
                 else if (i == 0)
                 {
-                    reaction.Range.Text += ("RA = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                    reaction.Range.Text += ("RA = 0.5 * " + (temp.wy + temp.aWeight.wAdd).ToString("#,#0.###") + " PLF" +
                                             " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
-                                            " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
+                                            " = " + (Math.Round((temp.wy + temp.aWeight.wAdd) * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
 
-                    buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                    buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + (temp.wy + temp.aWeight.wAdd).ToString("#,#0.###") + " PLF" +
                               " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
                 }
                 else
                 {
-                    buffer += (" + 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                    buffer += (" + 0.5 * " + (temp.wy + temp.aWeight.wAdd).ToString("#,#0.###") + " PLF" +
                                " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit +
-                               " = " + (Math.Round(temp.wy * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
+                               " = " + (Math.Round((temp.wy + temp.aWeight.wAdd) * temp.rect.Width * Globals.scale) * 0.5).ToString("#,#0.###") + " LBS");
                     reaction.Range.Text += buffer;
 
-                    buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + temp.wy.ToString("#,#0.###") + " PLF" +
+                    buffer = ("R" + (char)(65 + i + 1) + " = 0.5 * " + (temp.wy + temp.aWeight.wAdd).ToString("#,#0.###") + " PLF" +
                               " * " + (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit);
                     if (i == tempBottoms.Count() - 1)
                     {
-                        buffer += " = " + (0.5 * temp.wy * (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5)).ToString("#,#0.###") + " LBS\n";
+                        buffer += " = " + (0.5 * (temp.wy + temp.aWeight.wAdd) * (Math.Round(temp.rect.Width * Globals.scale / 0.5) * 0.5)).ToString("#,#0.###") + " LBS\n";
                     }
                 }
             }

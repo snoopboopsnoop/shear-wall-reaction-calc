@@ -554,6 +554,7 @@ namespace workspace_test
                 if(addWeight.ShowDialog() == DialogResult.OK)
                 {
                     hoverWeight.Update();
+                    shear.updateReactions();
                 }
 
             }
