@@ -289,5 +289,27 @@ namespace workspace_test
             textBox10.ReadOnly = same;
             textBox10.Enabled = !same;
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            weight.HP1 = 0;
+            weight.HP1 = 0;
+            weight.HA1 = 0;
+            weight.HB1 = 0;
+            weight.HS1 = 0;
+            weight.WW1 = 0;
+            weight.HP2 = 0;
+            weight.HA2 = 0;
+            weight.HB2 = 0;
+            weight.HS2 = 0;
+            weight.WW2 = 0;
+            weight.active = false;
+            weight.LA = LA;
+            weight.same = false;
+            weight.updateWeight();
+
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
     }
 }

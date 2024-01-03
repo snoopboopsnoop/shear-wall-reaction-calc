@@ -60,6 +60,7 @@ namespace workspace_test
                 str = " + (" + LA + " g * " + WW1 + " LBS * (0.5 * (" + HA1 + "\' + " + HB1 + "\') + " + HP1 + "\' + " + HS1 + "\'))";
                 str += " + (" + LA + " g * " + WW2 + " LBS * (0.5 * (" + HA2 + "\' + " + HB2 + "\') + " + HP2 + "\' + " + HS2 + "\'))";
             }
+            else str = "";
         }
     }
 }
