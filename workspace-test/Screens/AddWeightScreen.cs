@@ -8,6 +8,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using workspace_test.Screens;
 
 namespace workspace_test
 {
@@ -246,24 +247,37 @@ namespace workspace_test
 
         private void button1_Click(object sender, EventArgs e)
         {
-            weight.HP1 = HP1;
-            weight.HP1 = HP1;
-            weight.HA1 = HA1;
-            weight.HB1 = HB1;
-            weight.HS1 = HS1;
-            weight.WW1 = WW1;
-            weight.HP2 = HP2;
-            weight.HA2 = HA2;
-            weight.HB2 = HB2;
-            weight.HS2 = HS2;
-            weight.WW2 = WW2;
-            weight.active = true;
-            weight.LA = LA;
-            weight.same = same;
-            weight.updateWeight();
+            bool cont = false;
+            if (weight.active)
+            {
+                Confirm confirm = new Confirm("This will overwrite the current additional weight values.\nContinue?");
+                if (confirm.ShowDialog() == DialogResult.OK)
+                {
+                    cont = true;
+                }
+            }
+            else cont = true;
 
-            this.DialogResult = DialogResult.OK;
-            this.Close();
+            if(cont) {
+                weight.HP1 = HP1;
+                weight.HP1 = HP1;
+                weight.HA1 = HA1;
+                weight.HB1 = HB1;
+                weight.HS1 = HS1;
+                weight.WW1 = WW1;
+                weight.HP2 = HP2;
+                weight.HA2 = HA2;
+                weight.HB2 = HB2;
+                weight.HS2 = HS2;
+                weight.WW2 = WW2;
+                weight.active = true;
+                weight.LA = LA;
+                weight.same = same;
+                weight.updateWeight();
+
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)

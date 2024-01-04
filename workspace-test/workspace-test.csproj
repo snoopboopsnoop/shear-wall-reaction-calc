@@ -108,6 +108,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddiWeight.cs" />
+    <Compile Include="Screens\Confirm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Screens\Confirm.Designer.cs">
+      <DependentUpon>Confirm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Screens\ScaleScreen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -153,6 +159,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Screens\Confirm.resx">
+      <DependentUpon>Confirm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Screens\Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
     </EmbeddedResource>

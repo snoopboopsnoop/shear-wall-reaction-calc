@@ -19,10 +19,6 @@ using System.Drawing.Imaging;
 using Newtonsoft.Json;
 
 using Word = Microsoft.Office.Interop.Word;
-using Newtonsoft.Json.Converters;
-using System.Xml.Linq;
-using System.Security.Policy;
-using System.Linq.Expressions;
 
 namespace workspace_test
 {
