@@ -31,11 +31,6 @@ namespace workspace_test
 
         private bool same = false;
 
-        public AddWeightScreen()
-        {
-            InitializeComponent();
-        }
-
         public AddWeightScreen(AddiWeight weight, float LA)
         {
             InitializeComponent();
@@ -68,7 +63,17 @@ namespace workspace_test
             textBox8.Text = weight.HB2.ToString();
             textBox9.Text = weight.HS2.ToString();
             textBox10.Text = weight.WW2.ToString();
-            
+
+
+            Button b = new Button();
+            b.Click += button_click;
+            this.CancelButton = b;
+        }
+
+        private void button_click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
         }
 
         private void textBox_Click(object sender, EventArgs e)
