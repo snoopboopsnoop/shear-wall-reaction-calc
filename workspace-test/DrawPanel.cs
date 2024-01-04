@@ -48,6 +48,8 @@ namespace workspace_test
         private PointF hover = PointF.Empty;
         private ShearData hoverWeight = null;
 
+        private List<ShearData> selectWeight = new List<ShearData>();
+
         // the funny red line that tells you if you're lined up
         private PointF suggestLine = PointF.Empty;
 
@@ -564,8 +566,17 @@ namespace workspace_test
 
         private void contextMenu_Opening(object sender, EventArgs e)
         {
+            if (Control.ModifierKeys != Keys.Shift)
+            {
+                selectWeight.Clear();
+            }
+            else
+            {
+                hoverWeight = null;
+            }
+
             Console.WriteLine("cm openieng event");
-            if (hoverWeight != null)
+            if (hoverWeight != null ||  selectWeight.Count() != 0)
             {
                 cm.Items[3].Enabled = true;
             }
@@ -999,6 +1010,13 @@ namespace workspace_test
                 e.Graphics.FillRectangle(selectBrush, data.visual);
                 e.Graphics.DrawRectangle(Pens.Red, data.visual);
             }
+            else if(selectWeight.Any(x => x.visual == data.visual))
+            {
+                selectBrush.Color = Color.FromArgb(25, Color.Red);
+                textBrush.Color = Color.Red;
+                e.Graphics.FillRectangle(selectBrush, data.visual);
+                e.Graphics.DrawRectangle(Pens.Red, data.visual);
+            }
             else
             {
                 e.Graphics.FillRectangle(selectBrush, data.visual);
@@ -1418,21 +1436,6 @@ namespace workspace_test
                 if (drawing) end = e.Location;
                 else if (dragging)
                 {
-                    //foreach (var pos in selectedLines)
-                    //{
-                    //    foreach (var (line2, i) in lines.Select((value, i) => (value, i)))
-                    //    {
-                    //        if (pos == i) continue;
-                    //        else
-                    //        {
-                    //            var line = lines[pos];
-                    //            if()
-                    //            {
-
-                    //            }
-                    //        }
-                    //    }
-                    //}
                     // draw moved rectangle, update positions
                     PointF closest = PointF.Empty;
                     PointF temp;
@@ -1574,6 +1577,37 @@ namespace workspace_test
                     if (data.visual.Contains(e.Location))
                     {
                         hoverWeight = data;
+                    }
+                }
+            }
+
+            Invalidate();
+        }
+
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            if(Control.ModifierKeys != Keys.Shift)
+            {
+                selectWeight.Clear();
+            }
+
+            if (pointerMode == "select" && shear != null && shear.GetShearData() != null)
+            {
+                List<ShearData> lefts = shear.GetShearData().Item1;
+                List<ShearData> bottoms = shear.GetShearData().Item2;
+
+                foreach (var data in lefts)
+                {
+                    if (data.visual.Contains(e.Location))
+                    {
+                        selectWeight.Add(data);
+                    }
+                }
+                foreach (var data in bottoms)
+                {
+                    if (data.visual.Contains(e.Location))
+                    {
+                        selectWeight.Add(data);
                     }
                 }
             }

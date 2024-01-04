@@ -82,8 +82,9 @@
             this.label2.TabIndex = 5;
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // Form4
+            // ScaleScreen
             // 
+            this.AcceptButton = this.button1;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(273, 254);
@@ -92,7 +93,7 @@
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textBox1);
-            this.Name = "Form4";
+            this.Name = "ScaleScreen";
             this.Text = "Set Scale";
             this.ResumeLayout(false);
             this.PerformLayout();
