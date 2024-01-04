@@ -472,7 +472,8 @@ namespace workspace_test
                     saveDialog.Filter = "Word Document (*.docx)|*.docx";
                     if(saveDialog.ShowDialog() == DialogResult.OK)
                     {
-                        if(!File.Exists(saveDialog.FileName))
+                        this.Cursor = Cursors.WaitCursor;
+                        if (!File.Exists(saveDialog.FileName))
                         {
                             Globals.doc = Globals.word.Documents.Add(ref docPath, ref Globals.missing, ref Globals.missing, ref Globals.missing);
                         }
@@ -485,6 +486,7 @@ namespace workspace_test
                         Algorithm();
                         selectedLines.Clear();
                         selectedPoints.Clear();
+                        this.Cursor = Cursors.Default;
                     }
                 }
             }
