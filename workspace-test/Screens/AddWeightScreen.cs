@@ -14,7 +14,7 @@ namespace workspace_test
 {
     public partial class AddWeightScreen : Form
     {
-        private AddiWeight weight;
+        private List<AddiWeight> weights = new List<AddiWeight>();
         private float LA = 0;
 
         private float HP1 = 0;
@@ -34,7 +34,7 @@ namespace workspace_test
         public AddWeightScreen(AddiWeight weight, float LA)
         {
             InitializeComponent();
-            this.weight = weight;
+            weights.Add(weight);
             checkBox1.Checked = weight.same;
 
             this.LA = LA;
@@ -63,6 +63,44 @@ namespace workspace_test
             textBox8.Text = weight.HB2.ToString();
             textBox9.Text = weight.HS2.ToString();
             textBox10.Text = weight.WW2.ToString();
+
+
+            Button b = new Button();
+            b.Click += button_click;
+            this.CancelButton = b;
+        }
+
+        public AddWeightScreen(List<AddiWeight> weights, float LA)
+        {
+            InitializeComponent();
+            this.weights = weights;
+
+            this.LA = LA;
+
+            textBox1.Click += textBox_Click;
+            textBox2.Click += textBox_Click;
+            textBox3.Click += textBox_Click;
+            textBox4.Click += textBox_Click;
+            textBox5.Click += textBox_Click;
+            textBox6.Click += textBox_Click;
+            textBox7.Click += textBox_Click;
+            textBox8.Click += textBox_Click;
+            textBox9.Click += textBox_Click;
+            textBox10.Click += textBox_Click;
+
+
+            textBox1.Text = this.HP1.ToString();
+            textBox2.Text = this.HA1.ToString();
+            textBox2.Text = this.HA1.ToString();
+            textBox3.Text = this.HB1.ToString();
+            textBox4.Text = this.HS1.ToString();
+            textBox5.Text = this.WW1.ToString();
+
+            textBox6.Text = this.HP2.ToString();
+            textBox7.Text = this.HA2.ToString();
+            textBox8.Text = this.HB2.ToString();
+            textBox9.Text = this.HS2.ToString();
+            textBox10.Text = this.WW2.ToString();
 
 
             Button b = new Button();
@@ -253,7 +291,7 @@ namespace workspace_test
         private void button1_Click(object sender, EventArgs e)
         {
             bool cont = false;
-            if (weight.active)
+            if (weights.FirstOrDefault(weight => weight.active) != null)
             {
                 Confirm confirm = new Confirm("This will overwrite the current additional weight values.\nContinue?");
                 if (confirm.ShowDialog() == DialogResult.OK)
@@ -264,21 +302,24 @@ namespace workspace_test
             else cont = true;
 
             if(cont) {
-                weight.HP1 = HP1;
-                weight.HP1 = HP1;
-                weight.HA1 = HA1;
-                weight.HB1 = HB1;
-                weight.HS1 = HS1;
-                weight.WW1 = WW1;
-                weight.HP2 = HP2;
-                weight.HA2 = HA2;
-                weight.HB2 = HB2;
-                weight.HS2 = HS2;
-                weight.WW2 = WW2;
-                weight.active = true;
-                weight.LA = LA;
-                weight.same = same;
-                weight.updateWeight();
+                foreach(AddiWeight weight in weights)
+                {
+                    weight.HP1 = HP1;
+                    weight.HP1 = HP1;
+                    weight.HA1 = HA1;
+                    weight.HB1 = HB1;
+                    weight.HS1 = HS1;
+                    weight.WW1 = WW1;
+                    weight.HP2 = HP2;
+                    weight.HA2 = HA2;
+                    weight.HB2 = HB2;
+                    weight.HS2 = HS2;
+                    weight.WW2 = WW2;
+                    weight.active = true;
+                    weight.LA = LA;
+                    weight.same = same;
+                    weight.updateWeight();
+                }
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -311,22 +352,34 @@ namespace workspace_test
 
         private void button2_Click(object sender, EventArgs e)
         {
-            weight.HP1 = 0;
-            weight.HP1 = 0;
-            weight.HA1 = 0;
-            weight.HB1 = 0;
-            weight.HS1 = 0;
-            weight.WW1 = 0;
-            weight.HP2 = 0;
-            weight.HA2 = 0;
-            weight.HB2 = 0;
-            weight.HS2 = 0;
-            weight.WW2 = 0;
-            weight.active = false;
-            weight.LA = LA;
-            weight.same = false;
-            weight.updateWeight();
+            bool cont = false;
+            Confirm confirm = new Confirm("Remove all additional weight?");
+            if (confirm.ShowDialog() == DialogResult.OK)
+            {
+                cont = true;
+            }
 
+            if(cont)
+            {
+                foreach (AddiWeight weight in weights)
+                {
+                    weight.HP1 = 0;
+                    weight.HP1 = 0;
+                    weight.HA1 = 0;
+                    weight.HB1 = 0;
+                    weight.HS1 = 0;
+                    weight.WW1 = 0;
+                    weight.HP2 = 0;
+                    weight.HA2 = 0;
+                    weight.HB2 = 0;
+                    weight.HS2 = 0;
+                    weight.WW2 = 0;
+                    weight.active = false;
+                    weight.LA = LA;
+                    weight.same = false;
+                    weight.updateWeight();
+                }
+            }
             this.DialogResult = DialogResult.OK;
             this.Close();
         }

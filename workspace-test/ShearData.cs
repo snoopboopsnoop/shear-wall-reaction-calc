@@ -12,6 +12,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Xml.Linq;
+using System.Collections.Specialized;
 
 namespace workspace_test
 {
@@ -56,8 +57,14 @@ namespace workspace_test
 
             range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
 
-            Update();
+            range.InsertAfter("\n");
 
+            range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+
+            Update();
+            Console.WriteLine(range.Text);
+
+            rangeStart = range.Start;
             rangeEnd = range.End;
         }
 
@@ -67,8 +74,8 @@ namespace workspace_test
             //Console.WriteLine("wy ref " + wy / Globals.refMeasure);
 
             string text = name + " = ";
-            if (direction == "bottom") text += (LS + " PSF x " + (Math.Round(rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + aWeight.str + " = " + (wy + aWeight.wAdd).ToString("#,#0.###") + " PLF\n");
-            else if (direction == "left") text += (LS + " PSF x " + (Math.Round(rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + aWeight.str + " = " + (wx + aWeight.wAdd).ToString("#,#0.###") + " PLF\n");
+            if (direction == "bottom") text += (LS + " PSF x " + (Math.Round(rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + aWeight.str + " = " + (wy + aWeight.wAdd).ToString("#,#0.###") + " PLF");
+            else if (direction == "left") text += (LS + " PSF x " + (Math.Round(rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + aWeight.str + " = " + (wx + aWeight.wAdd).ToString("#,#0.###") + " PLF");
             range.Text = text;
 
             Console.WriteLine("bobr: " + aWeight.wAdd);

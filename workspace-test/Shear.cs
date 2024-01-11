@@ -84,7 +84,7 @@ namespace workspace_test
             intro.Range.Text += ("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF\n");
             intro.Range.Text += ("Wx = LS x dimX + additional weight (near) + additional weight (far)");
             intro.Range.Text += ("Wy = LS x dimY + additional weight (near) + additional weight (far)");
-            intro.Range.Text += ("Additional weight: LA x Ww x 0.5(Ha + Hb + Hp + Hs)\n");
+            intro.Range.Text += ("Additional weight: LA x Ww x 0.5(Ha + Hb + Hp + Hs)");
             intro.Range.InsertParagraphAfter();
 
             List<ShearData> tempLefts = new List<ShearData>();

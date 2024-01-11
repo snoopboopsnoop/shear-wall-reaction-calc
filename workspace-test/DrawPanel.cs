@@ -511,52 +511,32 @@ namespace workspace_test
             }
             else if(item.Text == "Add Weight...")
             {
-                //float addW = 0;
-                //AddWeightScreen addWeight = new AddWeightScreen(LA);
-                //string str = "";
-                //if (addWeight.ShowDialog() == DialogResult.OK)
-                //{
-                //    addW = addWeight.GetWAdd();
-                //    str = addWeight.GetOp();
-                //    Console.WriteLine("before: " + shear.GetShearData().Item1[0].wx);
-                //    Console.WriteLine("adding weight " + addW);
-
-
-                //    List<ShearData> lefts = shear.GetShearData().Item1;
-                //    List<ShearData> bottoms = shear.GetShearData().Item2;
-
-                //    for (int i = 0; i < lefts.Count; ++i)
-                //    //foreach (var data in lefts)
-                //    {
-                //        if (lefts[i].visual == hoverWeight)
-                //        {
-                //            lefts[i].AddWeight(addW, str);
-                //            Console.WriteLine("added " + addW + " to wx");
-                //            Invalidate();
-                //        }
-                //    }
-                //    for (int i = 0; i < bottoms.Count; ++i)
-                //    //foreach (var data in bottoms)
-                //    {
-                //        if (bottoms[i].visual == hoverWeight)
-                //        {
-                //            bottoms[i].AddWeight(addW, str);
-                //            Console.WriteLine("added " + addW + " to wy");
-                //            Invalidate();
-                //        }
-                //    }
-
-                //    shear.updateReactions();
-
-                //    Console.WriteLine("after: " + shear.GetShearData().Item1[0].wx);
-                //}
-                AddWeightScreen addWeight = new AddWeightScreen(hoverWeight.aWeight, LA);
-                if(addWeight.ShowDialog() == DialogResult.OK)
+                if(selectWeight.Count != 0)
                 {
-                    hoverWeight.Update();
-                    shear.updateReactions();
+                    List<AddiWeight> weights = new List<AddiWeight>();
+                    foreach(ShearData data in selectWeight)
+                    {
+                        weights.Add(data.aWeight);
+                    }
+                    AddWeightScreen addWeight = new AddWeightScreen(weights, LA);
+                    if (addWeight.ShowDialog() == DialogResult.OK)
+                    {
+                        foreach (ShearData data in selectWeight)
+                        {
+                            data.Update();
+                        }
+                        shear.updateReactions();
+                    }
                 }
-
+                else
+                {
+                    AddWeightScreen addWeight = new AddWeightScreen(hoverWeight.aWeight, LA);
+                    if (addWeight.ShowDialog() == DialogResult.OK)
+                    {
+                        hoverWeight.Update();
+                        shear.updateReactions();
+                    }
+                }
             }
             else if(item.Text == "Print Workspace to Active Word Doc")
             {
@@ -575,7 +555,7 @@ namespace workspace_test
                 hoverWeight = null;
             }
 
-            Console.WriteLine("cm openieng event");
+            //Console.WriteLine("cm openieng event");
             if (hoverWeight != null ||  selectWeight.Count() != 0)
             {
                 cm.Items[3].Enabled = true;
