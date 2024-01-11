@@ -114,6 +114,12 @@
     <Compile Include="Screens\Confirm.Designer.cs">
       <DependentUpon>Confirm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Screens\TreeScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Screens\TreeScreen.Designer.cs">
+      <DependentUpon>TreeScreen.cs</DependentUpon>
+    </Compile>
     <Compile Include="Screens\ScaleScreen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -155,6 +161,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Screens\Confirm.resx">
       <DependentUpon>Confirm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Screens\TreeScreen.resx">
+      <DependentUpon>TreeScreen.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Screens\Main.resx">
       <DependentUpon>Main.cs</DependentUpon>

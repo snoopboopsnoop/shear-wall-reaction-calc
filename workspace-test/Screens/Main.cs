@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
+using workspace_test.Screens;
 
 namespace workspace_test
 {
@@ -40,11 +41,15 @@ namespace workspace_test
             tabPages.Padding = new Point(0, 0);
             tabPages.Margin = new Padding(0, 10, 0, 0);
             tabs.Add(new TabPage("Untitled"));
+            tabs.Add(new TabPage("Level Acceleration Calculator"));
             tabs[0].Dock = DockStyle.Fill;
             tabs[0].BorderStyle = BorderStyle.FixedSingle;
             tabs[0].Margin = new Padding(0, 0, 0, 0);
+            tabs[1].Dock = DockStyle.Fill;
+            tabs[1].BorderStyle = BorderStyle.FixedSingle;
+            tabs[1].Margin = new Padding(0, 0, 0, 0);
             tableLayoutPanel2.Controls.Add(tabPages, 1, 0);
-            tabPages.Controls.AddRange(new Control[] { tabs[0] });
+            tabPages.Controls.AddRange(new Control[] { tabs[0], tabs[1] });
             workspaces.Add(new DrawPanel());
             tabs[0].Controls.Add(workspaces[0]);
             tabs[0].BackgroundImageLayout = ImageLayout.Stretch;
@@ -123,6 +128,11 @@ namespace workspace_test
 
             this.ActiveControl = workspaces[0];
             this.Click += on_Click;
+
+            TreeScreen fs = new TreeScreen();
+            fs.Show(this);
+
+            fs.Text = "Untitled";
         }
 
         private void on_Click(object sender, EventArgs e)
