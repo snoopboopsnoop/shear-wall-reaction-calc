@@ -24,6 +24,7 @@ namespace workspace_test.Screens
             linkedProject = project;
             treeView1.Nodes.Add("Project: Untitled");
             floors = treeView1.Nodes.Add(project.GetBuilding().GetName());
+            floors.Expand();
             foreach(Floor floor in project.GetBuilding().GetFloors())
             {
                 floors.Nodes.Add(floor.GetName());

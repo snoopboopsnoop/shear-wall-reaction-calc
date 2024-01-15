@@ -49,7 +49,7 @@ namespace workspace_test
             tabPages.Dock = DockStyle.Fill;
             tabPages.Padding = new Point(0, 0);
             tabPages.Margin = new Padding(0, 10, 0, 0);
-            tabs.Add(new TabPage("Untitled"));
+            tabs.Add(new TabPage("Floor 1"));
             tabs.Add(new TabPage("Level Acceleration Calculator"));
             tabs[0].Dock = DockStyle.Fill;
             tabs[0].BorderStyle = BorderStyle.FixedSingle;
@@ -158,6 +158,8 @@ namespace workspace_test
 
             fs = new TreeScreen(project);
             fs.Text = "Project View";
+
+            tabPages.SelectedIndexChanged += tabs_SelectedIndexChanged;
         }
 
         private void on_Click(object sender, EventArgs e)
@@ -179,13 +181,30 @@ namespace workspace_test
 
         private void addFloor_Click(object sender, EventArgs e)
         {
-            project.GetBuilding().AddFloor();
+            Floor newFloor = project.GetBuilding().AddFloor();
             fs.UpdateView();
+            TabPage newPage = new TabPage(newFloor.GetName());
+            newPage.Dock = DockStyle.Fill;
+            newPage.BorderStyle = BorderStyle.FixedSingle;
+            newPage.Margin = new Padding(0, 0, 0, 0);
+            newPage.Controls.Add(new DrawPanel(newFloor));
+            //tabs.Insert(tabs.Count - 2, new TabPage(newFloor.GetName()));
+            tabPages.TabPages.Insert(tabPages.TabPages.Count - 1, newPage);
+            tabPages.SelectedTab = tabPages.TabPages[tabPages.TabPages.Count - 2];
+            //currentWorkspace = tabPages.SelectedTab.Controls[0] as DrawPanel;
         }
 
         private void projView_Click(object sender, EventArgs e)
         {
-            fs.Show();
+            try
+            {
+                fs.Show();
+            }
+            catch(ObjectDisposedException)
+            {
+                fs = new TreeScreen(project);
+                fs.Show();
+            }
         }
         private void menu_Opening(object sender, EventArgs e)
         {
@@ -204,6 +223,17 @@ namespace workspace_test
         private void menu_Closing(object sender, EventArgs e)
         {
             (sender as ToolStripMenuItem).ForeColor = Globals.fontColor;
+        }
+
+        private void tabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Console.WriteLine("changed tab");
+            Console.WriteLine(tabPages.SelectedTab.Text);
+            if(tabPages.SelectedTab.Text.StartsWith("Floor"))
+            {
+                currentWorkspace = tabPages.SelectedTab.Controls[0] as DrawPanel;
+            }
+            
         }
 
         private void save()

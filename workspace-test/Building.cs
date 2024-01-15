@@ -27,10 +27,13 @@ namespace workspace_test
             this.name = name;
         }
 
-        public void AddFloor()
+        public Floor AddFloor()
         {
             floorCount++;
-            this.floors.Add(new Floor(floorCount));
+            Floor newFloor = new Floor(floorCount);
+            this.floors.Add(newFloor);
+
+            return newFloor;
         }
 
         public List<Floor> GetFloors()
