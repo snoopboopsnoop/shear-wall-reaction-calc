@@ -50,7 +50,7 @@ namespace workspace_test
             tabs[1].Margin = new Padding(0, 0, 0, 0);
             tableLayoutPanel2.Controls.Add(tabPages, 1, 0);
             tabPages.Controls.AddRange(new Control[] { tabs[0], tabs[1] });
-            workspaces.Add(new DrawPanel());
+            workspaces.Add(new DrawPanel(new Floor(1)));
             tabs[0].Controls.Add(workspaces[0]);
             tabs[0].BackgroundImageLayout = ImageLayout.Stretch;
             currentWorkspace = workspaces[0];
@@ -116,8 +116,6 @@ namespace workspace_test
             helpButton.BackgroundImageLayout = ImageLayout.Stretch;
             helpButton.Click += help_Click;
 
-
-
             fileMenu.DropDownOpening += menu_Opening;
             fileMenu.DropDownClosed += menu_Closing;
             imgMenu.DropDownOpening += menu_Opening;
@@ -132,7 +130,7 @@ namespace workspace_test
             TreeScreen fs = new TreeScreen();
             fs.Show(this);
 
-            fs.Text = "Untitled";
+            fs.Text = "Project View";
         }
 
         private void on_Click(object sender, EventArgs e)

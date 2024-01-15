@@ -28,6 +28,8 @@ namespace workspace_test
         // select | rectangle | pen
         private string pointerMode = "select";
 
+        private Floor floor;
+
         // mouse statuses
         private Boolean drawing = false;
         private Boolean dragging = false;
@@ -180,9 +182,9 @@ namespace workspace_test
         }
 
         // named panel constructor
-        public DrawPanel(string name) : this()
+        public DrawPanel(Floor floor) : this()
         {
-            Name = name;
+            this.floor = floor;
         }
 
         public void CloseWord()
