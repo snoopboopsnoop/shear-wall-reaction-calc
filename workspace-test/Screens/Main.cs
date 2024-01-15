@@ -31,6 +31,8 @@ namespace workspace_test
 
         private MenuStrip menu = new MenuStrip ();
 
+        private TreeScreen fs = new TreeScreen();
+
         public Main()
         {
             this.Font = SystemFonts.MessageBoxFont;
@@ -73,21 +75,28 @@ namespace workspace_test
             ToolStripMenuItem saveMenu = new ToolStripMenuItem("Save", Properties.Resources.saveIcon, new EventHandler(saveAs_Click));
             ToolStripMenuItem saveAsMenu = new ToolStripMenuItem("Save As...", Properties.Resources.saveAsIcon, new EventHandler(saveAs_Click));
 
-            ToolStripMenuItem imgMenu = new ToolStripMenuItem("Image");
-            ToolStripMenuItem openImgMenu = new ToolStripMenuItem("Load Image...", null, new EventHandler(imgLoad_Click));
-            ToolStripMenuItem clearImgMenu = new ToolStripMenuItem("Clear Image", null, new EventHandler(imgClear_Click));
-
-            fileMenu.ForeColor = Globals.fontColor;
-            imgMenu.ForeColor = Globals.fontColor;
-
             fileMenu.DropDownItems.Add(openMenu);
             fileMenu.DropDownItems.Add(saveMenu);
             fileMenu.DropDownItems.Add(saveAsMenu);
 
+            ToolStripMenuItem imgMenu = new ToolStripMenuItem("Image");
+            ToolStripMenuItem openImgMenu = new ToolStripMenuItem("Load Image...", null, new EventHandler(imgLoad_Click));
+            ToolStripMenuItem clearImgMenu = new ToolStripMenuItem("Clear Image", null, new EventHandler(imgClear_Click));
+
             imgMenu.DropDownItems.Add(openImgMenu);
             imgMenu.DropDownItems.Add(clearImgMenu);
 
+            ToolStripMenuItem viewMenu = new ToolStripMenuItem("View");
+            ToolStripMenuItem openProjView = new ToolStripMenuItem("Project View", null, new EventHandler(projView_Click));
+
+            viewMenu.DropDownItems.Add(openProjView);
+
+            fileMenu.ForeColor = Globals.fontColor;
+            imgMenu.ForeColor = Globals.fontColor;
+            viewMenu.ForeColor = Globals.fontColor;
+
             menu.Items.Add(fileMenu);
+            menu.Items.Add(viewMenu);
             menu.Items.Add(imgMenu);
             menu.BackColor = Color.FromArgb(255, 120, 120, 120);
 
@@ -127,9 +136,6 @@ namespace workspace_test
             this.ActiveControl = workspaces[0];
             this.Click += on_Click;
 
-            TreeScreen fs = new TreeScreen();
-            fs.Show(this);
-
             fs.Text = "Project View";
         }
 
@@ -150,6 +156,10 @@ namespace workspace_test
             save();
         }
 
+        private void projView_Click(object sender, EventArgs e)
+        {
+            fs.Show();
+        }
         private void menu_Opening(object sender, EventArgs e)
         {
             ToolStripMenuItem temp = sender as ToolStripMenuItem;
