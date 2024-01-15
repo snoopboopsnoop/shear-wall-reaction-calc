@@ -50,6 +50,11 @@ namespace workspace_test
             return shear;
         }
 
+        public string GetName()
+        {
+            return name;
+        }
+
         public void SetLines(List<Tuple<PointF, PointF>> lines)
         {
             this.lines = lines;

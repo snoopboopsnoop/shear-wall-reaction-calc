@@ -12,14 +12,31 @@ namespace workspace_test.Screens
 {
     public partial class TreeScreen : Form
     {
+        Project linkedProject;
+        TreeNode floors;
+
         public TreeScreen()
         {
             InitializeComponent();
-            TreeNode project = treeView1.Nodes.Add("Project: Untitled");
-            TreeNode building = treeView1.Nodes.Add("Floors");
-            building.Nodes.Add("Floor 1");
-            building.Nodes.Add("Floor 2");
-            building.Nodes.Add("Floor 3");
+        }
+        public TreeScreen(Project project) : this()
+        {
+            linkedProject = project;
+            treeView1.Nodes.Add("Project: Untitled");
+            floors = treeView1.Nodes.Add(project.GetBuilding().GetName());
+            foreach(Floor floor in project.GetBuilding().GetFloors())
+            {
+                floors.Nodes.Add(floor.GetName());
+            }
+        }
+
+        public void UpdateView()
+        {
+            floors.Nodes.Clear();
+            foreach (Floor floor in linkedProject.GetBuilding().GetFloors())
+            {
+                floors.Nodes.Add(floor.GetName());
+            }
         }
     }
 }

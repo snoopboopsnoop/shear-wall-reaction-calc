@@ -11,9 +11,11 @@ namespace workspace_test
     public class Building
     {
         [JsonProperty]
-        private string name;
+        private string name = "Floors";
         [JsonProperty]
         private List<Floor> floors = new List<Floor>();
+        [JsonProperty]
+        private int floorCount = 0;
 
         public Building()
         {
@@ -25,14 +27,20 @@ namespace workspace_test
             this.name = name;
         }
 
-        public void AddFloor(Floor floor)
+        public void AddFloor()
         {
-            this.floors.Add(floor);
+            floorCount++;
+            this.floors.Add(new Floor(floorCount));
         }
 
         public List<Floor> GetFloors()
         {
             return floors;
+        }
+
+        public string GetName()
+        {
+            return name;
         }
     }
 }

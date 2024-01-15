@@ -34,7 +34,7 @@ namespace workspace_test
 
         private MenuStrip menu = new MenuStrip ();
 
-        private TreeScreen fs = new TreeScreen();
+        private TreeScreen fs;
 
         private string loadedFile = "";
 
@@ -99,12 +99,19 @@ namespace workspace_test
 
             viewMenu.DropDownItems.Add(openProjView);
 
+            ToolStripMenuItem projMenu = new ToolStripMenuItem("Project");
+            ToolStripMenuItem addFloorMenu = new ToolStripMenuItem("Add Floor", null, new EventHandler(addFloor_Click));
+
+            projMenu.DropDownItems.Add(addFloorMenu);
+
             fileMenu.ForeColor = Globals.fontColor;
             imgMenu.ForeColor = Globals.fontColor;
             viewMenu.ForeColor = Globals.fontColor;
+            projMenu.ForeColor = Globals.fontColor;
 
             menu.Items.Add(fileMenu);
             menu.Items.Add(viewMenu);
+            menu.Items.Add(projMenu);
             menu.Items.Add(imgMenu);
             menu.BackColor = Color.FromArgb(255, 120, 120, 120);
 
@@ -144,12 +151,13 @@ namespace workspace_test
             this.ActiveControl = workspaces[0];
             this.Click += on_Click;
 
-            fs.Text = "Project View";
-
             Building building = new Building();
-            building.AddFloor(firstFloor);
+            building.AddFloor();
 
             project = new Project("Untitled", building);
+
+            fs = new TreeScreen(project);
+            fs.Text = "Project View";
         }
 
         private void on_Click(object sender, EventArgs e)
@@ -167,6 +175,12 @@ namespace workspace_test
         private void saveAs_Click(object sender, EventArgs e)
         {
             save();
+        }
+
+        private void addFloor_Click(object sender, EventArgs e)
+        {
+            project.GetBuilding().AddFloor();
+            fs.UpdateView();
         }
 
         private void projView_Click(object sender, EventArgs e)
