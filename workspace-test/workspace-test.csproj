@@ -109,6 +109,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddiWeight.cs" />
+    <Compile Include="Building.cs" />
+    <Compile Include="Project.cs" />
     <Compile Include="Screens\Confirm.cs">
       <SubType>Form</SubType>
     </Compile>

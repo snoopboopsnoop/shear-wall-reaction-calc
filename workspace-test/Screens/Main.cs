@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,12 +7,14 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using workspace_test.Screens;
+using Word = Microsoft.Office.Interop.Word;
 
 namespace workspace_test
 {
@@ -33,6 +36,10 @@ namespace workspace_test
 
         private TreeScreen fs = new TreeScreen();
 
+        private string loadedFile = "";
+
+        private Project project;
+
         public Main()
         {
             this.Font = SystemFonts.MessageBoxFont;
@@ -52,7 +59,8 @@ namespace workspace_test
             tabs[1].Margin = new Padding(0, 0, 0, 0);
             tableLayoutPanel2.Controls.Add(tabPages, 1, 0);
             tabPages.Controls.AddRange(new Control[] { tabs[0], tabs[1] });
-            workspaces.Add(new DrawPanel(new Floor(1)));
+            Floor firstFloor = new Floor(1);
+            workspaces.Add(new DrawPanel(firstFloor));
             tabs[0].Controls.Add(workspaces[0]);
             tabs[0].BackgroundImageLayout = ImageLayout.Stretch;
             currentWorkspace = workspaces[0];
@@ -137,6 +145,11 @@ namespace workspace_test
             this.Click += on_Click;
 
             fs.Text = "Project View";
+
+            Building building = new Building();
+            building.AddFloor(firstFloor);
+
+            project = new Project("Untitled", building);
         }
 
         private void on_Click(object sender, EventArgs e)
@@ -182,25 +195,81 @@ namespace workspace_test
         private void save()
         {
             Console.WriteLine("loaded file: " + currentWorkspace.GetLoadedFile());
-            if (currentWorkspace.GetLoadedFile() != "")
-            {
-                this.Cursor = Cursors.WaitCursor;
-                System.Threading.Thread.Sleep(50);
-                currentWorkspace.Save("");
-                this.Cursor = Cursors.Default;
-            }
-            else
-            {
+            //if (currentWorkspace.GetLoadedFile() != "")
+            //{
+            //    this.Cursor = Cursors.WaitCursor;
+            //    System.Threading.Thread.Sleep(50);
+            //    currentWorkspace.Save("");
+            //    this.Cursor = Cursors.Default;
+            //}
+            //else
+            //{
                 SaveFileDialog saveDialog = new SaveFileDialog();
                 saveDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     this.Cursor = Cursors.WaitCursor;
-                    currentWorkspace.Save(saveDialog.FileName);
+                        if (saveDialog.FileName == "") saveDialog.FileName = loadedFile;
+
+                        currentWorkspace.Save();
+
+                        Output output = new Output(project);
+                        //try
+                        //{
+                        //    output = new Output(project);
+                        //}
+                        //catch (System.Runtime.InteropServices.COMException)
+                        //{
+                        //    //output = new Output(lines, shear, Globals.refMeasure, Globals.scale);
+                            
+                        //}
+
+                        JsonSerializer serializer = new JsonSerializer();
+                        serializer.TypeNameHandling = TypeNameHandling.Auto;
+                        serializer.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
+
+                        using (StreamWriter sw = new StreamWriter(saveDialog.FileName))
+                        using (JsonWriter writer = new JsonTextWriter(sw))
+                        {
+                            serializer.Serialize(writer, output);
+                        }
                     this.Cursor = Cursors.Default;
-                }
+                //}
             }
             
+        }
+
+        public void LoadData(string path)
+        {
+            Output input;
+
+            using (StreamReader file = File.OpenText(path))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.TypeNameHandling = TypeNameHandling.Auto;
+                serializer.NullValueHandling = NullValueHandling.Ignore;
+
+                input = (Output)serializer.Deserialize(file, typeof(Output));
+
+                Globals.refMeasure = input.project.GetRefMeasure();
+                if (input.project.GetBuilding().GetFloors()[0].GetDocPath() != "")
+                {
+                    try
+                    {
+                        if (Globals.word.Visible == false) Globals.word.Visible = true;
+                    }
+                    catch (Exception)
+                    {
+                        Globals.word = new Word.Application();
+                        Globals.word.Visible = true;
+                    }
+                    Globals.doc = Globals.word.Documents.Open(input.project.GetBuilding().GetFloors()[0].GetDocPath());
+                }
+                this.currentWorkspace.Load(input.project.GetBuilding().GetFloors()[0]);
+                Globals.scale = input.project.GetScale();
+            }
+
+            loadedFile = path;
         }
 
         private void open_Click(object sender, EventArgs e)
@@ -209,7 +278,7 @@ namespace workspace_test
             openDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
             if (openDialog.ShowDialog() == DialogResult.OK)
             {
-                currentWorkspace.LoadData(openDialog.FileName);
+                LoadData(openDialog.FileName);
                 tabPages.SelectedTab.Text = Path.GetFileName(openDialog.FileName.TrimEnd(Path.DirectorySeparatorChar));
             }
         }

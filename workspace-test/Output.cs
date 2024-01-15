@@ -10,20 +10,22 @@ namespace workspace_test
     [Serializable]
     public struct Output
     {
-        public Shear shear;
-        public List<Tuple<PointF, PointF>> lines;
-        public string docPath;
-        public int refMeasure;
-        public double scale;
+        public Project project { get; set; }
+        //public Shear shear;
+        //public List<Tuple<PointF, PointF>> lines;
+        //public string docPath;
+        //public int refMeasure;
+        //public double scale;
 
-        public Output(List<Tuple<PointF, PointF>> paramLines, Shear paramShear, int paramRef, double paramScale, string paramPath = "")
-        {
-            shear = paramShear;
-            lines = paramLines;
-            docPath = paramPath;
-            refMeasure = paramRef;
-            scale = paramScale;
-        }
+        //public Output(List<Tuple<PointF, PointF>> paramLines, Shear paramShear, int paramRef, double paramScale, string paramPath = "")
+        //{
+        //    shear = paramShear;
+        //    lines = paramLines;
+        //    docPath = paramPath;
+        //    refMeasure = paramRef;
+        //    scale = paramScale;
+        //}
+        public Output(Project project) { this.project = project; }
     }
 
     

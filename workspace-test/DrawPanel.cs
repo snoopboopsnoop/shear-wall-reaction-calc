@@ -204,67 +204,24 @@ namespace workspace_test
             }
         }
 
-        public void Save(string path)
+        public void Save()
         {
-            if (path == "") path = loadedFile;
-
-            Output output;
-            try
+            floor.SetLines(lines);
+            if(shear != null)
             {
-                output = new Output(lines, shear, Globals.refMeasure, Globals.scale, Globals.doc.FullName);
-            }
-            catch(System.Runtime.InteropServices.COMException) {
-                output = new Output(lines, shear, Globals.refMeasure, Globals.scale);
-            }
-
-            JsonSerializer serializer = new JsonSerializer();
-            serializer.TypeNameHandling = TypeNameHandling.Auto;
-            serializer.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
-
-            using (StreamWriter sw = new StreamWriter(path))
-            using (JsonWriter writer = new JsonTextWriter(sw))
-            {
-                serializer.Serialize(writer, output);
+                floor.SetShear(shear);
             }
             //Console.WriteLine(Globals.doc.FullName);
         }
 
-        public void LoadData(string path)
+        public void Load(Floor floor)
         {
-            Output input;
-
-            using (StreamReader file = File.OpenText(path))
+            lines = floor.GetLines();
+            if (floor.GetShear() != null)
             {
-                JsonSerializer serializer = new JsonSerializer();
-                serializer.TypeNameHandling = TypeNameHandling.Auto;
-                serializer.NullValueHandling = NullValueHandling.Ignore;
-
-                input = (Output)serializer.Deserialize(file, typeof(Output));
-
-                Globals.refMeasure = input.refMeasure;
-                if(input.docPath != "")
-                {
-                    try
-                    {
-                        if (Globals.word.Visible == false) Globals.word.Visible = true;
-                    }
-                    catch (Exception)
-                    {
-                        Globals.word = new Word.Application();
-                        Globals.word.Visible = true;
-                    }   
-                    Globals.doc = Globals.word.Documents.Open(input.docPath);
-                }
-                lines = input.lines;
-                if(input.shear != null)
-                {
-                    shear = input.shear;
-                    shear.Load();
-                }
-                Globals.scale = input.scale;
+                shear = floor.GetShear();
+                shear.Load();
             }
-
-            loadedFile = path;
         }
 
         public void SetPointerMode(string mode)
