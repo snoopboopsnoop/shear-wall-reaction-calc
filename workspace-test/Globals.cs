@@ -20,5 +20,6 @@ namespace workspace_test
         public static string unit = "\'";
         public static int weightWidth = 5;
         public static int gap = 5;
+        public static Main main;
     }
 }

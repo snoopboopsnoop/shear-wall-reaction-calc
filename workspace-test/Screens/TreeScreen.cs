@@ -18,6 +18,7 @@ namespace workspace_test.Screens
         public TreeScreen()
         {
             InitializeComponent();
+            treeView1.NodeMouseDoubleClick += treeView_NodeMouseDoubleClick;
         }
         public TreeScreen(Project project) : this()
         {
@@ -38,6 +39,12 @@ namespace workspace_test.Screens
             {
                 floors.Nodes.Add(floor.GetName());
             }
+        }
+
+        void treeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            Console.WriteLine("pressed " + e.Node.Text);
+            Globals.main.Open(e.Node.Text);
         }
     }
 }

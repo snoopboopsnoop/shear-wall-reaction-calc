@@ -49,8 +49,12 @@ namespace workspace_test
             tabPages.Dock = DockStyle.Fill;
             tabPages.Padding = new Point(0, 0);
             tabPages.Margin = new Padding(0, 10, 0, 0);
-            tabs.Add(new TabPage("Floor 1"));
-            tabs.Add(new TabPage("Level Acceleration Calculator"));
+            TabPage firstPage = new TabPage("Floor 1");
+            firstPage.Name = firstPage.Text;
+            tabs.Add(firstPage);
+            TabPage LATab = new TabPage("Level Acceleration Calculator");
+            LATab.Name = LATab.Text;
+            tabs.Add(LATab);
             tabs[0].Dock = DockStyle.Fill;
             tabs[0].BorderStyle = BorderStyle.FixedSingle;
             tabs[0].Margin = new Padding(0, 0, 0, 0);
@@ -160,6 +164,8 @@ namespace workspace_test
             fs.Text = "Project View";
 
             tabPages.SelectedIndexChanged += tabs_SelectedIndexChanged;
+
+            Globals.main = this;
         }
 
         private void on_Click(object sender, EventArgs e)
@@ -184,6 +190,7 @@ namespace workspace_test
             Floor newFloor = project.GetBuilding().AddFloor();
             fs.UpdateView();
             TabPage newPage = new TabPage(newFloor.GetName());
+            newPage.Name = newPage.Text;
             newPage.Dock = DockStyle.Fill;
             newPage.BorderStyle = BorderStyle.FixedSingle;
             newPage.Margin = new Padding(0, 0, 0, 0);
@@ -281,6 +288,18 @@ namespace workspace_test
                 //}
             }
             
+        }
+
+        public void Open(string tabName)
+        {
+            Console.WriteLine("name: " + tabName);
+            int index = tabPages.TabPages.IndexOfKey(tabName);
+            foreach(TabPage page in tabPages.TabPages)
+            {
+                Console.WriteLine("tab name: " + page.Name);
+            }
+            tabPages.SelectedTab = tabPages.TabPages[index];
+            currentWorkspace = tabPages.SelectedTab.Controls[0] as DrawPanel;
         }
 
         public void LoadData(string path)
