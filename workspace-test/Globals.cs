@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Word = Microsoft.Office.Interop.Word;
@@ -21,5 +22,22 @@ namespace workspace_test
         public static int weightWidth = 5;
         public static int gap = 5;
         public static Main main;
+
+        public static void CloseWord()
+        {
+            try
+            {
+                if(doc != null) doc.Close();
+                word.Quit();
+            }
+            catch (COMException)
+            {
+                return;
+            }
+            catch (NullReferenceException)
+            {
+                return;
+            }
+        }
     }
 }

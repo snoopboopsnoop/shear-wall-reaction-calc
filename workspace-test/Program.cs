@@ -28,7 +28,7 @@ namespace workspace_test
         {
             try
             {
-                form.GetWorkspace().CloseWord();
+                Globals.CloseWord();
             }
             catch(NullReferenceException)
             {

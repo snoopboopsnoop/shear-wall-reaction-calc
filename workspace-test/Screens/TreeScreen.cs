@@ -44,7 +44,10 @@ namespace workspace_test.Screens
         void treeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             Console.WriteLine("pressed " + e.Node.Text);
-            Globals.main.Open(e.Node.Text);
+            if(e.Node.Nodes.Count == 0)
+            {
+                Globals.main.Open(e.Node.Text);
+            }
         }
     }
 }

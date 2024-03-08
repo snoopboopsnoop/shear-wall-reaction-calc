@@ -22,7 +22,6 @@ using Word = Microsoft.Office.Interop.Word;
 
 namespace workspace_test
 {
-    [Serializable]
     public class DrawPanel : Panel
     {
         // select | rectangle | pen
@@ -185,23 +184,7 @@ namespace workspace_test
         public DrawPanel(Floor floor) : this()
         {
             this.floor = floor;
-        }
-
-        public void CloseWord()
-        {
-            try
-            {
-                Globals.doc.Close();
-                Globals.word.Quit();
-            }
-            catch(COMException)
-            {
-                return;
-            }
-            catch(NullReferenceException)
-            {
-                return;
-            }
+            Load(floor);
         }
 
         public void Save()
@@ -211,7 +194,6 @@ namespace workspace_test
             {
                 floor.SetShear(shear);
             }
-            //Console.WriteLine(Globals.doc.FullName);
         }
 
         public void Load(Floor floor)
@@ -222,6 +204,7 @@ namespace workspace_test
                 shear = floor.GetShear();
                 shear.Load();
             }
+            Invalidate();
         }
 
         public void SetPointerMode(string mode)

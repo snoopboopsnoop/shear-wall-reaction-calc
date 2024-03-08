@@ -45,28 +45,33 @@ namespace workspace_test
             this.Font = SystemFonts.MessageBoxFont;
             this.ForeColor = Globals.fontColor;
             InitializeComponent();
+
+            Building building = new Building();
+            Floor firstFloor = building.AddFloor();
+
+            project = new Project("Untitled", building);
+
             tabPages = new TabControl();
             tabPages.Dock = DockStyle.Fill;
             tabPages.Padding = new Point(0, 0);
             tabPages.Margin = new Padding(0, 10, 0, 0);
+
             TabPage firstPage = new TabPage("Floor 1");
             firstPage.Name = firstPage.Text;
             tabs.Add(firstPage);
-            TabPage LATab = new TabPage("Level Acceleration Calculator");
-            LATab.Name = LATab.Text;
-            tabs.Add(LATab);
+
             tabs[0].Dock = DockStyle.Fill;
             tabs[0].BorderStyle = BorderStyle.FixedSingle;
             tabs[0].Margin = new Padding(0, 0, 0, 0);
-            tabs[1].Dock = DockStyle.Fill;
-            tabs[1].BorderStyle = BorderStyle.FixedSingle;
-            tabs[1].Margin = new Padding(0, 0, 0, 0);
+
             tableLayoutPanel2.Controls.Add(tabPages, 1, 0);
-            tabPages.Controls.AddRange(new Control[] { tabs[0], tabs[1] });
-            Floor firstFloor = new Floor(1);
+            tabPages.Controls.AddRange(new Control[] { tabs[0] });
+
             workspaces.Add(new DrawPanel(firstFloor));
+
             tabs[0].Controls.Add(workspaces[0]);
             tabs[0].BackgroundImageLayout = ImageLayout.Stretch;
+
             currentWorkspace = workspaces[0];
             currentWorkspace.BackgroundImageLayout = ImageLayout.Center;
             background = null;
@@ -105,8 +110,10 @@ namespace workspace_test
 
             ToolStripMenuItem projMenu = new ToolStripMenuItem("Project");
             ToolStripMenuItem addFloorMenu = new ToolStripMenuItem("Add Floor", null, new EventHandler(addFloor_Click));
+            ToolStripMenuItem levelAccelMenu = new ToolStripMenuItem("Calculate Level Accel.", null, new EventHandler(levelAccel_Click));
 
             projMenu.DropDownItems.Add(addFloorMenu);
+            projMenu.DropDownItems.Add(levelAccelMenu);
 
             fileMenu.ForeColor = Globals.fontColor;
             imgMenu.ForeColor = Globals.fontColor;
@@ -155,11 +162,6 @@ namespace workspace_test
             this.ActiveControl = workspaces[0];
             this.Click += on_Click;
 
-            Building building = new Building();
-            building.AddFloor();
-
-            project = new Project("Untitled", building);
-
             fs = new TreeScreen(project);
             fs.Text = "Project View";
 
@@ -196,7 +198,7 @@ namespace workspace_test
             newPage.Margin = new Padding(0, 0, 0, 0);
             newPage.Controls.Add(new DrawPanel(newFloor));
             //tabs.Insert(tabs.Count - 2, new TabPage(newFloor.GetName()));
-            tabPages.TabPages.Insert(tabPages.TabPages.Count - 1, newPage);
+            tabPages.TabPages.Insert(tabPages.TabPages.Count, newPage);
             tabPages.SelectedTab = tabPages.TabPages[tabPages.TabPages.Count - 2];
             //currentWorkspace = tabPages.SelectedTab.Controls[0] as DrawPanel;
         }
@@ -212,6 +214,12 @@ namespace workspace_test
                 fs = new TreeScreen(project);
                 fs.Show();
             }
+        }
+        private void levelAccel_Click(object sender, EventArgs e)
+        {
+            LevelAccel laScreen = new LevelAccel(project.GetBuilding());
+            laScreen.ShowDialog();
+            UpdateLA();
         }
         private void menu_Opening(object sender, EventArgs e)
         {
@@ -235,12 +243,23 @@ namespace workspace_test
         private void tabs_SelectedIndexChanged(object sender, EventArgs e)
         {
             Console.WriteLine("changed tab");
-            Console.WriteLine(tabPages.SelectedTab.Text);
-            if(tabPages.SelectedTab.Text.StartsWith("Floor"))
+            // sometimes selectedtab will go null when clearing it (temp?>)
+            if(tabPages.SelectedTab != null)
             {
-                currentWorkspace = tabPages.SelectedTab.Controls[0] as DrawPanel;
+                if (tabPages.SelectedTab.Text.StartsWith("Floor"))
+                {
+                    currentWorkspace = tabPages.SelectedTab.Controls[0] as DrawPanel;
+                    UpdateLA();
+                }
             }
+        
             
+        }
+
+        private void UpdateLA()
+        {
+            int floor = int.Parse(tabPages.SelectedTab.Text.Split(' ')[1]) - 1;
+            textBox1.Text = project.GetBuilding().GetFloors()[floor].GetLA().ToString("0.00");
         }
 
         private void save()
@@ -260,30 +279,24 @@ namespace workspace_test
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
                     this.Cursor = Cursors.WaitCursor;
-                        if (saveDialog.FileName == "") saveDialog.FileName = loadedFile;
+                    if (saveDialog.FileName == "") saveDialog.FileName = loadedFile;
 
-                        currentWorkspace.Save();
+                    foreach (DrawPanel workspace in workspaces)
+                    {
+                        workspace.Save();  
+                    }
 
-                        Output output = new Output(project);
-                        //try
-                        //{
-                        //    output = new Output(project);
-                        //}
-                        //catch (System.Runtime.InteropServices.COMException)
-                        //{
-                        //    //output = new Output(lines, shear, Globals.refMeasure, Globals.scale);
-                            
-                        //}
+                Console.WriteLine("liens: " + project.GetBuilding().GetFloors()[0].GetLines().Count);
 
-                        JsonSerializer serializer = new JsonSerializer();
-                        serializer.TypeNameHandling = TypeNameHandling.Auto;
-                        serializer.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
+                    JsonSerializer serializer = new JsonSerializer();
+                    serializer.TypeNameHandling = TypeNameHandling.Auto;
+                    serializer.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
 
-                        using (StreamWriter sw = new StreamWriter(saveDialog.FileName))
-                        using (JsonWriter writer = new JsonTextWriter(sw))
-                        {
-                            serializer.Serialize(writer, output);
-                        }
+                    using (StreamWriter sw = new StreamWriter(saveDialog.FileName))
+                    using (JsonWriter writer = new JsonTextWriter(sw))
+                    {
+                        serializer.Serialize(writer, project);
+                    }
                     this.Cursor = Cursors.Default;
                 //}
             }
@@ -304,34 +317,46 @@ namespace workspace_test
 
         public void LoadData(string path)
         {
-            Output input;
-
             using (StreamReader file = File.OpenText(path))
             {
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.TypeNameHandling = TypeNameHandling.Auto;
                 serializer.NullValueHandling = NullValueHandling.Ignore;
 
-                input = (Output)serializer.Deserialize(file, typeof(Output));
+                project = (Project)serializer.Deserialize(file, typeof(Project));
 
-                Globals.refMeasure = input.project.GetRefMeasure();
-                if (input.project.GetBuilding().GetFloors()[0].GetDocPath() != "")
+                Globals.refMeasure = project.GetRefMeasure();
+                Globals.scale = project.GetScale();
+                //if (project.GetBuilding().GetFloors()[0].GetDocPath() != "")
+                //{
+                //    try
+                //    {
+                //        if (Globals.word.Visible == false) Globals.word.Visible = true;
+                //    }
+                //    catch (Exception)
+                //    {
+                //        Globals.word = new Word.Application();
+                //        Globals.word.Visible = true;
+                //    }
+                //    Globals.doc = Globals.word.Documents.Open(input.project.GetBuilding().GetFloors()[0].GetDocPath());
+                //}
+
+                workspaces.Clear();
+                tabPages.TabPages.Clear();
+                foreach (Floor floor in project.GetBuilding().GetFloors())
                 {
-                    try
-                    {
-                        if (Globals.word.Visible == false) Globals.word.Visible = true;
-                    }
-                    catch (Exception)
-                    {
-                        Globals.word = new Word.Application();
-                        Globals.word.Visible = true;
-                    }
-                    Globals.doc = Globals.word.Documents.Open(input.project.GetBuilding().GetFloors()[0].GetDocPath());
-                }
-                this.currentWorkspace.Load(input.project.GetBuilding().GetFloors()[0]);
-                Globals.scale = input.project.GetScale();
-            }
+                    TabPage newPage = new TabPage(floor.GetName());
 
+                    newPage.Name = newPage.Text;
+                    newPage.Dock = DockStyle.Fill;
+                    newPage.BorderStyle = BorderStyle.FixedSingle;
+                    newPage.Margin = new Padding(0, 0, 0, 0);
+                    newPage.Controls.Add(new DrawPanel(floor));
+
+                    tabPages.TabPages.Insert(tabPages.TabPages.Count, newPage);
+                }
+                //tabPages.SelectedTab = tabPages.TabPages[tabPages.TabPages.Count - 2];
+            }
             loadedFile = path;
         }
 
@@ -342,7 +367,7 @@ namespace workspace_test
             if (openDialog.ShowDialog() == DialogResult.OK)
             {
                 LoadData(openDialog.FileName);
-                tabPages.SelectedTab.Text = Path.GetFileName(openDialog.FileName.TrimEnd(Path.DirectorySeparatorChar));
+                this.Text = Path.GetFileName(openDialog.FileName.TrimEnd(Path.DirectorySeparatorChar));
             }
         }
 
@@ -367,7 +392,7 @@ namespace workspace_test
         private void Form1_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Console.WriteLine("closing word");
-            //workspace.CloseWord();
+            Globals.CloseWord();
         }
 
         public DrawPanel GetWorkspace()

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using Word = Microsoft.Office.Interop.Word;
@@ -31,6 +32,16 @@ namespace workspace_test
         [JsonProperty]
         private string name = "";
 
+        [JsonProperty]
+        private double weight = 0.0;
+
+        [JsonProperty]
+        private double height = 0.0;
+
+        [JsonProperty]
+        private double LA = 0.0;
+
+
         public Floor(int floorNum) {
             name = "Floor " + floorNum;
         }
@@ -55,13 +66,45 @@ namespace workspace_test
             return name;
         }
 
+        public double GetWeight()
+        {
+            return weight;
+        }
+
+        public double GetHeight()
+        {
+            return height;
+        }
+
+        public double GetLA()
+        {
+            return this.LA;
+        }
+
         public void SetLines(List<Tuple<PointF, PointF>> lines)
         {
+            foreach(Tuple<PointF, PointF> line in lines)
+            {
+                Console.WriteLine(line.ToString());
+            }
+            Console.WriteLine("setting lines in floor " + name);
             this.lines = lines;
         }
         public void SetShear(Shear shear)
         {
             this.shear = shear;
+        }
+        public void SetWeight(double weight)
+        {
+            this.weight = weight;
+        }
+        public void SetHeight(double height)
+        {
+            this.height = height;
+        }
+        public void SetLA(double LA)
+        {
+            this.LA = LA;
         }
     }
 }
