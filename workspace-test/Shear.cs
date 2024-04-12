@@ -73,19 +73,19 @@ namespace workspace_test
 
             List<int> reactionValsLeft = new List<int>(paramData.Item1.Count() + 1);
 
-            Word.Paragraph intro;
-            intro = Globals.doc.Content.Paragraphs.Add();
-            intro.Range.Text = ("LA = " + LA + " g");
-            intro.Format.SpaceBefore = 0;
-            intro.Format.SpaceAfter = 0;
-            intro.Range.Font.Bold = 0;
-            intro.Range.Font.Size = 12;
-            intro.Range.Text += ("LD = " + LD + " PSF");
-            intro.Range.Text += ("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF\n");
-            intro.Range.Text += ("Wx = LS x dimX + additional weight (near) + additional weight (far)");
-            intro.Range.Text += ("Wy = LS x dimY + additional weight (near) + additional weight (far)");
-            intro.Range.Text += ("Additional weight: LA x Ww x 0.5(Ha + Hb + Hp + Hs)");
-            intro.Range.InsertParagraphAfter();
+            //Word.Paragraph intro;
+            //intro = Globals.doc.Content.Paragraphs.Add();
+            //intro.Range.Text = ("LA = " + LA + " g");
+            //intro.Format.SpaceBefore = 0;
+            //intro.Format.SpaceAfter = 0;
+            //intro.Range.Font.Bold = 0;
+            //intro.Range.Font.Size = 12;
+            //intro.Range.Text += ("LD = " + LD + " PSF");
+            //intro.Range.Text += ("LS = LA x LD = " + LA + " x " + LD + " = " + LA * LD + " PSF\n");
+            //intro.Range.Text += ("Wx = LS x dimX + additional weight (near) + additional weight (far)");
+            //intro.Range.Text += ("Wy = LS x dimY + additional weight (near) + additional weight (far)");
+            //intro.Range.Text += ("Additional weight: LA x Ww x 0.5(Ha + Hb + Hp + Hs)");
+            //intro.Range.InsertParagraphAfter();
 
             List<ShearData> tempLefts = new List<ShearData>();
             List<ShearData> tempBottoms = new List<ShearData>();
@@ -97,19 +97,18 @@ namespace workspace_test
             }
 
 
-            Word.Range range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
-            range.InsertParagraphAfter();
+            //Word.Range range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+            //range.InsertParagraphAfter();
 
             foreach(var (bottom, i) in paramData.Item2.Select((left, i) => (left, i)))
             {
                 tempBottoms.Add(new ShearData(bottom, LS, "bottom", "Wy" + (i + 1)));
             }
 
-            range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
-            range.InsertBreak(Word.WdBreakType.wdPageBreak);
-            //range.InsertParagraphAfter();
+            //range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+            //range.InsertBreak(Word.WdBreakType.wdPageBreak);
 
-            LoadReactions(tempLefts, tempBottoms);
+            //LoadReactions(tempLefts, tempBottoms);
 
             int wxMeasure = tempLefts.Min(p => (int)p.wx);
             int wyMeasure = tempBottoms.Min(p => (int)p.wy);
@@ -125,11 +124,6 @@ namespace workspace_test
             {
                 shearData.Update();
             }
-
-            //Console.WriteLine("sheardata left size: " + tempLefts.Count);
-            //Console.WriteLine("sheardata bottom size: " + tempBottoms.Count);
-
-            //Console.WriteLine("test0: " + tempLefts[0].visual);
 
             shearData = new Tuple<List<ShearData>, List<ShearData>>(tempLefts, tempBottoms);
         }

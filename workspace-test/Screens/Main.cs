@@ -357,6 +357,8 @@ namespace workspace_test
                 }
                 //tabPages.SelectedTab = tabPages.TabPages[tabPages.TabPages.Count - 2];
             }
+            UpdateLA();
+            currentWorkspace = tabPages.SelectedTab.Controls[0] as DrawPanel;
             loadedFile = path;
         }
 
@@ -530,6 +532,7 @@ namespace workspace_test
             {
                 return;
             }
+            Console.WriteLine("set LD");
         }
 
         private void trackBar1_Scroll(object sender, EventArgs e)

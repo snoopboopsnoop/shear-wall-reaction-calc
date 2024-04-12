@@ -39,7 +39,7 @@ namespace workspace_test
         private double height = 0.0;
 
         [JsonProperty]
-        private double LA = 0.0;
+        private float LA = 0.0f;
 
 
         public Floor(int floorNum) {
@@ -76,7 +76,7 @@ namespace workspace_test
             return height;
         }
 
-        public double GetLA()
+        public float GetLA()
         {
             return this.LA;
         }
@@ -102,7 +102,7 @@ namespace workspace_test
         {
             this.height = height;
         }
-        public void SetLA(double LA)
+        public void SetLA(float LA)
         {
             this.LA = LA;
         }

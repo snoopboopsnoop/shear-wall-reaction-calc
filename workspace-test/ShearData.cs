@@ -55,17 +55,17 @@ namespace workspace_test
 
             visual = Rectangle.Empty;
 
-            range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+            //range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
 
-            range.InsertAfter("\n");
+            //range.InsertAfter("\n");
 
-            range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
+            //range = Globals.doc.Bookmarks.get_Item("\\endofdoc").Range;
 
             Update();
-            Console.WriteLine(range.Text);
+            //Console.WriteLine(range.Text);
 
-            rangeStart = range.Start;
-            rangeEnd = range.End;
+            //rangeStart = range.Start;
+            //rangeEnd = range.End;
         }
 
         public void Update()
@@ -73,12 +73,12 @@ namespace workspace_test
             //Console.WriteLine("wx ref " + wx / Globals.refMeasure);
             //Console.WriteLine("wy ref " + wy / Globals.refMeasure);
 
-            string text = name + " = ";
-            if (direction == "bottom") text += (LS + " PSF x " + (Math.Round(rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + aWeight.str + " = " + (wy + aWeight.wAdd).ToString("#,#0.###") + " PLF");
-            else if (direction == "left") text += (LS + " PSF x " + (Math.Round(rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + aWeight.str + " = " + (wx + aWeight.wAdd).ToString("#,#0.###") + " PLF");
-            range.Text = text;
+            //string text = name + " = ";
+            //if (direction == "bottom") text += (LS + " PSF x " + (Math.Round(rect.Height * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + aWeight.str + " = " + (wy + aWeight.wAdd).ToString("#,#0.###") + " PLF");
+            //else if (direction == "left") text += (LS + " PSF x " + (Math.Round(rect.Width * Globals.scale / 0.5) * 0.5).ToString("#,#0.###") + Globals.unit + aWeight.str + " = " + (wx + aWeight.wAdd).ToString("#,#0.###") + " PLF");
+            //range.Text = text;
 
-            Console.WriteLine("bobr: " + aWeight.wAdd);
+            //Console.WriteLine("bobr: " + aWeight.wAdd);
 
             visual = (direction == "bottom") ?
                 new Rectangle((int)rect.X + Globals.gap, (int)(rect.Y + Globals.gap + rect.Height), (int)rect.Width - 2 * Globals.gap, (int)((wy + aWeight.wAdd) / Globals.refMeasure * Globals.weightWidth)) :

@@ -199,6 +199,7 @@ namespace workspace_test
         public void Load(Floor floor)
         {
             lines = floor.GetLines();
+            LA = floor.GetLA();
             if (floor.GetShear() != null)
             {
                 shear = floor.GetShear();
@@ -232,6 +233,7 @@ namespace workspace_test
         public void SetLD(float paramLD)
         {
             LD = paramLD;
+            Console.WriteLine("Set LD wiorrskapce: " + LD);
         }
 
         public void clearShear()
@@ -410,28 +412,37 @@ namespace workspace_test
             System.Console.WriteLine(item.Text);
             if (item.Text == "Run Shear Reaction")
             {
+                Console.WriteLine(LA + ", " + LD);
                 if (!(LA == 0 || LD == 0)) {
                     cm.Close();
-                    SaveFileDialog saveDialog = new SaveFileDialog();
-                    saveDialog.Filter = "Word Document (*.docx)|*.docx";
-                    if(saveDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        this.Cursor = Cursors.WaitCursor;
-                        if (!File.Exists(saveDialog.FileName))
-                        {
-                            Globals.doc = Globals.word.Documents.Add(ref docPath, ref Globals.missing, ref Globals.missing, ref Globals.missing);
-                        }
-                        else
-                        {
-                            Globals.doc = Globals.word.Documents.Open(saveDialog.FileName);
-                        }
-                        Globals.doc.Content.Delete();
-                        Globals.doc.SaveAs(saveDialog.FileName);
-                        Algorithm();
-                        selectedLines.Clear();
-                        selectedPoints.Clear();
-                        this.Cursor = Cursors.Default;
-                    }
+                    //SaveFileDialog saveDialog = new SaveFileDialog();
+                    //saveDialog.Filter = "Word Document (*.docx)|*.docx";
+                    //if(saveDialog.ShowDialog() == DialogResult.OK)
+                    //{
+                    //    this.Cursor = Cursors.WaitCursor;
+                    //    if (!File.Exists(saveDialog.FileName))
+                    //    {
+                    //        Globals.doc = Globals.word.Documents.Add(ref docPath, ref Globals.missing, ref Globals.missing, ref Globals.missing);
+                    //    }
+                    //    else
+                    //    {
+                    //        Globals.doc = Globals.word.Documents.Open(saveDialog.FileName);
+                    //    }
+                    //    Globals.doc.Content.Delete();
+                    //    Globals.doc.SaveAs(saveDialog.FileName);
+                    //    AlgorithmNoWord();
+                    //    selectedLines.Clear();
+                    //    selectedPoints.Clear();
+                    //    this.Cursor = Cursors.Default;
+                    //}
+                    AlgorithmNoWord();
+                    selectedLines.Clear();
+                    selectedPoints.Clear();
+                    this.Cursor = Cursors.Default;
+                }
+                else
+                {
+                    Console.WriteLine("one of the levels is 0");
                 }
             }
             else if(item.Text == "Set Scale")
@@ -522,6 +533,173 @@ namespace workspace_test
             {
                 cm.Items[4].Enabled = false;
             }
+        }
+
+        private void AlgorithmNoWord()
+        {
+            // splits all unique vertices by drawing a line through the x and y values
+            // (theoretically, though it actually just stores all the unique x and ys)
+            List<int> y = new List<int>();
+            List<int> x = new List<int>();
+
+            foreach (var pos in selectedLines)
+            {
+                if (!y.Contains((int)lines[pos].Item1.Y))
+                {
+                    y.Add((int)lines[pos].Item1.Y);
+                }
+                if (!y.Contains((int)lines[pos].Item2.Y))
+                {
+                    y.Add((int)lines[pos].Item2.Y);
+                }
+                if (!x.Contains((int)lines[pos].Item1.X))
+                {
+                    x.Add((int)lines[pos].Item1.X);
+                }
+                if (!x.Contains((int)lines[pos].Item2.X))
+                {
+                    x.Add((int)lines[pos].Item2.X);
+                }
+            }
+
+            // vertical: all the vertical line poisitions
+            // horizontal: all the horziontal line positions
+            List<int> vertical = new List<int>();
+            List<int> horizontal = new List<int>();
+            List<Tuple<PointF, PointF>> selectLines = new List<Tuple<PointF, PointF>>();
+
+            // initilize the horiozntal and verticals
+            foreach (var pos in selectedLines)
+            {
+                Tuple<PointF, PointF> temp = lines[pos];
+                //lines.Remove(temp);
+                selectLines.Add(temp);
+                string direction = GetDirection(temp.Item1, temp.Item2);
+                if (direction == "vertical") vertical.Add(selectLines.Count() - 1);
+                else horizontal.Add(selectLines.Count() - 1);
+            }
+
+            vertical = vertical.OrderBy(p => selectLines[p].Item1.X).ToList();
+            horizontal = horizontal.OrderBy(p => selectLines[p].Item1.Y).ToList();
+
+            foreach (var i in vertical)
+            {
+                Console.WriteLine("line " + selectLines[i].Item1 + " => " + selectLines[i].Item2);
+            }
+
+            Console.WriteLine("horizontal: ");
+
+            foreach (var i in horizontal)
+            {
+                Console.WriteLine("line " + selectLines[i].Item1 + " => " + selectLines[i].Item2);
+            }
+
+            x.Sort();
+            y.Sort();
+
+            Point min = new Point(9999, 9999);
+            Point max = Point.Empty;
+
+            // get minimum and max points to form a big rectangle around the shape
+            // useless rn but will be useful for the r value implementation (i hope)
+            foreach (var pos in vertical)
+            {
+                var line = selectLines[pos];
+                if (line.Item1.X < min.X) min.X = (int)line.Item1.X;
+                else if (line.Item1.X > max.X) max.X = (int)line.Item1.X;
+                if (line.Item1.Y < min.Y) min.Y = (int)line.Item1.Y;
+                else if (line.Item1.Y > max.Y) max.Y = (int)line.Item1.Y;
+                if (line.Item2.X < min.X) min.X = (int)line.Item2.X;
+                else if (line.Item2.X > max.X) max.X = (int)line.Item2.X;
+                if (line.Item2.Y < min.Y) min.Y = (int)line.Item2.Y;
+                else if (line.Item2.Y > max.Y) max.Y = (int)line.Item2.Y;
+            }
+
+            Console.WriteLine("minmax: " + min + ", " + max);
+
+            // get all the rectangles to shear by forming a rectangle out of the fake lines and the real lines
+            // its a lot and tbh i forgot most of the logic
+            List<RectangleF> leftRects = new List<RectangleF>();
+            for (int i = 0; i < y.Count - 1; i++)
+            {
+                Tuple<int, int> range = new Tuple<int, int>(y[i], y[i + 1]);
+                List<int> lookAt = new List<int>();
+
+                foreach (var pos in vertical)
+                {
+                    if ((range.Item1 >= selectLines[pos].Item1.Y && range.Item2 <= selectLines[pos].Item2.Y) ||
+                        range.Item1 >= selectLines[pos].Item2.Y && range.Item2 <= selectLines[pos].Item1.Y)
+                    {
+                        lookAt.Add(pos);
+                    }
+                }
+
+                //Console.WriteLine("From y=" + range.Item1 + " to y=" + range.Item2 + ", look at lines " + selectLines[lookAt[0]] + " and " + selectLines[lookAt[1]]);
+
+                RectangleF tempRect;
+
+                for (int j = 0; j < lookAt.Count() - 1; j += 2)
+                {
+                    Tuple<PointF, PointF> a = selectLines[lookAt[j]];
+                    Tuple<PointF, PointF> b = selectLines[lookAt[j + 1]];
+
+                    if (a.Item1.X > b.Item1.X)
+                    {
+                        tempRect = new RectangleF((int)b.Item1.X, range.Item1, a.Item1.X - b.Item1.X, range.Item2 - range.Item1);
+                    }
+                    else
+                    {
+                        tempRect = new RectangleF((int)a.Item1.X, range.Item1, b.Item1.X - a.Item1.X, range.Item2 - range.Item1);
+                    }
+                    leftRects.Add(tempRect);
+                }
+
+            }
+
+            // same thing but do it using the vertical lines along the x axis
+            List<RectangleF> bottomRects = new List<RectangleF>();
+            for (int i = 0; i < x.Count - 1; i++)
+            {
+                Tuple<int, int> range = new Tuple<int, int>(x[i], x[i + 1]);
+                List<int> lookAt = new List<int>();
+
+                foreach (var pos in horizontal)
+                {
+                    if ((range.Item1 >= selectLines[pos].Item1.X && range.Item2 <= selectLines[pos].Item2.X) ||
+                        range.Item1 >= selectLines[pos].Item2.X && range.Item2 <= selectLines[pos].Item1.X)
+                    {
+                        lookAt.Add(pos);
+                    }
+                }
+
+                //Console.WriteLine("From x=" + range.Item1 + " to x=" + range.Item2 + ", look at lines " + selectLines[lookAt[0]] + " and " + selectLines[lookAt[1]]);
+
+                RectangleF tempRect;
+
+                for (int j = 0; j < lookAt.Count() - 1; j += 2)
+                {
+                    Tuple<PointF, PointF> a = selectLines[lookAt[j]];
+                    Tuple<PointF, PointF> b = selectLines[lookAt[j + 1]];
+
+                    if (a.Item1.Y > b.Item1.Y)
+                    {
+                        tempRect = new RectangleF((int)range.Item1, b.Item1.Y, range.Item2 - range.Item1, a.Item1.Y - b.Item2.Y);
+                    }
+                    else
+                    {
+                        tempRect = new RectangleF((int)range.Item1, a.Item1.Y, range.Item2 - range.Item1, b.Item1.Y - a.Item1.Y);
+                    }
+                    bottomRects.Add(tempRect);
+                }
+            }
+
+            // take all that and send it somewhere else
+            shear = new Shear(selectLines, new Tuple<List<RectangleF>,
+                              List<RectangleF>>(leftRects, bottomRects),
+                              new Tuple<List<int>, List<int>>(x, y),
+                              GetRectangle(min, max), LA, LD);
+
+            Invalidate();
         }
 
         // all the shear wall stuff in one bundle

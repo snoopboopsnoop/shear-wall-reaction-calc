@@ -224,7 +224,7 @@ namespace workspace_test.Screens
             building.SetVals(vals);
             foreach(ListViewItem item in listView1.Items)
             {
-                ((Floor)item.Tag).SetLA(double.Parse(item.SubItems[6].Text.Split(' ')[0]));
+                ((Floor)item.Tag).SetLA(float.Parse(item.SubItems[6].Text.Split(' ')[0]));
             }
         }
     }
