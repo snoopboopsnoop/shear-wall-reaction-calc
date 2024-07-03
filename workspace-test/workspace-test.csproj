@@ -273,6 +273,8 @@
     <None Include="src\saveAsIcon.png" />
     <None Include="src\openIcon.png" />
     <None Include="src\helpIcon.png" />
+    <None Include="Resources\pointIcon.bmp" />
+    <None Include="src\pointIcon.png" />
     <Content Include="src\Tutorial2.png" />
     <Content Include="src\Tutorial3.png" />
     <Content Include="src\Tutorial4.png" />

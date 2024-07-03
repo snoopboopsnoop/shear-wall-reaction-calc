@@ -24,7 +24,7 @@ namespace workspace_test
 {
     public class DrawPanel : Panel
     {
-        // select | rectangle | pen
+        // select | pen | point 
         private string pointerMode = "select";
 
         private Floor floor;
@@ -48,6 +48,10 @@ namespace workspace_test
         // which point is currently being hovered over, draws bigger one over it later
         private PointF hover = PointF.Empty;
         private ShearData hoverWeight = null;
+
+        // point appearing when hovering over line in point mode
+        private PointF hoverPoint = PointF.Empty;
+        private int hoverLine = -1;
 
         private List<ShearData> selectWeight = new List<ShearData>();
 
@@ -158,6 +162,9 @@ namespace workspace_test
             // 4
             ToolStripItem printButton = cm.Items.Add("Print Workspace to Active Word Doc");
             printButton.Enabled = false;
+            // 5
+            ToolStripItem dragButton = cm.Items.Add("Drag Calculations");
+            dragButton.Enabled = false;
 
             cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
             cm.Opening += contextMenu_Opening;
@@ -177,7 +184,6 @@ namespace workspace_test
 
             Console.WriteLine(docPath);
 
-            Globals.word.Visible = false;
         }
 
         // named panel constructor
@@ -509,7 +515,7 @@ namespace workspace_test
             }
 
             //Console.WriteLine("cm openieng event");
-            if (hoverWeight != null ||  selectWeight.Count() != 0)
+            if (hoverWeight != null || selectWeight.Count() != 0)
             {
                 cm.Items[3].Enabled = true;
             }
@@ -517,7 +523,7 @@ namespace workspace_test
             {
                 cm.Items[3].Enabled = false;
             }
-            if(shear != null)
+            if (shear != null)
             {
                 cm.Items[1].Enabled = true;
             }
@@ -525,13 +531,23 @@ namespace workspace_test
             {
                 cm.Items[1].Enabled = false;
             }
-            if(Globals.doc != null)
+
+            if (Globals.doc != null)
             {
                 cm.Items[4].Enabled = true;
             }
             else
             {
                 cm.Items[4].Enabled = false;
+            }
+
+            if (selectedLines.Count == 1)
+            {
+                cm.Items[5].Enabled = true;
+            }
+            else
+            {
+                cm.Items[5].Enabled = false;
             }
         }
 
@@ -1275,7 +1291,7 @@ namespace workspace_test
         // begin new rectangle if mouse down while rectangle selection
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            Console.WriteLine("clicked: " + e.Location);        
+            Console.WriteLine("clicked: " + e.Location);
             clickedLine = false;
             suggestLine = PointF.Empty;
             base.OnMouseDown(e);
@@ -1301,7 +1317,7 @@ namespace workspace_test
                 end = PointF.Empty;
                 Invalidate();
             }
-            else if (e.Button == MouseButtons.Left && (pointerMode == "rectangle" || pointerMode == "pen"))
+            else if (e.Button == MouseButtons.Left && pointerMode == "pen")
             {
                 drawing = true;
                 dragging = false;
@@ -1522,6 +1538,8 @@ namespace workspace_test
         // move end location if mouse moves
         protected override void OnMouseMove(MouseEventArgs e)
         {
+            
+
             if(pointerMode != "menu")
             {
                 hoverWeight = null;
@@ -1529,6 +1547,7 @@ namespace workspace_test
 
             suggestLine = PointF.Empty;
             hover = PointF.Empty;
+            hoverPoint = Point.Empty;
             base.OnMouseMove(e);
 
             if (e.Button == MouseButtons.Left)
@@ -1600,8 +1619,10 @@ namespace workspace_test
                 }
             }
 
-            foreach (var line in lines)
+            for (int i = 0; i < lines.Count; ++i)
             {
+                Tuple<PointF, PointF> line = lines[i];
+
                 if (Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 10)
                 {
                     hover = line.Item1;
@@ -1618,6 +1639,51 @@ namespace workspace_test
                         end = hover;
                     }
                 }
+
+                // check if pointer is close enough between lines to place point suggestion
+                else if(pointerMode == "point" || (pointerMode == "pen" && drawing == false))
+                {
+                    if (Math.Abs(e.Location.X - line.Item1.X) <= 10 && line.Item1.X == line.Item2.X)
+                    {
+
+                        if (line.Item1.Y < line.Item2.Y)
+                        {
+                            if (e.Location.Y > line.Item1.Y + 10 && e.Location.Y < line.Item2.Y - 10)
+                            {
+                                hoverPoint = new PointF(line.Item1.X, e.Location.Y);
+                                hoverLine = i;
+                            }
+                        }
+                        else
+                        {
+                            if (e.Location.Y > line.Item2.Y + 10 && e.Location.Y < line.Item1.Y - 10)
+                            {
+                                hoverPoint = new PointF(line.Item1.X, e.Location.Y);
+                                hoverLine = i;
+                            }
+                        }
+                    }
+                    else if (Math.Abs(e.Location.Y - line.Item1.Y) <= 10 && line.Item1.Y == line.Item2.Y)
+                    {
+                        if (line.Item1.X < line.Item2.X)
+                        {
+                            if (e.Location.X > line.Item1.X + 10 && e.Location.X < line.Item2.X - 10)
+                            {
+                                hoverPoint = new PointF(e.Location.X, line.Item1.Y);
+                                hoverLine = i;
+                            }
+                        }
+                        else
+                        {
+                            if (e.Location.X > line.Item2.X + 10 && e.Location.X < line.Item1.X - 10)
+                            {
+                                hoverPoint = new PointF(e.Location.X, line.Item1.Y);
+                                hoverLine = i;
+                            }
+                        }
+                    }
+                }
+                
 
                 if (pointerMode == "pen" && drawing)
                 {
@@ -1749,12 +1815,18 @@ namespace workspace_test
                     DrawLine(e, new Tuple<PointF, PointF> (start, end), Color.Blue);
                     
                 }
-                
             }
+
             if(!hover.IsEmpty)
             {
                 e.Graphics.FillEllipse(solidBrush, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
                 e.Graphics.DrawEllipse(Pens.Black, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
+            }
+            if (!hoverPoint.IsEmpty)
+            {
+                e.Graphics.FillEllipse(solidBrush, new RectangleF(hoverPoint.X - dotSize / 2, hoverPoint.Y - dotSize / 2, dotSize, dotSize));
+                e.Graphics.DrawEllipse(Pens.Black, new RectangleF(hoverPoint.X - dotSize / 2, hoverPoint.Y - dotSize / 2, dotSize, dotSize));
+
             }
 
             e.Graphics.FillRectangle(selectBrush, selection);

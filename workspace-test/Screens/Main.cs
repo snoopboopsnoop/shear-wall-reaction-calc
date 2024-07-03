@@ -29,6 +29,7 @@ namespace workspace_test
 
         private RadioButton pointerButton;
         private RadioButton penButton;
+        private RadioButton pointButton;
         private Button helpButton;
         private Image background;
 
@@ -142,8 +143,17 @@ namespace workspace_test
             penButton.BackgroundImageLayout = ImageLayout.Stretch;
             toolTip1.SetToolTip(penButton, "Pen Tool");
 
+            pointButton = new RadioButton();
+            pointButton.Name = "pointButton";
+            pointButton.Appearance = Appearance.Button;
+            panel5.Controls.Add(pointButton);
+            pointButton.BackgroundImage = Properties.Resources.pointIcon;
+            pointButton.BackgroundImageLayout = ImageLayout.Stretch;
+            toolTip1.SetToolTip(pointButton, "Point Tool");
+
             pointerButton.CheckedChanged += radioButton_CheckedChanged;
             penButton.CheckedChanged += radioButton_CheckedChanged;
+            pointButton.CheckedChanged += radioButton_CheckedChanged;
 
             helpButton = new Button();
             panel5.Controls.Add(helpButton);
@@ -265,40 +275,30 @@ namespace workspace_test
         private void save()
         {
             Console.WriteLine("loaded file: " + currentWorkspace.GetLoadedFile());
-            //if (currentWorkspace.GetLoadedFile() != "")
-            //{
-            //    this.Cursor = Cursors.WaitCursor;
-            //    System.Threading.Thread.Sleep(50);
-            //    currentWorkspace.Save("");
-            //    this.Cursor = Cursors.Default;
-            //}
-            //else
-            //{
-                SaveFileDialog saveDialog = new SaveFileDialog();
-                saveDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
-                if (saveDialog.ShowDialog() == DialogResult.OK)
+            SaveFileDialog saveDialog = new SaveFileDialog();
+            saveDialog.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt";
+            if (saveDialog.ShowDialog() == DialogResult.OK)
+            {
+                this.Cursor = Cursors.WaitCursor;
+                if (saveDialog.FileName == "") saveDialog.FileName = loadedFile;
+
+                foreach (DrawPanel workspace in workspaces)
                 {
-                    this.Cursor = Cursors.WaitCursor;
-                    if (saveDialog.FileName == "") saveDialog.FileName = loadedFile;
+                    workspace.Save();  
+                }
 
-                    foreach (DrawPanel workspace in workspaces)
-                    {
-                        workspace.Save();  
-                    }
+            Console.WriteLine("liens: " + project.GetBuilding().GetFloors()[0].GetLines().Count);
 
-                Console.WriteLine("liens: " + project.GetBuilding().GetFloors()[0].GetLines().Count);
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.TypeNameHandling = TypeNameHandling.Auto;
+                serializer.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
 
-                    JsonSerializer serializer = new JsonSerializer();
-                    serializer.TypeNameHandling = TypeNameHandling.Auto;
-                    serializer.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
-
-                    using (StreamWriter sw = new StreamWriter(saveDialog.FileName))
-                    using (JsonWriter writer = new JsonTextWriter(sw))
-                    {
-                        serializer.Serialize(writer, project);
-                    }
-                    this.Cursor = Cursors.Default;
-                //}
+                using (StreamWriter sw = new StreamWriter(saveDialog.FileName))
+                using (JsonWriter writer = new JsonTextWriter(sw))
+                {
+                    serializer.Serialize(writer, project);
+                }
+                this.Cursor = Cursors.Default;
             }
             
         }
@@ -385,6 +385,11 @@ namespace workspace_test
             penButton.Left = pointerButton.Left;
             penButton.Top = penButton.Left + pointerButton.Bottom;
 
+            pointButton.Width = pointerButton.Width;
+            pointButton.Height = pointButton.Width;
+            pointButton.Left = pointerButton.Left;
+            pointButton.Top = pointButton.Left + penButton.Bottom;
+
             helpButton.Width = pointerButton.Width;
             helpButton.Height = helpButton.Width;
             helpButton.Left = penButton.Left;
@@ -420,6 +425,9 @@ namespace workspace_test
                         return;
                     case "penButton":
                         currentWorkspace.SetPointerMode("pen");
+                        break;
+                    case "pointButton":
+                        currentWorkspace.SetPointerMode("point");
                         break;
                     default:
                         currentWorkspace.SetPointerMode("select");

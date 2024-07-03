@@ -103,6 +103,16 @@ namespace workspace_test.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap pointIcon {
+            get {
+                object obj = ResourceManager.GetObject("pointIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap saveAsIcon {
             get {
                 object obj = ResourceManager.GetObject("saveAsIcon", resourceCulture);

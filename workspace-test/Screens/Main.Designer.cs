@@ -60,7 +60,7 @@
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(6);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -130,7 +130,7 @@
             this.textBox1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox1.Location = new System.Drawing.Point(99, 20);
-            this.textBox1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(6);
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.Size = new System.Drawing.Size(128, 51);
@@ -144,7 +144,7 @@
             this.panel2.Controls.Add(this.label2);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(6, 93);
-            this.panel2.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.panel2.Margin = new System.Windows.Forms.Padding(6);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(244, 112);
             this.panel2.TabIndex = 14;
@@ -154,7 +154,7 @@
             this.textBox2.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox2.Location = new System.Drawing.Point(93, 27);
-            this.textBox2.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.textBox2.Margin = new System.Windows.Forms.Padding(6);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(128, 51);
             this.textBox2.TabIndex = 12;
@@ -180,7 +180,7 @@
             this.panel3.Controls.Add(this.label3);
             this.panel3.Controls.Add(this.trackBar1);
             this.panel3.Location = new System.Drawing.Point(6, 217);
-            this.panel3.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.panel3.Margin = new System.Windows.Forms.Padding(6);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(244, 90);
             this.panel3.TabIndex = 15;
@@ -225,15 +225,15 @@
             // 
             // Main
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(192F, 192F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ClientSize = new System.Drawing.Size(2594, 1577);
             this.Controls.Add(this.tableLayoutPanel1);
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
-            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Really Cool Shear Reaction Application";
