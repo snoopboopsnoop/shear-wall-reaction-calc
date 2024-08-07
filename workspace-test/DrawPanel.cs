@@ -19,71 +19,15 @@ using System.Drawing.Imaging;
 using Newtonsoft.Json;
 
 using Word = Microsoft.Office.Interop.Word;
+using System.Security.Policy;
 
 namespace workspace_test
 {
-    public class DrawPanel : Panel
+    public class DrawPanel : BasePanel
     {
-        // select | pen | point 
-        private string pointerMode = "select";
-
         private Floor floor;
 
-        // mouse statuses
-        private Boolean drawing = false;
-        private Boolean dragging = false;
-        private Boolean selecting = false;
-        private Boolean clickedLine = false;
-
-        // used to check if mouse clicked in one spot
-        private PointF clickOff = Point.Empty;
-
-        // previous mouse position, for stuff
-        private PointF lastPos = PointF.Empty;
-
-        // start end points for mouse drag
-        private PointF start = PointF.Empty;
-        private PointF end = PointF.Empty;
-
-        // which point is currently being hovered over, draws bigger one over it later
-        private PointF hover = PointF.Empty;
-        private ShearData hoverWeight = null;
-
-        // point appearing when hovering over line in point mode
-        private PointF hoverPoint = PointF.Empty;
-        private int hoverLine = -1;
-
         private List<ShearData> selectWeight = new List<ShearData>();
-
-        // the funny red line that tells you if you're lined up
-        private PointF suggestLine = PointF.Empty;
-
-        //index of currently selected rectangle
-        private int currentlySelected = -1;
-
-        // the funny blue rectangle when you drag to select
-        private Rectangle selection = Rectangle.Empty;
-
-        // List containing drawn lines
-        private List<Tuple<PointF, PointF>> lines = new List<Tuple<PointF, PointF>>();
-
-        // list containing positions of drawn lines that are currently selected
-        private List<int> selectedLines = new List<int>();
-        private List<PointF> selectedPoints = new List<PointF>();
-
-        // how big to make the vertex dots
-        private int dotSize = 6;
-
-        // default font
-        private Font font = new Font("Arial", 8);
-
-        // formatting for measurement display text
-        private StringFormat formatWidth = new StringFormat();
-        private StringFormat formatHeight = new StringFormat();
-        private StringFormat formatwx = new StringFormat();
-        private StringFormat formatwy = new StringFormat();
-        private StringFormat formatrx = new StringFormat();
-        private StringFormat formatry = new StringFormat();
 
         private int arrowDist = 10;
         private int arrowLength = 20;
@@ -91,11 +35,14 @@ namespace workspace_test
         // right click menu
         private ContextMenuStrip cm;
 
-        private Label scaleLabel;
-
         // calculator values
         private float LA = 0;
         private float LD = 0;
+
+        public StringFormat formatwx = new StringFormat();
+        public StringFormat formatwy = new StringFormat();
+        public StringFormat formatrx = new StringFormat();
+        public StringFormat formatry = new StringFormat();
 
         // i should change its name but it's just all the shear data collected
         // when analysis is performed on a compound object
@@ -111,26 +58,10 @@ namespace workspace_test
         private string loadedFile = "";
 
         // default constructor
-        public DrawPanel()
+        public DrawPanel() : base()
         {
-            Dock = DockStyle.Fill;
-            DoubleBuffered = true;
-            BorderStyle = BorderStyle.FixedSingle;
-            Margin = new Padding(0, 0, 0, 0);
 
-            // settings to allow importing images behind
-            BackColor = Color.White;
-            BackgroundImage = null;
-            BackgroundImageLayout = ImageLayout.Center;
-            DoubleBuffered = true;
-
-            // string formatting settings
-            formatWidth.Alignment = StringAlignment.Center;
-            formatWidth.LineAlignment = StringAlignment.Far;
-
-            formatHeight.Alignment = StringAlignment.Near;
-            formatHeight.LineAlignment = StringAlignment.Center;
-
+            Console.WriteLine("child constructor");
             formatwx.Alignment = StringAlignment.Far;
             formatwx.LineAlignment = StringAlignment.Center;
 
@@ -166,70 +97,45 @@ namespace workspace_test
             ToolStripItem dragButton = cm.Items.Add("Drag Calculations");
             dragButton.Enabled = false;
 
-            cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
-            cm.Opening += contextMenu_Opening;
+            //cm.ItemClicked += new ToolStripItemClickedEventHandler(contextMenu_ItemClicked);
+            //cm.Opening += contextMenu_Opening;
 
-            scaleLabel = new Label();
-            scaleLabel.ForeColor = Color.Black;
-            scaleLabel.Parent = this;
-            scaleLabel.BackColor = Color.Transparent;
-            scaleLabel.Location = new Point(0, 0);
-            scaleLabel.AutoSize = true;
-            scaleLabel.Padding = new Padding(5);
-            
 
-            scaleLabel.Text = $"Scale: 1 pixel = {Globals.scale}{Globals.unit}";
 
-            this.Controls.Add(scaleLabel);
-
-            Console.WriteLine(docPath);
-
+            //Console.WriteLine(base.cm.Items.Count);
         }
 
         // named panel constructor
-        public DrawPanel(Floor floor) : this()
+        public DrawPanel(Floor floor, Main main) : this(main)
         {
             this.floor = floor;
-            Load(floor);
+            //Load(floor);
         }
 
-        public void Save()
+        public DrawPanel(Main main) : base(main)
         {
-            floor.SetLines(lines);
-            if(shear != null)
-            {
-                floor.SetShear(shear);
-            }
         }
 
-        public void Load(Floor floor)
-        {
-            lines = floor.GetLines();
-            LA = floor.GetLA();
-            if (floor.GetShear() != null)
-            {
-                shear = floor.GetShear();
-                shear.Load();
-            }
-            Invalidate();
-        }
+        //public void Save()
+        //{
+        //    floor.SetLines(base.lines);
+        //    if(shear != null)
+        //    {
+        //        floor.SetShear(shear);
+        //    }
+        //}
 
-        public void SetPointerMode(string mode)
-        {
-            System.Console.WriteLine("switching pointer to mode " + mode);
-            start = PointF.Empty;
-            end = PointF.Empty;
-            suggestLine = PointF.Empty;
-
-            drawing = false;
-            dragging = false;
-            selecting = false;
-            clickedLine = false;
-
-            pointerMode = mode;
-
-            Invalidate();
-        }
+        //public void Load(Floor floor)
+        //{
+        //    lines = floor.GetLines();
+        //    LA = floor.GetLA();
+        //    if (floor.GetShear() != null)
+        //    {
+        //        shear = floor.GetShear();
+        //        shear.Load();
+        //    }
+        //    Invalidate();
+        //}
 
         public void SetLA(float paramLA)
         {
@@ -248,28 +154,9 @@ namespace workspace_test
             Invalidate();
         }
 
-        public int GetCurrentlySelected()
-        {
-            return currentlySelected;
-        }
-
         public string GetLoadedFile()
         {
             return loadedFile;
-        }
-
-        // deletes currently selected lines
-        public void deleteSelected()
-        {
-            foreach (var (pos, i) in selectedLines.Select((value, i) => (value, i)))
-            {
-                lines.RemoveAt(pos - i);
-            }
-
-            selectedLines.Clear();
-            selectedPoints.Clear();
-
-            Invalidate();
         }
 
         // exports formatted screenshot of workspace to current word document
@@ -368,13 +255,6 @@ namespace workspace_test
             File.Delete(tempFile);
         }
 
-        public void SetScale(double value, string paramUnit)
-        {
-            Globals.scale = value;
-            Globals.unit = paramUnit;
-            scaleLabel.Text = $"Scale: 1 pixel = {Globals.scale.ToString("N2")}{Globals.unit}";
-        }
-
         private double Magnitude(PointF point)
         {
             return Math.Sqrt(Math.Pow(point.X, 2) + Math.Pow(point.Y, 2));
@@ -390,26 +270,6 @@ namespace workspace_test
             return Math.Sqrt(Math.Pow(line.Item2.X - line.Item1.X, 2) + Math.Pow(line.Item2.Y - line.Item1.Y, 2));
         }
 
-        // returns if 4 coordinates from a rectangle
-        private bool isRectangle(List<PointF> points)
-        {
-            // this cool math i foundo n stack overflow might be useless, see function above
-            if (points.Count != 4)
-            {
-                Console.WriteLine("not enough points");
-                return false;
-            }
-
-            double cx = (points[0].X + points[1].X + points[2].X + points[3].X) / 4;
-            double cy = (points[0].Y + points[1].Y + points[2].Y + points[3].Y) / 4;
-
-            double dd1 = Math.Pow(cx - points[0].X, 2) + Math.Pow(cy - points[0].Y, 2);
-            double dd2 = Math.Pow(cx - points[1].X, 2) + Math.Pow(cy - points[1].Y, 2);
-            double dd3 = Math.Pow(cx - points[2].X, 2) + Math.Pow(cy - points[2].Y, 2);
-            double dd4 = Math.Pow(cx - points[3].X, 2) + Math.Pow(cy - points[3].Y, 2);
-
-            return Math.Abs(dd1 - dd2) < 1E-6 && Math.Abs(dd1 - dd3) < 1E-6 && Math.Abs(dd1 - dd4) < 1E-6;
-        }
 
         // deal with right click menu selections
         private void contextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -442,8 +302,8 @@ namespace workspace_test
                     //    this.Cursor = Cursors.Default;
                     //}
                     AlgorithmNoWord();
-                    selectedLines.Clear();
-                    selectedPoints.Clear();
+                    ClearSelected();
+
                     this.Cursor = Cursors.Default;
                 }
                 else
@@ -453,14 +313,14 @@ namespace workspace_test
             }
             else if(item.Text == "Set Scale")
             {
-                if (selectedLines.Count() != 1)
+                if (SelectedLines().Count() != 1)
                 {
                     Error error = new Error("Error: Need to select 1 line to set scale");
                     error.ShowDialog();
                 }
                 else
                 {
-                    ScaleScreen scaleForm = new ScaleScreen(this, (int)Magnitude(lines[selectedLines[0]]), Globals.unit);
+                    ScaleScreen scaleForm = new ScaleScreen(this, (int)Magnitude(Lines()[SelectedLines()[0]]), Globals.unit);
                     scaleForm.ShowDialog();
                 }
             }
@@ -489,17 +349,21 @@ namespace workspace_test
                 }
                 else
                 {
-                    AddWeightScreen addWeight = new AddWeightScreen(hoverWeight.aWeight, LA);
-                    if (addWeight.ShowDialog() == DialogResult.OK)
-                    {
-                        hoverWeight.Update();
-                        shear.updateReactions();
-                    }
+                    //AddWeightScreen addWeight = new AddWeightScreen(hoverWeight.aWeight, LA);
+                    //if (addWeight.ShowDialog() == DialogResult.OK)
+                    //{
+                    //    hoverWeight.Update();
+                    //    shear.updateReactions();
+                    //}
                 }
             }
             else if(item.Text == "Print Workspace to Active Word Doc")
             {
                 Export();
+            }
+            else if(item.Text == "Drag Calculations")
+            {
+                //main.ToggleDragPage();
             }
         }
 
@@ -511,18 +375,17 @@ namespace workspace_test
             }
             else
             {
-                hoverWeight = null;
+                //hoverWeight = null;
             }
 
-            //Console.WriteLine("cm openieng event");
-            if (hoverWeight != null || selectWeight.Count() != 0)
-            {
-                cm.Items[3].Enabled = true;
-            }
-            else
-            {
-                cm.Items[3].Enabled = false;
-            }
+            //if (hoverWeight != null || selectWeight.Count() != 0)
+            //{
+            //    cm.Items[3].Enabled = true;
+            //}
+            //else
+            //{
+            //    cm.Items[3].Enabled = false;
+            //}
             if (shear != null)
             {
                 cm.Items[1].Enabled = true;
@@ -541,7 +404,11 @@ namespace workspace_test
                 cm.Items[4].Enabled = false;
             }
 
-            if (selectedLines.Count == 1)
+            List<Tuple<PointF, PointF>> lines = Lines();
+            List<int> selectedLines = SelectedLines();
+            // allow drag calculation if selected lines are all the same horizontally or vertically
+            if ((selectedLines.All(item => lines[item].Item1.X == lines[selectedLines[0]].Item1.X) && selectedLines.All(item => lines[item].Item2.X == lines[selectedLines[0]].Item2.X))
+                || (selectedLines.All(item => lines[item].Item1.Y == lines[selectedLines[0]].Item1.Y) && selectedLines.All(item => lines[item].Item2.Y == lines[selectedLines[0]].Item2.Y)))
             {
                 cm.Items[5].Enabled = true;
             }
@@ -553,6 +420,9 @@ namespace workspace_test
 
         private void AlgorithmNoWord()
         {
+            List<Tuple<PointF, PointF>> lines = Lines();
+            List<int> selectedLines = SelectedLines();
+
             // splits all unique vertices by drawing a line through the x and y values
             // (theoretically, though it actually just stores all the unique x and ys)
             List<int> y = new List<int>();
@@ -590,9 +460,15 @@ namespace workspace_test
                 Tuple<PointF, PointF> temp = lines[pos];
                 //lines.Remove(temp);
                 selectLines.Add(temp);
-                string direction = GetDirection(temp.Item1, temp.Item2);
-                if (direction == "vertical") vertical.Add(selectLines.Count() - 1);
-                else horizontal.Add(selectLines.Count() - 1);
+
+                if (temp.Item1.X == temp.Item2.X)
+                {
+                    vertical.Add(selectLines.Count() - 1);
+                }
+                else
+                {
+                    horizontal.Add(selectLines.Count() - 1);
+                }
             }
 
             vertical = vertical.OrderBy(p => selectLines[p].Item1.X).ToList();
@@ -721,6 +597,9 @@ namespace workspace_test
         // all the shear wall stuff in one bundle
         private void Algorithm()
         {
+
+            List<Tuple<PointF, PointF>> lines = Lines();
+            List<int> selectedLines = SelectedLines();
             Globals.word.Visible = true;
 
             Word.Paragraph header;
@@ -772,11 +651,15 @@ namespace workspace_test
                 Tuple<PointF, PointF> temp = lines[pos - shift];
                 //lines.Remove(temp);
                 selectLines.Add(temp);
-                string direction = GetDirection(temp.Item1, temp.Item2);
-                if (direction == "vertical") vertical.Add(selectLines.Count() - 1);
-                else horizontal.Add(selectLines.Count() - 1);
 
-                //++shift;
+                if (temp.Item1.X == temp.Item2.X)
+                {
+                    vertical.Add(selectLines.Count() - 1);
+                }
+                else
+                {
+                    horizontal.Add(selectLines.Count() - 1);
+                }
             }
 
             vertical = vertical.OrderBy(p => selectLines[p].Item1.X).ToList();
@@ -902,107 +785,6 @@ namespace workspace_test
             Invalidate();
         }
 
-        private void checkSelection()
-        {
-
-            foreach(var (line, i) in lines.Select((value, i) => (value, i)))
-            {
-                //    2 
-                //  |----|
-                //  | 1  |
-                //  |____|
-                //
-                if (selection.Contains(Point.Round(line.Item1)))
-                {
-                    selectedLines.Add(i);
-                }
-                //    1 
-                //  |----|
-                //  | 2  |
-                //  |____|
-                //
-                else if (selection.Contains(Point.Round(line.Item2)))
-                {
-                    selectedLines.Add(i);
-                }
-                else if (line.Item1.X <= selection.Right && line.Item1.X >= selection.Left)
-                {
-                    //    1 
-                    //  |----|
-                    //  |    |
-                    //  |____|
-                    //    
-                    if (line.Item1.Y < selection.Top)
-                    {
-                        //    1 
-                        //  |----|
-                        //  |    |
-                        //  |____|
-                        //    2
-                        if (line.Item2.X == line.Item1.X && line.Item2.Y > selection.Bottom)
-                        {
-                            selectedLines.Add(i);
-                        }
-                    }
-                    //     
-                    //  |----|
-                    //  |    |
-                    //  |____|
-                    //    1
-                    else if (line.Item1.Y >= selection.Bottom)
-                    {
-                        //    2 
-                        //  |----|
-                        //  |    |
-                        //  |____|
-                        //    1
-                        if (line.Item2.X == line.Item1.X && line.Item2.Y < selection.Top)
-                        {
-                            selectedLines.Add(i);
-                        }
-                    }
-                }
-                else if (line.Item1.Y <= selection.Bottom && line.Item1.Y >= selection.Top)
-                {
-                    //     
-                    //  |----|
-                    // 1|    |
-                    //  |____|
-                    //    
-                    if (line.Item1.X < selection.Left)
-                    {
-                        //     
-                        //  |----|
-                        // 1|    |  2
-                        //  |____|
-                        // 
-                        if (line.Item2.X > selection.Right)
-                        {
-                            selectedLines.Add(i);
-                        }
-                    }
-                    //     
-                    //  |----|
-                    //  |    | 1
-                    //  |____|
-                    // 
-                    else if (line.Item1.X > selection.Right)
-                    {
-                        //     
-                        //  |----|
-                        // 2|    | 1
-                        //  |____|
-                        // 
-                        if (line.Item2.X < selection.Left)
-                        {
-                            selectedLines.Add(i);
-                        }
-                    }
-                }
-                setSelectedPoints();
-            }
-        }
-
         // returns rectangle data from 2 points in form (starting point, (width, length))
         private RectangleF GetRectangle(PointF start, PointF end)
         {
@@ -1055,44 +837,6 @@ namespace workspace_test
             return rect;
         }
 
-        private Tuple<PointF, PointF> RectToPP(RectangleF paramRect)
-        {
-            // point = (Ax + width, Ay + height)
-            PointF end = new PointF(paramRect.X + paramRect.Width, paramRect.Y + paramRect.Height);
-
-            return new Tuple<PointF, PointF>(new PointF(paramRect.X, paramRect.Y), end);
-        }
-
-        //draws rectangle without any physics data
-        private void DrawRect(PaintEventArgs e, RectangleF paramRect, Color color)
-        {
-            Brush brush = new SolidBrush(color);
-            Pen pen = new Pen(brush);
-
-            RectangleF[] temp = new RectangleF[1] { paramRect };
-
-            StringFormat formatWidth = new StringFormat();
-            StringFormat formatHeight = new StringFormat();
-
-            // string formatting settings
-            formatWidth.Alignment = StringAlignment.Center;
-            formatWidth.LineAlignment = StringAlignment.Far;
-
-            formatHeight.Alignment = StringAlignment.Near;
-            formatHeight.LineAlignment = StringAlignment.Center;
-
-            // draw rectangle
-            e.Graphics.DrawRectangles(pen, temp);
-            e.Graphics.DrawString(paramRect.Width.ToString() + "ft", font, brush,
-                paramRect.X + paramRect.Width / 2, paramRect.Y - 5, formatWidth);
-            e.Graphics.DrawString(paramRect.Height.ToString() + "ft", font, brush,
-                paramRect.X + paramRect.Width + 5, paramRect.Y + paramRect.Height / 2, formatHeight);
-
-            // destructors
-            brush.Dispose();
-            pen.Dispose();
-        }
-
         // draws rectangle on screen from parameter data
         private void DrawRect(PaintEventArgs e, Tuple<RectangleF, ShearData> rect, Color color, Color weightColor = default(Color), bool show = true, string name = "")
         {
@@ -1119,25 +863,25 @@ namespace workspace_test
                     paramRect.X + paramRect.Width + 5, paramRect.Y + paramRect.Height / 2, formatHeight);
             }
 
-            if(hoverWeight != null && data.visual == hoverWeight.visual)
-            {
-                selectBrush.Color = Color.FromArgb(25, Color.Red);
-                textBrush.Color = Color.Red;
-                e.Graphics.FillRectangle(selectBrush, data.visual);
-                e.Graphics.DrawRectangle(Pens.Red, data.visual);
-            }
-            else if(selectWeight.Any(x => x.visual == data.visual))
-            {
-                selectBrush.Color = Color.FromArgb(25, Color.Red);
-                textBrush.Color = Color.Red;
-                e.Graphics.FillRectangle(selectBrush, data.visual);
-                e.Graphics.DrawRectangle(Pens.Red, data.visual);
-            }
-            else
-            {
-                e.Graphics.FillRectangle(selectBrush, data.visual);
-                e.Graphics.DrawRectangle(weightPen, data.visual);
-            }
+            //if(hoverWeight != null && data.visual == hoverWeight.visual)
+            //{
+            //    selectBrush.Color = Color.FromArgb(25, Color.Red);
+            //    textBrush.Color = Color.Red;
+            //    e.Graphics.FillRectangle(selectBrush, data.visual);
+            //    e.Graphics.DrawRectangle(Pens.Red, data.visual);
+            //}
+            //else if(selectWeight.Any(x => x.visual == data.visual))
+            //{
+            //    selectBrush.Color = Color.FromArgb(25, Color.Red);
+            //    textBrush.Color = Color.Red;
+            //    e.Graphics.FillRectangle(selectBrush, data.visual);
+            //    e.Graphics.DrawRectangle(Pens.Red, data.visual);
+            //}
+            //else
+            //{
+            //    e.Graphics.FillRectangle(selectBrush, data.visual);
+            //    e.Graphics.DrawRectangle(weightPen, data.visual);
+            //}
             
             //Console.WriteLine("drawing " + data.visual);
 
@@ -1187,36 +931,6 @@ namespace workspace_test
             }
         }
 
-        // draws line lmao
-        private void DrawLine(PaintEventArgs e, Tuple<PointF, PointF> line, Color color)
-        {
-            Font font = new Font("Arial", 8);
-            Brush brush = new SolidBrush(color);
-            Pen pen = new Pen(brush);
-            SolidBrush solidBrush = new SolidBrush(Color.White);
-
-            e.Graphics.DrawLine(pen, line.Item1, line.Item2);
-
-            // 2 vertices
-            e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item1.X - dotSize/2, line.Item1.Y - dotSize/2, dotSize, dotSize));
-            e.Graphics.DrawEllipse(pen, new RectangleF(line.Item1.X - dotSize / 2, line.Item1.Y - dotSize / 2, dotSize, dotSize));
-
-            e.Graphics.FillEllipse(solidBrush, new RectangleF(line.Item2.X - dotSize / 2, line.Item2.Y - dotSize / 2, dotSize, dotSize));
-            e.Graphics.DrawEllipse(pen, new RectangleF(line.Item2.X - dotSize / 2, line.Item2.Y - dotSize / 2, dotSize, dotSize));
-
-            double magnitude = Magnitude(line);
-
-            // text display depends on if the line is horizontal or vertical
-            if (line.Item1.X == line.Item2.X)
-            {
-                e.Graphics.DrawString((Math.Round((magnitude * Globals.scale)/0.5) * 0.5).ToString("#,#0.###") + Globals.unit, font, brush, line.Item1.X + 5, line.Item1.Y + (line.Item2.Y - line.Item1.Y) / 2, formatHeight);
-            }
-            else
-            {
-                e.Graphics.DrawString((Math.Round((magnitude * Globals.scale)/0.5)*0.5).ToString("#,#0.###") + Globals.unit, font, brush, line.Item1.X + (line.Item2.X - line.Item1.X) / 2, line.Item1.Y - 5, formatWidth);
-            }
-        }
-
         private void DrawShear(PaintEventArgs e, Shear shear)
         {
             //foreach (var (line, i) in shear.GetLines().Select((value, i) => (value, i)))
@@ -1245,595 +959,6 @@ namespace workspace_test
 
                 DrawArrows(e, shear.GetDimensions(), shear.GetReactions());
             }
-        }
-
-        // move currently selected rectangle by values given by translation Point
-        public void moveSelected(PointF translation)
-        {
-            for (int i = 0; i < selectedLines.Count; i++)
-            {
-                Tuple<PointF, PointF> line = lines[selectedLines[i]];
-                PointF new1 = new PointF(line.Item1.X + translation.X, line.Item1.Y + translation.Y);
-                PointF new2 = new PointF(line.Item2.X + translation.X, line.Item2.Y + translation.Y);
-                lines[selectedLines[i]] = new Tuple<PointF, PointF>(new1, new2);
-            }
-        }
-
-        private void setSelectedPoints()
-        {
-            selectedPoints.Clear();
-
-            foreach (var pos in selectedLines)
-            {
-                if (!selectedPoints.Contains(lines[pos].Item1))
-                {
-                    selectedPoints.Add(lines[pos].Item1);
-                }
-                if (!selectedPoints.Contains(lines[pos].Item2))
-                {
-                    selectedPoints.Add(lines[pos].Item2);
-                }
-            }
-        }
-
-        private string GetDirection(PointF start, PointF location)
-        {
-            float x = location.X - start.X;
-            float y = location.Y - start.Y;
-
-            if (Math.Abs(x) > Math.Abs(y))
-            {
-                return "horizontal";
-            }
-            else return "vertical";
-        }
-
-        // begin new rectangle if mouse down while rectangle selection
-        protected override void OnMouseDown(MouseEventArgs e)
-        {
-            Console.WriteLine("clicked: " + e.Location);
-            clickedLine = false;
-            suggestLine = PointF.Empty;
-            base.OnMouseDown(e);
-
-            if(e.Button == MouseButtons.Right)
-            {
-                return;
-            }
-
-            if (pointerMode == "pen" && drawing)
-            {
-                if (start == end)
-                {
-                    drawing = false;
-                    start = PointF.Empty;
-                }
-                else
-                {
-                    lines.Add(new Tuple<PointF, PointF>(start, end));
-                    start = end;
-                }
-
-                end = PointF.Empty;
-                Invalidate();
-            }
-            else if (e.Button == MouseButtons.Left && pointerMode == "pen")
-            {
-                drawing = true;
-                dragging = false;
-                if(!hover.IsEmpty)
-                {
-                    start = hover;
-                }
-                else start = e.Location;
-            }
-            else if(e.Button == MouseButtons.Left && pointerMode == "select")
-            {
-                Console.WriteLine("selecting");
-                start = e.Location;
-                selecting = true;
-                drawing = false;
-
-                foreach (var (points, i) in lines.Select((value, i) => (value, i)))
-                {
-                    string direction = GetDirection(points.Item1, points.Item2);
-                    if (direction == "vertical")
-                    {
-                        if (Math.Abs(e.Location.X - points.Item1.X) < 3)
-                        {
-                            if (points.Item1.Y < points.Item2.Y)
-                            {
-                                if (e.Location.Y >= points.Item1.Y && e.Location.Y <= points.Item2.Y)
-                                {
-                                    if(selectedLines.Count == 0)
-                                    {
-                                        selectedLines.Add(i);
-                                    }
-                                    else clickedLine = true;
-                                    dragging = true;
-                                    selecting = false;
-                                    lastPos = e.Location;
-                                }
-                            }
-                            else
-                            {
-                                if (e.Location.Y <= points.Item1.Y && e.Location.Y >= points.Item2.Y)
-                                {
-                                    if (selectedLines.Count == 0)
-                                    {
-                                        selectedLines.Add(i);
-                                    }
-                                    else clickedLine = true;
-                                    dragging = true;
-                                    selecting = false;
-                                    lastPos = e.Location;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (Math.Abs(e.Location.Y - points.Item1.Y) < 3)
-                        {
-                            if (points.Item1.X < points.Item2.X)
-                            {
-                                if (e.Location.X >= points.Item1.X && e.Location.X <= points.Item2.X)
-                                {
-                                    if (selectedLines.Count == 0)
-                                    {
-                                        selectedLines.Add(i);
-                                    }
-                                    else clickedLine = true;
-                                    dragging = true;
-                                    selecting = false;
-                                    lastPos = e.Location;
-                                }
-                            }
-                            else
-                            {
-                                if (e.Location.X <= points.Item1.X && e.Location.X >= points.Item2.X)
-                                {
-                                    if (selectedLines.Count == 0)
-                                    {
-                                        selectedLines.Add(i);
-                                    }
-                                    else clickedLine = true;
-                                    dragging = true;
-                                    selecting = false;
-                                    lastPos = e.Location;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                clickOff = e.Location;
-            }
-            else
-            {
-                dragging = false;
-                drawing = false;
-                start = PointF.Empty;
-                clickOff = Point.Empty;
-            }
-
-            end = PointF.Empty;
-            Invalidate();
-        }
-
-        // if mouse up when end point, adds new rectangle data
-        protected override void OnMouseUp(MouseEventArgs e)
-        {
-            base.OnMouseUp(e);
-
-            if ((clickOff == e.Location || selecting))
-            {
-                if(clickedLine == true)
-                {
-                    Console.WriteLine("clicked oline");
-                    foreach (var (points, i) in lines.Select((value, i) => (value, i)))
-                    {
-                        string direction = GetDirection(points.Item1, points.Item2);
-                        if (direction == "vertical")
-                        {
-                            if (Math.Abs(e.Location.X - points.Item1.X) < 3)
-                            {
-                                if (points.Item1.Y < points.Item2.Y)
-                                {
-                                    if (e.Location.Y >= points.Item1.Y && e.Location.Y <= points.Item2.Y)
-                                    {
-                                        if (Control.ModifierKeys != Keys.Shift)
-                                        {
-                                            selectedLines.Clear();
-                                            selectedPoints.Clear();
-                                        }
-                                        selectedLines.Add(i);
-                                        clickedLine = false;
-                                        dragging = false;
-                                    }
-                                }
-                                else
-                                {
-                                    if (e.Location.Y <= points.Item1.Y && e.Location.Y >= points.Item2.Y)
-                                    {
-                                        if (Control.ModifierKeys != Keys.Shift)
-                                        {
-                                            selectedLines.Clear();
-                                            selectedPoints.Clear();
-                                        }
-                                        selectedLines.Add(i);
-                                        clickedLine = false;
-                                        dragging = false;
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (Math.Abs(e.Location.Y - points.Item1.Y) < 3)
-                            {
-                                if (points.Item1.X < points.Item2.X)
-                                {
-                                    if (e.Location.X >= points.Item1.X && e.Location.X <= points.Item2.X)
-                                    {
-                                        if (Control.ModifierKeys != Keys.Shift)
-                                        {
-                                            selectedLines.Clear();
-                                            selectedPoints.Clear();
-                                        }
-                                        selectedLines.Add(i);
-                                        clickedLine = false;
-                                        dragging = false;
-                                    }
-                                }
-                                else
-                                {
-                                    if (e.Location.X <= points.Item1.X && e.Location.X >= points.Item2.X)
-                                    {
-                                        if (Control.ModifierKeys != Keys.Shift)
-                                        {
-                                            selectedLines.Clear();
-                                            selectedPoints.Clear();
-                                        }
-                                        selectedLines.Add(i);
-                                        clickedLine = false;
-                                        dragging = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    selectedLines.Clear();
-                    selectedPoints.Clear();
-                    clickOff = Point.Empty;
-                }
-                
-            }
-
-            if (drawing && !start.IsEmpty && !end.IsEmpty)
-            {
-                // resets
-                drawing = false;
-                start = PointF.Empty;
-                end = PointF.Empty;
-            }
-            else if (dragging) dragging = false;
-            else if (selecting)
-            {
-                checkSelection();
-
-                selecting = false;
-                start = PointF.Empty;
-                end = PointF.Empty;
-                selection = Rectangle.Empty;
-            }
-
-            clickedLine = false;
-            Invalidate();
-        }
-
-        // move end location if mouse moves
-        protected override void OnMouseMove(MouseEventArgs e)
-        {
-            
-
-            if(pointerMode != "menu")
-            {
-                hoverWeight = null;
-            }
-
-            suggestLine = PointF.Empty;
-            hover = PointF.Empty;
-            hoverPoint = Point.Empty;
-            base.OnMouseMove(e);
-
-            if (e.Button == MouseButtons.Left)
-            {
-                if (drawing) end = e.Location;
-                else if (dragging)
-                {
-                    // draw moved rectangle, update positions
-                    PointF closest = PointF.Empty;
-                    PointF temp;
-                    PointF attached = PointF.Empty;
-                    foreach(var line in lines)
-                    {
-                        foreach(var point in selectedPoints)
-                        {
-                            
-                            if(line.Item1 != point)
-                            {
-                                temp = PointF.Subtract(line.Item1, new SizeF(point));
-                                //Console.WriteLine("distnace from " + point + " to " + line.Item1 + ": " + Magnitude(temp));
-                                if (closest == PointF.Empty || Magnitude(temp) < Magnitude(closest))
-                                {
-                                    //Console.WriteLine("new closest: " + Magnitude(temp) + " away < " + Magnitude(closest));
-                                    closest = temp;
-                                    attached = point;
-                                }
-                            }
-                            if(line.Item2 != point)
-                            {
-                                temp = PointF.Subtract(line.Item2, new SizeF(point));
-                                if (closest == PointF.Empty || Magnitude(temp) < Magnitude(closest))
-                                {
-                                    //Console.WriteLine("new closest: " + Magnitude(temp) + " away < " + Magnitude(closest));
-                                    closest = temp;
-                                    attached = point;
-                                }
-                            }
-                        }
-                    }
-                    //Console.WriteLine("closest Point is " + closest + " away\n");
-
-                    if(Magnitude(closest) < 5)
-                    {
-                        moveSelected(closest);
-                    }
-                    else
-                    {
-                        moveSelected(new PointF(e.Location.X - lastPos.X, e.Location.Y - lastPos.Y));
-                    }
-                    
-                    setSelectedPoints();
-                    lastPos = e.Location;
-                }
-                else if (selecting)
-                {
-                    selection = Rectangle.Round(GetRectangle(start, e.Location));
-                }
-            }
-            else if(drawing)
-            {
-                string direction = GetDirection(start, e.Location);
-                if(direction == "vertical")
-                {
-                    end = new PointF(start.X, e.Location.Y);
-                }
-                else if(direction == "horizontal")
-                {
-                    end = new PointF(e.Location.X, start.Y);
-                }
-            }
-
-            for (int i = 0; i < lines.Count; ++i)
-            {
-                Tuple<PointF, PointF> line = lines[i];
-
-                if (Math.Sqrt(Math.Pow(line.Item1.X - e.Location.X, 2) + Math.Pow(line.Item1.Y - e.Location.Y, 2)) <= 10)
-                {
-                    hover = line.Item1;
-                    if (drawing)
-                    {
-                        end = hover;
-                    }
-                }
-                else if (Math.Sqrt(Math.Pow(line.Item2.X - e.Location.X, 2) + Math.Pow(line.Item2.Y - e.Location.Y, 2)) <= 10)
-                {
-                    hover = line.Item2;
-                    if (drawing)
-                    {
-                        end = hover;
-                    }
-                }
-
-                // check if pointer is close enough between lines to place point suggestion
-                else if(pointerMode == "point" || (pointerMode == "pen" && drawing == false))
-                {
-                    if (Math.Abs(e.Location.X - line.Item1.X) <= 10 && line.Item1.X == line.Item2.X)
-                    {
-
-                        if (line.Item1.Y < line.Item2.Y)
-                        {
-                            if (e.Location.Y > line.Item1.Y + 10 && e.Location.Y < line.Item2.Y - 10)
-                            {
-                                hoverPoint = new PointF(line.Item1.X, e.Location.Y);
-                                hoverLine = i;
-                            }
-                        }
-                        else
-                        {
-                            if (e.Location.Y > line.Item2.Y + 10 && e.Location.Y < line.Item1.Y - 10)
-                            {
-                                hoverPoint = new PointF(line.Item1.X, e.Location.Y);
-                                hoverLine = i;
-                            }
-                        }
-                    }
-                    else if (Math.Abs(e.Location.Y - line.Item1.Y) <= 10 && line.Item1.Y == line.Item2.Y)
-                    {
-                        if (line.Item1.X < line.Item2.X)
-                        {
-                            if (e.Location.X > line.Item1.X + 10 && e.Location.X < line.Item2.X - 10)
-                            {
-                                hoverPoint = new PointF(e.Location.X, line.Item1.Y);
-                                hoverLine = i;
-                            }
-                        }
-                        else
-                        {
-                            if (e.Location.X > line.Item2.X + 10 && e.Location.X < line.Item1.X - 10)
-                            {
-                                hoverPoint = new PointF(e.Location.X, line.Item1.Y);
-                                hoverLine = i;
-                            }
-                        }
-                    }
-                }
-                
-
-                if (pointerMode == "pen" && drawing)
-                {
-                    if (!line.Item1.Equals(end) && !line.Item2.Equals(end))
-                    {
-                        string direction = GetDirection(start, e.Location);
-
-                        if (direction == "vertical")
-                        {
-                            if (Math.Abs(line.Item1.Y - e.Location.Y) <= 5)
-                            {
-                                end = new PointF(start.X, line.Item1.Y);
-
-                                if(!start.Equals(end)) suggestLine = line.Item1;
-                            }
-                            else if (Math.Abs(line.Item2.Y - e.Location.Y) <= 5)
-                            {
-                                end = new PointF(start.X, line.Item2.Y);
-
-                                if (!start.Equals(end)) suggestLine = line.Item2;
-                            }
-                        }
-                        else if (direction == "horizontal")
-                        {
-                            if (Math.Abs(line.Item1.X - e.Location.X) <= 5)
-                            {
-                                end = new PointF(line.Item1.X, start.Y);
-
-                                if (!start.Equals(end)) suggestLine = line.Item1;
-                            }
-
-                            else if (Math.Abs(line.Item2.X - e.Location.X) <= 5)
-                            {
-                                end = new PointF(line.Item2.X, start.Y);
-
-                                if (!start.Equals(end)) suggestLine = line.Item2;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (pointerMode == "select" && shear != null && shear.GetShearData() != null)
-            {
-                List<ShearData> lefts = shear.GetShearData().Item1;
-                List<ShearData> bottoms = shear.GetShearData().Item2;
-
-                foreach (var data in lefts)
-                {
-                    if (data.visual.Contains(e.Location))
-                    {
-                        hoverWeight = data;
-                    }
-                }
-                foreach (var data in bottoms)
-                {
-                    if (data.visual.Contains(e.Location))
-                    {
-                        hoverWeight = data;
-                    }
-                }
-            }
-
-            Invalidate();
-        }
-
-        protected override void OnMouseClick(MouseEventArgs e)
-        {
-            if(Control.ModifierKeys != Keys.Shift)
-            {
-                selectWeight.Clear();
-            }
-
-            if (pointerMode == "select" && shear != null && shear.GetShearData() != null)
-            {
-                List<ShearData> lefts = shear.GetShearData().Item1;
-                List<ShearData> bottoms = shear.GetShearData().Item2;
-
-                foreach (var data in lefts)
-                {
-                    if (data.visual.Contains(e.Location))
-                    {
-                        selectWeight.Add(data);
-                    }
-                }
-                foreach (var data in bottoms)
-                {
-                    if (data.visual.Contains(e.Location))
-                    {
-                        selectWeight.Add(data);
-                    }
-                }
-            }
-
-            Invalidate();
-        }
-
-        // paint solid rectangles and currently drawing rectangles
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            Color color = Color.FromArgb(25, Color.Blue);
-            SolidBrush selectBrush = new SolidBrush(color);
-            SolidBrush solidBrush = new SolidBrush(Color.White);
-
-            if (!suggestLine.IsEmpty)
-            {
-                e.Graphics.DrawLine(Pens.Red, end, suggestLine);
-            }
-
-            foreach (var (line, i) in lines.Select((value, i) => (value, i)))
-            {
-                if (selectedLines.Contains(i))
-                {
-                    DrawLine(e, line, Color.Blue);
-                }
-                else DrawLine(e, line, Color.Black);
-            }
-
-            if(shear != null) DrawShear(e, shear);
-
-            if (!start.IsEmpty && !end.IsEmpty)
-            {
-                if(pointerMode == "rectangle") {
-                    RectangleF measurements = GetRectangle(start, end);
-                    DrawRect(e, measurements, Color.Blue);
-                }
-                else if(pointerMode == "pen")
-                {
-                    DrawLine(e, new Tuple<PointF, PointF> (start, end), Color.Blue);
-                    
-                }
-            }
-
-            if(!hover.IsEmpty)
-            {
-                e.Graphics.FillEllipse(solidBrush, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
-                e.Graphics.DrawEllipse(Pens.Black, new RectangleF(hover.X - 5, hover.Y - 5, 10, 10));
-            }
-            if (!hoverPoint.IsEmpty)
-            {
-                e.Graphics.FillEllipse(solidBrush, new RectangleF(hoverPoint.X - dotSize / 2, hoverPoint.Y - dotSize / 2, dotSize, dotSize));
-                e.Graphics.DrawEllipse(Pens.Black, new RectangleF(hoverPoint.X - dotSize / 2, hoverPoint.Y - dotSize / 2, dotSize, dotSize));
-
-            }
-
-            e.Graphics.FillRectangle(selectBrush, selection);
-            e.Graphics.DrawRectangle(Pens.Blue, selection);
-
-            solidBrush.Dispose();
-            selectBrush.Dispose();
         }
     }
 }

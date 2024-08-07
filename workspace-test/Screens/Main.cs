@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -41,6 +42,11 @@ namespace workspace_test
 
         private Project project;
 
+        private TabPage dragPage;
+        private bool dragToggle = false;
+
+        private BasePanel testPanel = new BasePanel();
+
         public Main()
         {
             this.Font = SystemFonts.MessageBoxFont;
@@ -61,14 +67,23 @@ namespace workspace_test
             firstPage.Name = firstPage.Text;
             tabs.Add(firstPage);
 
+            dragPage = new TabPage("Drag Calculator");
+            dragPage.Name = dragPage.Text;
+            dragPage.Controls.Add(new DragScreen());
+
             tabs[0].Dock = DockStyle.Fill;
             tabs[0].BorderStyle = BorderStyle.FixedSingle;
             tabs[0].Margin = new Padding(0, 0, 0, 0);
 
             tableLayoutPanel2.Controls.Add(tabPages, 1, 0);
-            tabPages.Controls.AddRange(new Control[] { tabs[0] });
+            tabPages.Controls.Add(firstPage);
 
-            workspaces.Add(new DrawPanel(firstFloor));
+            TabPage testPage = new TabPage("test");
+            testPage.Name = testPage.Text;
+            testPage.Controls.Add(testPanel);
+            tabPages.Controls.Add(testPage);
+
+            workspaces.Add(new DrawPanel(firstFloor, this));
 
             tabs[0].Controls.Add(workspaces[0]);
             tabs[0].BackgroundImageLayout = ImageLayout.Stretch;
@@ -206,7 +221,7 @@ namespace workspace_test
             newPage.Dock = DockStyle.Fill;
             newPage.BorderStyle = BorderStyle.FixedSingle;
             newPage.Margin = new Padding(0, 0, 0, 0);
-            newPage.Controls.Add(new DrawPanel(newFloor));
+            newPage.Controls.Add(new DrawPanel(newFloor, this));
             //tabs.Insert(tabs.Count - 2, new TabPage(newFloor.GetName()));
             tabPages.TabPages.Insert(tabPages.TabPages.Count, newPage);
             tabPages.SelectedTab = tabPages.TabPages[tabPages.TabPages.Count - 2];
@@ -225,12 +240,17 @@ namespace workspace_test
                 fs.Show();
             }
         }
+
         private void levelAccel_Click(object sender, EventArgs e)
         {
             LevelAccel laScreen = new LevelAccel(project.GetBuilding());
             laScreen.ShowDialog();
-            UpdateLA();
+            if (tabPages.SelectedTab.Text.StartsWith("Floor"))
+            {
+                UpdateLA();
+            }
         }
+
         private void menu_Opening(object sender, EventArgs e)
         {
             ToolStripMenuItem temp = sender as ToolStripMenuItem;
@@ -258,8 +278,12 @@ namespace workspace_test
             {
                 if (tabPages.SelectedTab.Text.StartsWith("Floor"))
                 {
-                    currentWorkspace = tabPages.SelectedTab.Controls[0] as DrawPanel;
                     UpdateLA();
+                    currentWorkspace = tabPages.SelectedTab.Controls[0] as DrawPanel;
+                }
+                else if(tabPages.SelectedTab.Text == "Drag Calculator")
+                {
+                    currentWorkspace = (tabPages.SelectedTab.Controls[0] as DragScreen).GetPanel();
                 }
             }
         
@@ -284,7 +308,7 @@ namespace workspace_test
 
                 foreach (DrawPanel workspace in workspaces)
                 {
-                    workspace.Save();  
+                    //workspace.Save();  
                 }
 
             Console.WriteLine("liens: " + project.GetBuilding().GetFloors()[0].GetLines().Count);
@@ -351,7 +375,7 @@ namespace workspace_test
                     newPage.Dock = DockStyle.Fill;
                     newPage.BorderStyle = BorderStyle.FixedSingle;
                     newPage.Margin = new Padding(0, 0, 0, 0);
-                    newPage.Controls.Add(new DrawPanel(floor));
+                    newPage.Controls.Add(new DrawPanel(floor, this));
 
                     tabPages.TabPages.Insert(tabPages.TabPages.Count, newPage);
                 }
@@ -439,30 +463,6 @@ namespace workspace_test
         // this kind of works but it sucks
         private void workspace_KeyDown(object sender, KeyEventArgs e)
         {
-            //System.Console.WriteLine(e.KeyCode);
-            if (currentWorkspace.GetCurrentlySelected() != -1)
-            {
-                if (e.KeyCode == Keys.W)
-                {
-                    //System.Console.WriteLine("w pressed");
-                    currentWorkspace.moveSelected(new Point(0, -1));
-                }
-                else if (e.KeyCode == Keys.A)
-                {
-                    //System.Console.WriteLine("a pressed");
-                    currentWorkspace.moveSelected(new Point(-1, 0));
-                }
-                else if (e.KeyCode == Keys.S)
-                {
-                    //System.Console.WriteLine("a pressed");
-                    currentWorkspace.moveSelected(new Point(0, 1));
-                }
-                else if (e.KeyCode == Keys.D)
-                {
-                    //System.Console.WriteLine("a pressed");
-                    currentWorkspace.moveSelected(new Point(1, 0));
-                }
-            }
             if (e.KeyCode == Keys.Delete)
             {
                 //Console.WriteLine("delete");
@@ -473,12 +473,14 @@ namespace workspace_test
                 pointerButton.Checked = true;
                 //penButton.Checked = false;
                 currentWorkspace.SetPointerMode("select");
+                testPanel.SetPointerMode("select");
             }
             else if (e.KeyCode == Keys.P)
             {
                 penButton.Checked = true;
                 //pointerButton.Checked = false;
                 currentWorkspace.SetPointerMode("pen");
+                testPanel.SetPointerMode("pen");
             }
             else if(e.KeyCode == Keys.S && (ModifierKeys & Keys.Control) == Keys.Control)
             {
@@ -589,6 +591,21 @@ namespace workspace_test
             b.Save(Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName, "src/tempImg/temp.jpg"));
 
             return b;
+        }
+
+        public void ToggleDragPage()
+        {
+            if(!dragToggle)
+            {
+                tabPages.Controls.Add(dragPage);
+                tabPages.SelectedTab = dragPage;
+                dragToggle = true;
+            }
+            else
+            {
+                tabPages.Controls.Remove(dragPage);
+                dragToggle = false;
+            }
         }
     }
 }

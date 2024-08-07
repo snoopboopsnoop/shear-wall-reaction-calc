@@ -52,9 +52,9 @@ namespace workspace_test
             {
                 if (comboBox1.SelectedItem.ToString() == "ft")
                 {
-                    workspace.SetScale(double.Parse(textBox1.Text) / magnitude, "\'");
+                    workspace.SetScale(float.Parse(textBox1.Text) / magnitude, "\'");
                 }
-                else workspace.SetScale(double.Parse(textBox1.Text)/magnitude, " " + comboBox1.SelectedItem.ToString());
+                else workspace.SetScale(float.Parse(textBox1.Text)/magnitude, " " + comboBox1.SelectedItem.ToString());
                 this.Close();
             }
             catch (FormatException)
